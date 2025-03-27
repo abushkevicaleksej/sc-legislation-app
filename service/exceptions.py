@@ -1,3 +1,6 @@
+class ScServerError(Exception):
+    message = "Failed to connect to SC-server! Goodbye."
+
 class APIError(Exception):
     code = 400
     message = "A client error occurred."

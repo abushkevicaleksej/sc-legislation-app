@@ -7,25 +7,15 @@ from .services import auth_agent, reg_agent
 
 main = Blueprint("main", __name__)
 
+@main.route("/index")
+def index():
+    return "Hello world!"
 
-@main.route("/auth", methods=["POST"])
+@main.route("/auth")
 def auth():
-    data = AuthInputSchema().load(request.get_json())
-
-    username = data["username"]
-    password = data["password"]
-
-    output = auth_agent(username, password)
-    return jsonify(AuthOutputSchema().dump(output)), 200
+    return "200"
 
 
-@main.route("/reg", methods=["POST"])
+@main.route("/reg")
 def reg():
-    data = AuthInputSchema().load(request.get_json())
-
-    username = data["username"]
-    password = data["password"]
-
-    output = reg_agent(username, password)
-
-    return jsonify(RegOutputSchema().dump(output)), 200
+    return "200"
