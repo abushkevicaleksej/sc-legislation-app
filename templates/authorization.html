@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Авторизация</title>
+  <link rel="stylesheet" href="static/styles/style.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <img src="static/images/logo.png" alt="Логотип" class="header-logo">
+      <nav>
+        <a href="{{ url_for('request') }}"><button class="nav-button">Запросы</button></a>
+        <a href="{{ url_for('directory') }}"><button class="nav-button">Справочник</button></a>
+        <a href="{{ url_for('calendar') }}"><button class="nav-button">Календарь</button></a>
+        <a href="{{ url_for('templates') }}"><button class="nav-button">Шаблоны</button></a>
+        <img src="static/images/user.png" alt="Иконка пользователя" class="user-icon">
+      </nav>
+    </header>
+    <!-- Main -->
+    <main>
+      <img src="static/images/logo.png" alt="Логотип" class="main-logo">
+      <div class="auth-form">
+        <h2>Авторизация</h2>
+        <label for="login">Логин</label>
+        <input type="text" id="login" name="login" placeholder="Введите ваш логин">
+        <label for="password">Пароль</label>
+        <input type="password" id="password" name="password" placeholder="Введите ваш пароль">
+        <a class="submit" href="{{ url_for('templates') }}"><button type="submit">Войти</button></a>
+        <a href="registration.html">Зарегистрироваться</a>
+      </div>
+    </main>
+    <!-- Footer -->
+    <footer>
+      <p>Персональный ассистент по юриспруденции</p>
+      <p>Ostis 2025</p>
+    </footer>
+  </div>
+</body>
+</html>
