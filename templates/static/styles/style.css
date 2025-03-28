@@ -1,0 +1,289 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #F5F7FA;
+    color: #222349;
+}
+
+.container {
+    max-width: 2000px;
+    margin: 0 auto;
+}
+
+/* Header */
+header {
+    background-color: #E9E9FD;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+}
+
+.header-logo {
+    width: 130px;
+    height: 130px;
+    object-fit: contain;
+}
+
+/* Навигация */
+nav {
+    display: flex;
+    align-items: center;
+}
+
+.nav-button {
+    background-color: #E9E9FD;
+    color: #222349;
+    border: none;
+    padding: 16px 32px;
+    margin-right: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    height: 50px;
+    transition: background-color 0.3s ease;
+}
+
+.nav-button:active {
+    background-color: #F5F7FA;
+}
+
+.nav-button:last-of-type {
+    margin-right: 0;
+}
+
+.user-icon {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    margin-left: 40px;
+    border-radius: 8px;
+}
+
+/* Main */
+main {
+    background-color: #F5F7FA;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 720px;
+}
+
+.main-logo {
+    width: 250px;
+    height: 250px;
+    object-fit: contain;
+    margin-top: -25px;
+    margin-bottom: -75px;
+}
+
+.auth-form {
+    min-width: 320px;
+    background-color: #FFFFFF;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.auth-form h2 {
+    font-size: 24px;
+    color: #222349;
+    margin-bottom: 20px;
+}
+
+.auth-form label {
+    align-self: flex-start;
+    margin-bottom: 5px;
+    color: #222349;
+}
+
+.auth-form input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 24px;
+    border: 1px solid #B5B6E2;
+    border-radius: 10px;
+    font-size: 16px;
+    color: #222349;
+}
+
+.auth-form input::placeholder {
+    color: #CBCCED;
+}
+
+.auth-form input:focus {
+    border-color: #8788CB;
+    color: #222349;
+    outline: none;
+}
+
+.auth-form button {
+    width: 100%;
+    padding: 10px;
+    background-color: #222349;
+    border: 1px solid #222349;
+    color: #FFFFFF;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    margin-bottom: 24px;
+}
+
+.auth-form button:active {
+    background-color: #4D4FA3;
+}
+
+.auth-form a {
+    color: #4D4FA3;
+    text-decoration: underline;
+    font-size: 16px;
+}
+
+.submit {
+    width: 100%;
+}
+
+.registr-form {
+    min-width: 450px;
+    background-color: #FFFFFF;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.registr-form h2 {
+    font-size: 24px;
+    color: #222349;
+    margin-bottom: 20px;
+}
+
+.registr-form label {
+    align-self: flex-start;
+    margin-bottom: 5px;
+    color: #222349;
+}
+
+.registr-form input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 24px;
+    border: 1px solid #B5B6E2;
+    border-radius: 10px;
+    font-size: 16px;
+    color: #222349;
+}
+
+.registr-form input::placeholder {
+    color: #CBCCED;
+}
+
+.registr-form input:focus {
+    border-color: #8788CB;
+    color: #222349;
+    outline: none;
+}
+
+.registr-form button {
+    width: 100%;
+    padding: 10px;
+    background-color: #222349;
+    border: 1px solid #222349;
+    color: #FFFFFF;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    margin-bottom: 24px;
+}
+
+.registr-form button:active {
+    background-color: #4D4FA3;
+}
+
+.registr-form a {
+    color: #4D4FA3;
+    text-decoration: underline;
+    font-size: 16px;
+}
+
+.date-picker {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.date-picker input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    padding-right: 45px;
+    border: 1px solid #B5B6E2;
+    border-radius: 10px;
+    font-size: 16px;
+    color: #222349;
+    outline: none;
+    cursor: pointer;
+    background-color: #fff;
+}
+
+.date-picker button {
+    position: absolute;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.date-picker button:focus,
+.date-picker button:active {
+    outline: none;
+    background: transparent;
+}
+
+.date-picker .calendar {
+    width: 24px;
+    height: 24px;
+}
+
+.date-picker input[type="date"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+
+/* Footer */
+footer {
+    background-color: #222349;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    text-align: center;
+    color: #E9E9FD;
+    padding: 20px;
+}
+
+footer p {
+    margin-bottom: 10px;
+}
