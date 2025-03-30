@@ -13,7 +13,7 @@ class RegAgent(ABC):
     @abstractmethod
     def reg_agent(
         self,
-        gender: Gender, 
+        gender: str, 
         surname: str,
         name: str,
         fname: str,

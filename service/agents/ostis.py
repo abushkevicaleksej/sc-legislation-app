@@ -283,7 +283,7 @@ class OstisRegAgent(RegAgent):
 
     def reg_agent(
         self,
-        gender: Gender, 
+        gender: str, 
         surname: str,
         name: str,
         fname: str,
@@ -294,7 +294,7 @@ class OstisRegAgent(RegAgent):
         ):
         global payload
         payload = None
-        agent_response = self.ostis.call_reg_agent("action_registration", 
+        agent_response = self.ostis.call_reg_agent("action_register", 
                                                    username, 
                                                    password,
                                                    gender,

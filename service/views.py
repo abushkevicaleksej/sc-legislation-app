@@ -11,16 +11,20 @@ main = Blueprint("main", __name__)
 def index():
     return "Hello world!"
 
-@main.route("/auth")
+@main.route("/auth", methods = ['POST'])
 def auth():
+    username = request.get.form.get("username")
+    password = request.get.form.get("password")
+    print(username)
+    print(password)
     return render_template('authorization.html')
 
 @main.route("/reg")
 def reg():
     return render_template('registration.html')
 
-@main.route("/request")
-def request():
+@main.route("/requests")
+def requests():
     return '200 ok'
 
 @main.route("/directory")

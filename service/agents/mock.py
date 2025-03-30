@@ -12,7 +12,7 @@ class OstisAuthAgent(AuthAgent):
 class OstisRegAgent(RegAgent):
     def reg_agent(
         self,
-        gender: Gender, 
+        gender: str, 
         surname: str,
         name: str,
         fname: str,
