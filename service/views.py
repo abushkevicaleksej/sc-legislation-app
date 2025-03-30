@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-
+from flask import render_template
 from .schemas.input import AuthSchema as AuthInputSchema
 from .schemas.output import AuthSchema as AuthOutputSchema
 from .schemas.output import RegSchema as RegOutputSchema
@@ -13,9 +13,9 @@ def index():
 
 @main.route("/auth")
 def auth():
-    return "200"
+    return render_template('authorization.html')
 
 
 @main.route("/reg")
 def reg():
-    return "200"
+    return render_template('registration.html')
