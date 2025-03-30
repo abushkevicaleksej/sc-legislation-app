@@ -1,6 +1,6 @@
 from enum import Enum
 import sc_client.client as client
-from exceptions import ScServerError
+from ..exceptions import ScServerError
 from sc_client.client import is_connected
 from sc_client.models import (
     ScAddr,
@@ -39,48 +39,48 @@ def get_node(client) -> ScAddr:
     return main_node
 
 
-def call_back(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
-    global payload
-    callback_event.clear()
+# def call_back(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
+#     global payload
+#     callback_event.clear()
 
-    succ_node = client.resolve_keynodes(
-        ScIdtfResolveParams(idtf='action_finished_successfully', type=sc_types.NODE_CONST_CLASS)
-    )[0]
-    unsucc_node = client.resolve_keynodes(
-        ScIdtfResolveParams(idtf='action_finished_unsuccessfully', type=sc_types.NODE_CONST_CLASS)
-    )[0]
-    node_err = client.resolve_keynodes(
-        ScIdtfResolveParams(idtf='action_finished_with_error', type=sc_types.NODE_CONST_CLASS)
-    )[0]
+#     succ_node = client.resolve_keynodes(
+#         ScIdtfResolveParams(idtf='action_finished_successfully', type=sc_types.NODE_CONST_CLASS)
+#     )[0]
+#     unsucc_node = client.resolve_keynodes(
+#         ScIdtfResolveParams(idtf='action_finished_unsuccessfully', type=sc_types.NODE_CONST_CLASS)
+#     )[0]
+#     node_err = client.resolve_keynodes(
+#         ScIdtfResolveParams(idtf='action_finished_with_error', type=sc_types.NODE_CONST_CLASS)
+#     )[0]
 
-    if trg.value == succ_node.value:
-        nrel_result = client.resolve_keynodes(
-            ScIdtfResolveParams(idtf='nrel_result', type=sc_types.NODE_CONST_CLASS)
-        )[0]
-        res_templ = ScTemplate()
-        res_templ.triple_with_relation(
-            src,
-            sc_types.EDGE_D_COMMON_VAR,
-            sc_types.NODE_VAR_STRUCT >> "_res_struct",
-            sc_types.EDGE_ACCESS_VAR_POS_PERM,
-            nrel_result
-        )
-        res_templ.triple(
-            "_res_struct",
-            sc_types.EDGE_ACCESS_VAR_POS_PERM,
-            sc_types.LINK_VAR >> "_link_res"
-        )
-        gen_res = client.template_search(res_templ)[0]
-        link_res = gen_res.get("_link_res")
-        link_data = client.get_link_content(link_res)[0].data
-        payload = link_data
-    elif trg.value == unsucc_node.value or trg.value == node_err.value:
-        raise AgentError
+#     if trg.value == succ_node.value:
+#         nrel_result = client.resolve_keynodes(
+#             ScIdtfResolveParams(idtf='nrel_result', type=sc_types.NODE_CONST_CLASS)
+#         )[0]
+#         res_templ = ScTemplate()
+#         res_templ.triple_with_relation(
+#             src,
+#             sc_types.EDGE_D_COMMON_VAR,
+#             sc_types.NODE_VAR_STRUCT >> "_res_struct",
+#             sc_types.EDGE_ACCESS_VAR_POS_PERM,
+#             nrel_result
+#         )
+#         res_templ.triple(
+#             "_res_struct",
+#             sc_types.EDGE_ACCESS_VAR_POS_PERM,
+#             sc_types.LINK_VAR >> "_link_res"
+#         )
+#         gen_res = client.template_search(res_templ)[0]
+#         link_res = gen_res.get("_link_res")
+#         link_data = client.get_link_content(link_res)[0].data
+#         payload = link_data
+#     elif trg.value == unsucc_node.value or trg.value == node_err.value:
+#         raise AgentError
 
-    callback_event.set()
-    if not payload:
-        return result.FAILURE
-    return result.SUCCESS
+#     callback_event.set()
+#     if not payload:
+#         return result.FAILURE
+#     return result.SUCCESS
 
 
 class result(Enum):

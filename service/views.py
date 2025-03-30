@@ -11,12 +11,13 @@ main = Blueprint("main", __name__)
 def index():
     return "Hello world!"
 
-@main.route("/auth", methods = ['POST'])
+@main.route("/auth", methods=['GET', 'POST'])
 def auth():
-    username = request.get.form.get("username")
-    password = request.get.form.get("password")
-    print(username)
-    print(password)
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        print(username, password)
+        auth_agent(username, password)
     return render_template('authorization.html')
 
 @main.route("/reg")

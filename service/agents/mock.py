@@ -21,5 +21,5 @@ class OstisRegAgent(RegAgent):
         username: str,
         password: str
         ):
-        print(f"MockAgent: Pretend registering {gender} - {surname} - {name} - {fname} - {birthdate} - {reg_place} {username} - {password}")
+        print(f"MockAgent: Pretend registering {gender} - {surname} - {name} - {fname} - {birthdate} - {reg_place} - {username} - {password}")
         return {"status": RegStatus.CREATED}
