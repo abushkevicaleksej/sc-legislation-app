@@ -12,10 +12,10 @@
     <header>
       <img src="static/images/logo.png" alt="Логотип" class="header-logo">
       <nav>
-        <a href="{{ url_for('request') }}"><button class="nav-button">Запросы</button></a>
-        <a href="{{ url_for('directory') }}"><button class="nav-button">Справочник</button></a>
-        <a href="{{ url_for('calendar') }}"><button class="nav-button">Календарь</button></a>
-        <a href="{{ url_for('templates') }}"><button class="nav-button">Шаблоны</button></a>
+        <a href="{{ url_for('main.request') }}"><button class="nav-button">Запросы</button></a>
+        <a href="{{ url_for('main.directory') }}"><button class="nav-button">Справочник</button></a>
+        <a href="{{ url_for('main.calendar') }}"><button class="nav-button">Календарь</button></a>
+        <a href="{{ url_for('main.templates') }}"><button class="nav-button">Шаблоны</button></a>
         <img src="static/images/user.png" alt="Иконка пользователя" class="user-icon">
       </nav>
     </header>
@@ -28,8 +28,8 @@
         <input type="text" id="login" name="login" placeholder="Введите ваш логин">
         <label for="password">Пароль</label>
         <input type="password" id="password" name="password" placeholder="Введите ваш пароль">
-        <a class="submit" href="{{ url_for('templates') }}"><button type="submit">Войти</button></a>
-        <a href="registration.html">Зарегистрироваться</a>
+        <a class="submit" href="{{ url_for('main.auth') }}"><button type="submit">Войти</button></a>
+        <a href="reg">Зарегистрироваться</a>
       </div>
     </main>
     <!-- Footer -->
