@@ -33,7 +33,9 @@
     <!-- Main -->
     <main>
       <img src="static/images/logo.png" alt="Логотип" class="main-logo">
+      
       <div class="registr-form">
+        <form method="POST" action="{{ url_for('main.reg') }}">
         <h2>Регистрация</h2>
         <label>Ваш пол:</label>
         <div class="radio-group">
@@ -50,7 +52,7 @@
         <input type="text" id="patronymic" name="patronymic" placeholder="Введите ваше отчество">
         <label for="birthdate">Выберите дату рождения</label>
         <div class="date-picker">
-          <input type="text" id="birthdate-text" placeholder="Дата рождения в формате ДД.ММ.ГГГГ">
+          <input type="text" name = "birthdate" id="birthdate-text" placeholder="Дата рождения в формате ДД.ММ.ГГГГ">
           <button type="button" id="calendar-button">
             <img src="static/images/calendar.png" alt="Календарь" class="calendar">
           </button>
@@ -65,7 +67,9 @@
         <input type="password" id="password" name="password" placeholder="Введите ваш пароль">
         <a class="submit" href="{{ url_for('main.reg') }}"><button type="submit">Зарегистрироваться</button></a>
         <a href="auth">Войти</a>
+      </form>
       </div>
+    
     </main>
     <!-- Footer -->
     <footer>

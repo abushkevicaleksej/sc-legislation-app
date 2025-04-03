@@ -1,8 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask import render_template
-from .schemas.input import AuthSchema as AuthInputSchema
-from .schemas.output import AuthSchema as AuthOutputSchema
-from .schemas.output import RegSchema as RegOutputSchema
+
 from .services import auth_agent, reg_agent
 
 main = Blueprint("main", __name__)
@@ -20,8 +18,18 @@ def auth():
         auth_agent(username, password)
     return render_template('authorization.html')
 
-@main.route("/reg")
+@main.route("/reg", methods=['GET', 'POST'])
 def reg():
+    if request.method == 'POST':
+        gender = request.form.get("gender")
+        surname = request.form.get("surname")
+        name = request.form.get("name")
+        fname = request.form.get("partonymic")
+        reg_place = request.form.get("reg_place")
+        birthdate = request.form.get("birthdate")
+        username = request.form.get('username')
+        password = request.form.get('password')
+        reg_agent(gender=gender, surname=surname, name=name, fname=fname, reg_place=reg_place, birthdate=birthdate, username=username, password=password)
     return render_template('registration.html')
 
 @main.route("/requests")

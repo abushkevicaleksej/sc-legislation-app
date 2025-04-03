@@ -12,11 +12,11 @@ class OstisAuthAgent(AuthAgent):
 class OstisRegAgent(RegAgent):
     def reg_agent(
         self,
-        gender: str, 
+        gender, 
         surname: str,
         name: str,
         fname: str,
-        birthdate: str,
+        birthdate,
         reg_place: str,
         username: str,
         password: str

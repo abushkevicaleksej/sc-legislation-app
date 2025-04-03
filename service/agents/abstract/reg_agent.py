@@ -17,7 +17,7 @@ class RegAgent(ABC):
         surname: str,
         name: str,
         fname: str,
-        birthdate: str,
+        birthdate,
         reg_place: str,
         username: str,
         password: str

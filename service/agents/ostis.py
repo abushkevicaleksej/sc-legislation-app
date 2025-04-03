@@ -13,16 +13,22 @@ from sc_client.models import (
 )
 from sc_client.constants.common import ScEventType
 from sc_client.constants import sc_types
+from sc_kpm.utils.common_utils import generate_node, generate_nodes, generate_role_relation
 from threading import Event
+import re
 
 from service.agents.abstract.auth_agent import AuthAgent, AuthStatus
 from service.agents.abstract.reg_agent import RegAgent, RegStatus, Gender
 from config import Config
-from service.exceptions import AgentError
+from service.exceptions import AgentError, ParseDataError
 
 payload = None
 callback_event = Event()
 
+gender_dict = {
+    "male": "мужской",
+    "female": "женский"
+}
 
 def create_link(client, content: str):
     construction = ScConstruction()
@@ -38,49 +44,89 @@ def get_node(client) -> ScAddr:
     main_node: ScAddr = client.generate_elements(construction)[0]
     return main_node
 
+def set_gender_content(client, gender) -> ScAddr:
+    gender_node = None
+    print(gender)
+    if gender == "male":
+        print("male right now here")
+        construction = ScConstruction()
+        construction.create_node(sc_types.NODE_CONST, gender)
+        gender_node: ScAddr = client.generate_elements(construction)[0]
+        print("ended")
+        return gender_node
+    if gender == "female":
+        print("female right now here")
+        construction =  ScConstruction()
+        construction.create_node(sc_types.NODE_CONST, gender)
+        gender_node: ScAddr = client.generate_elements(construction)[0]
+        return gender_node
+    else:
+        raise ParseDataError(666, "Failed to parse args")
 
-# def call_back(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
-#     global payload
-#     callback_event.clear()
+def set_birthdate_content(client, birthdate) -> ScAddr:
+    pattern = r'(\d{2})\.(\d{2})\.(\d{4})'
+    match = re.match(pattern, birthdate)
+    if match:
+        day, month, year = map(int, match.groups())
+        construction = ScConstruction()
+        construction.create_node(sc_types.NODE_CONST, day)
+        construction.create_node(sc_types.NODE_CONST, month)
+        construction.create_node(sc_types.NODE_CONST, year)
 
-#     succ_node = client.resolve_keynodes(
-#         ScIdtfResolveParams(idtf='action_finished_successfully', type=sc_types.NODE_CONST_CLASS)
-#     )[0]
-#     unsucc_node = client.resolve_keynodes(
-#         ScIdtfResolveParams(idtf='action_finished_unsuccessfully', type=sc_types.NODE_CONST_CLASS)
-#     )[0]
-#     node_err = client.resolve_keynodes(
-#         ScIdtfResolveParams(idtf='action_finished_with_error', type=sc_types.NODE_CONST_CLASS)
-#     )[0]
+        day_node: ScAddr = client.generate_elements(construction)[0]
+        month_node: ScAddr = client.generate_elements(construction)[1]
+        year_node: ScAddr = client.generate_elements(construction)[2]
+        return day_node, month_node, year_node
 
-#     if trg.value == succ_node.value:
-#         nrel_result = client.resolve_keynodes(
-#             ScIdtfResolveParams(idtf='nrel_result', type=sc_types.NODE_CONST_CLASS)
-#         )[0]
-#         res_templ = ScTemplate()
-#         res_templ.triple_with_relation(
-#             src,
-#             sc_types.EDGE_D_COMMON_VAR,
-#             sc_types.NODE_VAR_STRUCT >> "_res_struct",
-#             sc_types.EDGE_ACCESS_VAR_POS_PERM,
-#             nrel_result
-#         )
-#         res_templ.triple(
-#             "_res_struct",
-#             sc_types.EDGE_ACCESS_VAR_POS_PERM,
-#             sc_types.LINK_VAR >> "_link_res"
-#         )
-#         gen_res = client.template_search(res_templ)[0]
-#         link_res = gen_res.get("_link_res")
-#         link_data = client.get_link_content(link_res)[0].data
-#         payload = link_data
-#     elif trg.value == unsucc_node.value or trg.value == node_err.value:
-#         raise AgentError
+    else:
+        raise ParseDataError(666, "Failed to parse args") 
 
-#     callback_event.set()
-#     if not payload:
-#         return result.FAILURE
-#     return result.SUCCESS
+def call_back(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
+    global payload
+    callback_event.clear()  # Clear the event at the start of callback
+
+    succ_node = client.resolve_keynodes(
+        ScIdtfResolveParams(idtf='action_finished_successfully', type=sc_types.NODE_CONST_CLASS)
+    )[0]
+    unsucc_node = client.resolve_keynodes(
+        ScIdtfResolveParams(idtf='action_finished_unsuccessfully', type=sc_types.NODE_CONST_CLASS)
+    )[0]
+    node_err = client.resolve_keynodes(
+        ScIdtfResolveParams(idtf='action_finished_with_error', type=sc_types.NODE_CONST_CLASS)
+    )[0]
+    
+    print(f'trg: {trg.value}')
+    print(f'succ: {succ_node.value}')
+
+    if trg.value == succ_node.value:
+        nrel_result = client.resolve_keynodes(
+            ScIdtfResolveParams(idtf='nrel_result', type=sc_types.NODE_CONST_CLASS)
+        )[0]
+        res_templ = ScTemplate()
+        res_templ.triple_with_relation(
+            src,
+            sc_types.EDGE_D_COMMON_VAR,
+            sc_types.NODE_VAR_STRUCT >> "_res_struct",
+            sc_types.EDGE_ACCESS_VAR_POS_PERM,
+            nrel_result
+        )
+        res_templ.triple(
+            "_res_struct",
+            sc_types.EDGE_ACCESS_VAR_POS_PERM,
+            sc_types.LINK_VAR >> "_link_res"
+        )
+        gen_res = client.template_search(res_templ)[0]
+        link_res = gen_res.get("_link_res")
+        link_data = client.get_link_content(link_res)[0].data
+        payload = {"message": link_data}
+    elif trg.value == unsucc_node.value or trg.value == node_err.value:
+        payload = {"message": "Agent error"}
+
+    callback_event.set()  # Signal the event when done
+    print("Callback", payload)
+    if not payload:
+        return result.FAILURE
+    return result.SUCCESS
 
 
 class result(Enum):
@@ -145,11 +191,11 @@ class Ostis:
     def call_reg_agent(
             self, 
             action_name: str,
-            gender: Gender, 
+            gender: str, 
             surname: str,
             name: str,
             fname: str,
-            birthdate: str,
+            birthdate,
             reg_place: str,
             username: str,
             password: str
@@ -157,11 +203,11 @@ class Ostis:
         if is_connected():
             username_lnk = create_link(client, username)
             password_lnk = create_link(client, password)
-            gender_lnk = create_link(client, gender)
+            gender_node = set_gender_content(client, gender)
             surname_lnk = create_link(client, surname)
             name_lnk = create_link(client, name)
             fname_lnk = create_link(client, fname)
-            birthdate_lnk = create_link(client, birthdate)
+            day_node, month_node, year_node = set_birthdate_content(client, birthdate)
             reg_place_lnk = create_link(client, reg_place)
 
             rrel_1 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_1', type=sc_types.NODE_CONST_ROLE))[0]
@@ -173,9 +219,18 @@ class Ostis:
             rrel_7 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_7', type=sc_types.NODE_CONST_ROLE))[0]
             rrel_8 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_8', type=sc_types.NODE_CONST_ROLE))[0]
 
+            rrel_user_day = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_user_day', type=sc_types.NODE_CONST_ROLE))[0]
+            rrel_user_month = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_user_month', type=sc_types.NODE_CONST_ROLE))[0]
+            rrel_user_year = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_user_year', type=sc_types.NODE_CONST_ROLE))[0]
+
             initiated_node = client.resolve_keynodes(ScIdtfResolveParams(idtf='action_initiated', type=sc_types.NODE_CONST_CLASS))[0]
             action_agent = client.resolve_keynodes(ScIdtfResolveParams(idtf=action_name, type=sc_types.NODE_CONST_CLASS))[0]
             main_node = get_node(client)
+
+            birthdate_con = generate_node(sc_types.NODE_CONST_TUPLE)
+            generate_role_relation(birthdate_con, day_node, rrel_user_day)
+            generate_role_relation(birthdate_con, month_node, rrel_user_month)
+            generate_role_relation(birthdate_con, year_node, rrel_user_year)
 
             template = ScTemplate()
             template.triple_with_relation(
@@ -216,7 +271,7 @@ class Ostis:
             template.triple_with_relation(
                 main_node >> "_main_node",
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
-                birthdate_lnk,
+                birthdate_con,
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
                 rrel_6
             )
@@ -230,7 +285,7 @@ class Ostis:
             template.triple_with_relation(
                 main_node >> "_main_node",
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
-                gender_lnk,
+                gender_node,
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
                 rrel_8
             )
@@ -248,7 +303,7 @@ class Ostis:
             event_params = ScEventSubscriptionParams(main_node, ScEventType.AFTER_GENERATE_INCOMING_ARC, call_back)
             client.events_create(event_params)
             client.template_generate(template)
-
+            
             global payload
             if callback_event.wait(timeout=10):
                 while not payload:
@@ -287,22 +342,22 @@ class OstisRegAgent(RegAgent):
         surname: str,
         name: str,
         fname: str,
-        birthdate: str,
+        birthdate,
         reg_place: str,
         username: str,
         password: str
         ):
         global payload
         payload = None
-        agent_response = self.ostis.call_reg_agent("action_register", 
-                                                   username, 
-                                                   password,
-                                                   gender,
-                                                   surname,
-                                                   name,
-                                                   fname,
-                                                   birthdate,
-                                                   reg_place
+        agent_response = self.ostis.call_reg_agent(action_name="action_register", 
+                                                   username=username, 
+                                                   password=password,
+                                                   gender=gender,
+                                                   surname=surname,
+                                                   name=name,
+                                                   fname=fname,
+                                                   birthdate=birthdate,
+                                                   reg_place=reg_place
                                                    )
         if agent_response == "User created":
             return {"status": RegStatus.CREATED}
