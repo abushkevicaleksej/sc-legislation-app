@@ -1,5 +1,6 @@
 from enum import Enum
 import sc_client.client as client
+from sc_client.client import generate_elements, resolve_keynodes, generate_by_template
 from ..exceptions import ScServerError
 from sc_client.client import is_connected
 from sc_client.models import (
@@ -13,7 +14,8 @@ from sc_client.models import (
 )
 from sc_client.constants.common import ScEventType
 from sc_client.constants import sc_types
-from sc_kpm.utils.common_utils import generate_node, generate_nodes, generate_role_relation
+from sc_kpm.utils.common_utils import generate_node, generate_role_relation, get_link_content_data, get_element_system_identifier, generate_connector
+from sc_kpm import ScKeynodes
 from threading import Event
 import re
 
@@ -37,26 +39,45 @@ def create_link(client, content: str):
     link = client.generate_elements(construction)
     return link[0]
 
-
 def get_node(client) -> ScAddr:
     construction = ScConstruction()
     construction.create_node(sc_types.NODE_CONST)
     main_node: ScAddr = client.generate_elements(construction)[0]
     return main_node
 
+def get_main_idtf(node: ScAddr) -> str:
+    template = ScTemplate()
+    template.quintuple(
+        node,
+        sc_types.EDGE_D_COMMON_VAR,
+        '_value',
+        sc_types.EDGE_ACCESS_VAR_POS_PERM,
+        ScKeynodes['nrel_main_idtf']
+        )
+    template_result = client.template_search(template)
+    value = ''
+    if len(template_result):
+        value = client.get_link_content(template_result[0].get('_value'))[0].data
+    return value
+
 def set_gender_content(client, gender) -> ScAddr:
-    gender_node = None
-    print(gender)
+    gender_node = generate_node(sc_types.NODE_CONST)
+    construction = ScConstruction()
     if gender == "male":
-        print("male right now here")
-        construction = ScConstruction()
-        construction.create_node(sc_types.NODE_CONST, gender)
-        gender_node: ScAddr = client.generate_elements(construction)[0]
-        print("ended")
-        return gender_node
+        gender_lnk = create_link(client, gender_dict[gender])
+        print(get_link_content_data(gender_lnk))
+        template = ScTemplate()
+        template.quintuple(
+            gender_node,
+            sc_types.EDGE_D_COMMON_VAR,
+            gender_lnk,
+            sc_types.EDGE_ACCESS_VAR_POS_PERM,
+            ScKeynodes['nrel_main_idtf']
+        )
+        res = generate_by_template(template)
+        print(get_link_content_data(res[2]))
+        return res[0]
     if gender == "female":
-        print("female right now here")
-        construction =  ScConstruction()
         construction.create_node(sc_types.NODE_CONST, gender)
         gender_node: ScAddr = client.generate_elements(construction)[0]
         return gender_node
@@ -210,6 +231,22 @@ class Ostis:
             day_node, month_node, year_node = set_birthdate_content(client, birthdate)
             reg_place_lnk = create_link(client, reg_place)
 
+            args = [
+                get_link_content_data(username_lnk),
+                get_link_content_data(password_lnk),
+                get_main_idtf(gender_node),
+                get_link_content_data(surname_lnk),
+                get_link_content_data(name_lnk),
+                get_link_content_data(fname_lnk),
+                get_link_content_data(reg_place_lnk),
+                get_main_idtf(day_node),
+                get_main_idtf(month_node),
+                get_main_idtf(year_node),
+            ]
+            for _ in args:
+                print(_)
+            return
+
             rrel_1 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_1', type=sc_types.NODE_CONST_ROLE))[0]
             rrel_2 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_2', type=sc_types.NODE_CONST_ROLE))[0]
             rrel_3 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_3', type=sc_types.NODE_CONST_ROLE))[0]
@@ -303,7 +340,7 @@ class Ostis:
             event_params = ScEventSubscriptionParams(main_node, ScEventType.AFTER_GENERATE_INCOMING_ARC, call_back)
             client.events_create(event_params)
             client.template_generate(template)
-            
+
             global payload
             if callback_event.wait(timeout=10):
                 while not payload:
