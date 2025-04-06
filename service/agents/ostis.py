@@ -20,7 +20,8 @@ from threading import Event
 import re
 
 from service.agents.abstract.auth_agent import AuthAgent, AuthStatus
-from service.agents.abstract.reg_agent import RegAgent, RegStatus, Gender
+from service.agents.abstract.reg_agent import RegAgent, RegStatus
+from service.agents.abstract.user_request_agent import RequestAgent, RequestStatus
 from config import Config
 from service.exceptions import AgentError, ParseDataError
 
@@ -361,6 +362,51 @@ class Ostis:
                 raise AgentError(524, "Timeout")
         else:
             raise ScServerError
+        
+    def call_user_request_agent(self,
+                                action_name: str,
+                                content: str
+                                ):
+        if is_connected():
+            request_lnk = create_link(client, content)
+            rrel_1 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_1', type=sc_types.NODE_CONST_ROLE))[0]
+    
+            initiated_node = client.resolve_keynodes(ScIdtfResolveParams(idtf='action_initiated', type=sc_types.NODE_CONST_CLASS))[0]
+            action_agent = client.resolve_keynodes(ScIdtfResolveParams(idtf=action_name, type=sc_types.NODE_CONST_CLASS))[0]
+            main_node = get_node(client)
+
+            template = ScTemplate()
+            template.triple_with_relation(
+                main_node >> "_main_node",
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                request_lnk,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                rrel_1
+            )
+            template.triple(
+                action_agent,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                "_main_node",
+            )
+            template.triple(
+                initiated_node,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                "_main_node",
+            )
+
+            event_params = ScEventSubscriptionParams(main_node, ScEventType.AFTER_GENERATE_INCOMING_ARC, call_back)
+            client.events_create(event_params)
+            client.template_generate(template)
+
+            global payload
+            if callback_event.wait(timeout=10):
+                while not payload:
+                    continue
+                return payload
+            else:
+                raise AgentError(524, "Timeout")
+        else:
+            raise ScServerError
 
 
 class OstisAuthAgent(AuthAgent):
@@ -414,4 +460,21 @@ class OstisRegAgent(RegAgent):
                 "status": RegStatus.EXISTS,
                 "message": "User with that credentials already exists.",
                 }
+        raise AgentError
+
+class OstisUserRequestAgent(RequestAgent):
+    def __init__(self):
+        self.ostis = Ostis(Config.OSTIS_URL)
+
+    def request_agent(self, action_name: str, content: str):
+        global payload
+        payload = None
+        agent_response = self.ostis.call_user_request_agent("action_user_request", content)
+        if agent_response == "Valid":
+            return {"status": RequestStatus.VALID}
+        elif agent_response == "Invalid":
+            return {
+                "status": RequestStatus.INVALID,
+                "message": "Invalid credentials",
+            }
         raise AgentError

@@ -2,6 +2,7 @@ from flask import current_app
 
 from service.agents.abstract.auth_agent import AuthAgent
 from service.agents.abstract.reg_agent import RegAgent
+from service.agents.abstract.user_request_agent import RequestAgent
 
 
 def reg_agent(gender, surname: str, name: str, fname: str, birthdate, reg_place: str, username: str, password: str):
@@ -19,3 +20,7 @@ def reg_agent(gender, surname: str, name: str, fname: str, birthdate, reg_place:
 def auth_agent(username: str, password: str):
     agent: AuthAgent = current_app.config['agents']['auth_agent']
     return agent.auth_agent(username, password)
+
+def user_request_agent(content: str):
+    agent: RequestAgent = current_app.config['agent']['user_request_agent']
+    return agent.request_agent(content)
