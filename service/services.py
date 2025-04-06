@@ -22,5 +22,5 @@ def auth_agent(username: str, password: str):
     return agent.auth_agent(username, password)
 
 def user_request_agent(content: str):
-    agent: RequestAgent = current_app.config['agent']['user_request_agent']
+    agent: RequestAgent = current_app.config['agents']['user_request_agent']
     return agent.request_agent(content)

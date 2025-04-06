@@ -369,6 +369,7 @@ class Ostis:
                                 ):
         if is_connected():
             request_lnk = create_link(client, content)
+
             rrel_1 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_1', type=sc_types.NODE_CONST_ROLE))[0]
     
             initiated_node = client.resolve_keynodes(ScIdtfResolveParams(idtf='action_initiated', type=sc_types.NODE_CONST_CLASS))[0]
@@ -466,10 +467,10 @@ class OstisUserRequestAgent(RequestAgent):
     def __init__(self):
         self.ostis = Ostis(Config.OSTIS_URL)
 
-    def request_agent(self, action_name: str, content: str):
+    def request_agent(self, content: str):
         global payload
         payload = None
-        agent_response = self.ostis.call_user_request_agent("action_user_request", content)
+        agent_response = self.ostis.call_user_request_agent(action_name="action_user_request", content=content)
         if agent_response == "Valid":
             return {"status": RequestStatus.VALID}
         elif agent_response == "Invalid":

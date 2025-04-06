@@ -167,10 +167,14 @@
     <div class="header-title">
         <h1 class="main-heading">Запросы</h1>
         <div class="search-bar">
-            <input type="text" placeholder="Что такое арендное жилье?" class="search-input" id="searchQuery">
-            <div class="search-icon" id="searchButton">
-                <img src="search2.png" alt="Поиск">
-            </div>
+            <form action="/requests" method="POST">
+                <input name="request_entry" type="text" placeholder="Что такое арендное жилье?" class="search-input" id="searchQuery">
+                <div class="search-icon" id="searchButton">
+                    <button type="submit">
+                        <img src="search2.png" alt="Поиск">
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -188,7 +192,7 @@
             const query = searchInput.value.trim();
             if (query) {
                 // Переходим на страницу результата запроса
-                window.location.href = 'requests-results';
+                window.location.href = 'requests';
             }
         }
 

@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask import render_template
 
-from .services import auth_agent, reg_agent
+from .services import auth_agent, reg_agent, user_request_agent
 
 main = Blueprint("main", __name__)
 
@@ -32,8 +32,15 @@ def reg():
         reg_agent(gender=gender, surname=surname, name=name, fname=fname, reg_place=reg_place, birthdate=birthdate, username=username, password=password)
     return render_template('registration.html')
 
-@main.route("/requests")
+@main.route("/requests", methods=['GET', 'POST'])
 def requests():
+    print("GO")
+    if request.method == 'POST':
+        print("GO")
+        content = request.form.get("request_entry")
+        print(content)
+        user_request_agent(content)
+        return render_template("requests.html")
     return render_template("requests.html")
 
 @main.route("/requests-results")
