@@ -28,8 +28,8 @@ payload = None
 callback_event = Event()
 
 gender_dict = {
-    "male": "мужской",
-    "female": "женский"
+    "male": "мужчина",
+    "female": "женщина"
 }
 
 def create_link(client, content: str):
@@ -60,45 +60,57 @@ def get_main_idtf(node: ScAddr) -> str:
         value = client.get_link_content(template_result[0].get('_value'))[0].data
     return value
 
-def set_gender_content(client, gender) -> ScAddr:
-    gender_node = generate_node(sc_types.NODE_CONST)
-    construction = ScConstruction()
+def set_gender_content(gender) -> ScAddr:
     if gender == "male":
-        gender_lnk = create_link(client, gender_dict[gender])
-        print(get_link_content_data(gender_lnk))
-        template = ScTemplate()
-        template.quintuple(
-            gender_node,
-            sc_types.EDGE_D_COMMON_VAR,
-            gender_lnk,
-            sc_types.EDGE_ACCESS_VAR_POS_PERM,
-            ScKeynodes['nrel_main_idtf']
-        )
-        res = generate_by_template(template)
-        print(get_link_content_data(res[2]))
-        return res[0]
+        return ScKeynodes['concept_man']
     if gender == "female":
-        construction.create_node(sc_types.NODE_CONST, gender)
-        gender_node: ScAddr = client.generate_elements(construction)[0]
-        return gender_node
+        return ScKeynodes['concept_woman']
     else:
         raise ParseDataError(666, "Failed to parse args")
 
 def set_birthdate_content(client, birthdate) -> ScAddr:
     pattern = r'(\d{2})\.(\d{2})\.(\d{4})'
     match = re.match(pattern, birthdate)
+    day_node = generate_node(sc_types.NODE_CONST)
+    month_node = generate_node(sc_types.NODE_CONST)
+    year_node = generate_node(sc_types.NODE_CONST)
     if match:
         day, month, year = map(int, match.groups())
-        construction = ScConstruction()
-        construction.create_node(sc_types.NODE_CONST, day)
-        construction.create_node(sc_types.NODE_CONST, month)
-        construction.create_node(sc_types.NODE_CONST, year)
+        day_lnk = create_link(client, day)
+        month_lnk = create_link(client, month)
+        year_lnk = create_link(client, year)
 
-        day_node: ScAddr = client.generate_elements(construction)[0]
-        month_node: ScAddr = client.generate_elements(construction)[1]
-        year_node: ScAddr = client.generate_elements(construction)[2]
-        return day_node, month_node, year_node
+        day_template = ScTemplate()
+        day_template.quintuple(
+            day_node,
+            sc_types.EDGE_D_COMMON_VAR,
+            day_lnk,
+            sc_types.EDGE_ACCESS_VAR_POS_PERM,
+            ScKeynodes['nrel_main_idtf']
+        )
+        day_res = generate_by_template(day_template)
 
+        month_template = ScTemplate()
+        month_template.quintuple(
+            month_node,
+            sc_types.EDGE_D_COMMON_VAR,
+            month_lnk,
+            sc_types.EDGE_ACCESS_VAR_POS_PERM,
+            ScKeynodes['nrel_main_idtf']
+        )
+        month_res = generate_by_template(month_template)
+
+        year_template = ScTemplate()
+        year_template.quintuple(
+            year_node,
+            sc_types.EDGE_D_COMMON_VAR,
+            year_lnk,
+            sc_types.EDGE_ACCESS_VAR_POS_PERM,
+            ScKeynodes['nrel_main_idtf']
+        )
+        year_res = generate_by_template(year_template)
+
+        return day_res[0], month_res[0], year_res[0]
     else:
         raise ParseDataError(666, "Failed to parse args") 
 
@@ -224,7 +236,7 @@ class Ostis:
         if is_connected():
             username_lnk = create_link(client, username)
             password_lnk = create_link(client, password)
-            gender_node = set_gender_content(client, gender)
+            gender_node = set_gender_content(gender)
             surname_lnk = create_link(client, surname)
             name_lnk = create_link(client, name)
             fname_lnk = create_link(client, fname)
@@ -234,7 +246,7 @@ class Ostis:
             args = [
                 get_link_content_data(username_lnk),
                 get_link_content_data(password_lnk),
-                get_main_idtf(gender_node),
+                get_element_system_identifier(gender_node),
                 get_link_content_data(surname_lnk),
                 get_link_content_data(name_lnk),
                 get_link_content_data(fname_lnk),
@@ -245,7 +257,6 @@ class Ostis:
             ]
             for _ in args:
                 print(_)
-            return
 
             rrel_1 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_1', type=sc_types.NODE_CONST_ROLE))[0]
             rrel_2 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_2', type=sc_types.NODE_CONST_ROLE))[0]
