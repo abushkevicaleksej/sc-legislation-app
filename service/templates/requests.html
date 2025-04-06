@@ -112,10 +112,10 @@
             outline: none;
         }
         .search-input::placeholder {
-    color: #B5B6E2;
-    opacity: 1;
-}
-.nav-button.active {
+            color: #B5B6E2;
+            opacity: 1;
+        }
+        .nav-button.active {
             background-color: #ffffff;
             font-weight: 500;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -154,10 +154,10 @@
     <header>
         <img src="logo.png" alt="Логотип" class="header-logo">
         <nav>
-            <a href="zaprosy.html"><button class="nav-button active">Запросы</button></a>
-            <a href="spravochnik.html"><button class="nav-button">Справочник</button></a>
-            <a href="{{ url_for('calendar') }}"><button class="nav-button">Календарь</button></a>
-            <a href="{{ url_for('templates') }}"><button class="nav-button">Шаблоны</button></a>
+            <a href="{{ url_for('main.requests') }}"><button class="nav-button active">Запросы</button></a>
+            <a href="{{ url_for('main.directory') }}"><button class="nav-button">Справочник</button></a>
+            <a href="{{ url_for('main.calendar') }}"><button class="nav-button">Календарь</button></a>
+            <a href="{{ url_for('main.templates') }}"><button class="nav-button">Шаблоны</button></a>
             <a href="#">
                 <img src="user.png" alt="Профиль" class="user-icon">
             </a>
@@ -184,18 +184,18 @@
         const searchInput = document.getElementById('searchQuery');
         const searchButton = document.getElementById('searchButton');
 
-        function navigateToZaprosyResult() {
+        function navigateToRequestsResult() {
             const query = searchInput.value.trim();
             if (query) {
                 // Переходим на страницу результата запроса
-                window.location.href = 'zaprosy-results.html';
+                window.location.href = 'requests-results.html';
             }
         }
 
         searchButton.addEventListener('click', navigateToZaprosyResult);
         searchInput.addEventListener('keyup', function(event) {
             if (event.key === 'Enter') {
-                navigateToZaprosyResult();
+                navigateToRequestsResult();
             }
         });
     });

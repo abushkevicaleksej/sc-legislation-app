@@ -34,11 +34,15 @@ def reg():
 
 @main.route("/requests")
 def requests():
-    return '200 ok'
+    return render_template("requests.html")
+
+@main.route("/requests-results")
+def request_results():
+    return render_template("requests-results.html")
 
 @main.route("/directory")
 def directory():
-    return 'directory route'
+    return render_template("directory.html")
 
 @main.route("/templates")
 def templates():
