@@ -32,6 +32,7 @@ def reg():
         reg_agent(gender=gender, surname=surname, name=name, fname=fname, reg_place=reg_place, birthdate=birthdate, username=username, password=password)
     return render_template('registration.html')
 
+<<<<<<< HEAD
 @main.route("/add-event")
 def add_event():
     return render_template("add-event.html")
@@ -49,6 +50,9 @@ def templs():
     return render_template("templates.html")
 
 @main.route("/requests", methods=['GET', 'POST'])
+=======
+@main.route("/requests")
+>>>>>>> 7dedd95 (view fixed)
 def requests():
     print("GO")
     if request.method == 'POST':
