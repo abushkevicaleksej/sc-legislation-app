@@ -1,7 +1,7 @@
 from flask import current_app
 
-from service.agents.abstract.auth_agent import AuthAgent
-from service.agents.abstract.reg_agent import RegAgent
+from service.agents.abstract.auth_agent import AuthAgent, AuthStatus
+from service.agents.abstract.reg_agent import RegAgent, RegStatus
 
 
 def reg_agent(gender, surname: str, name: str, fname: str, birthdate, reg_place: str, username: str, password: str):

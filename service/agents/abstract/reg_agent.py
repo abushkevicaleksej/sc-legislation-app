@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from enum import StrEnum
 
 class RegStatus(StrEnum):
-    CREATED = "created"
-    EXISTS = "exists"
+    CREATED = "Valid"
+    EXISTS = "Invalid"
 
 class Gender(StrEnum):
     MALE = "мужской"

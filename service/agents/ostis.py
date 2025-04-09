@@ -114,7 +114,8 @@ def set_birthdate_content(client, birthdate) -> ScAddr:
     else:
         raise ParseDataError(666, "Failed to parse args") 
 
-def call_back_reg(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
+
+def call_back(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
     global payload
     callback_event.clear()  # Clear the event at the start of callback
 
@@ -160,62 +161,7 @@ def call_back_reg(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
         # link_data = client.get_link_content(link_res)[0].data
         payload = {"message": result.SUCCESS}
     elif trg.value == unsucc_node.value or trg.value == node_err.value:
-        payload = {"message": "Agent error"}
-
-    callback_event.set()  # Signal the event when done
-    print("Callback", payload)
-    if not payload:
-        return result.FAILURE
-    return result.SUCCESS
-
-
-def call_back_auth(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
-    global payload
-    callback_event.clear()  # Clear the event at the start of callback
-
-    succ_node = client.resolve_keynodes(
-        ScIdtfResolveParams(idtf='action_finished_successfully', type=sc_types.NODE_CONST_CLASS)
-    )[0]
-    unsucc_node = client.resolve_keynodes(
-        ScIdtfResolveParams(idtf='action_finished_unsuccessfully', type=sc_types.NODE_CONST_CLASS)
-    )[0]
-    node_err = client.resolve_keynodes(
-        ScIdtfResolveParams(idtf='action_finished_with_error', type=sc_types.NODE_CONST_CLASS)
-    )[0]
-    
-    print(f'trg: {trg.value}')
-    print(f'succ: {succ_node.value}')
-
-    if trg.value == succ_node.value:
-        print("OK")
-        nrel_result = client.resolve_keynodes(
-            ScIdtfResolveParams(idtf='nrel_result', type=sc_types.NODE_CONST_CLASS)
-        )[0]
-        res_templ = ScTemplate()
-        res_templ.triple_with_relation(
-            src,
-            sc_types.EDGE_D_COMMON_VAR,
-            sc_types.NODE_VAR_STRUCT >> "_res_struct",
-            sc_types.EDGE_ACCESS_VAR_POS_PERM,
-            nrel_result
-        )
-        # res_templ.triple(
-        #     "_res_struct",
-        #     sc_types.EDGE_ACCESS_VAR_POS_PERM,
-        #     sc_types.LINK_VAR >> "_link_res"
-        # )
-        res_templ.triple(
-            succ_node,
-            sc_types.EDGE_ACCESS_VAR_POS_PERM,
-            src
-        )
-        gen_res = client.template_search(res_templ)[0]
-        print(len(gen_res))
-        # link_res = gen_res.get("_link_res")
-        # link_data = client.get_link_content(link_res)[0].data
-        payload = {"message": result.SUCCESS}
-    elif trg.value == unsucc_node.value or trg.value == node_err.value:
-        payload = {"message": "Agent error"}
+        payload = {"message": result.FAILURE}
 
     callback_event.set()  # Signal the event when done
     print("Callback", payload)
@@ -276,7 +222,6 @@ class result(Enum):
     SUCCESS = 0
     FAILURE = 1
 
-
 class Ostis:
     def __init__(self, url):
         self.ostis_url = url
@@ -317,14 +262,16 @@ class Ostis:
                 "_main_node",
             )
 
-            event_params = ScEventSubscriptionParams(main_node, ScEventType.AFTER_GENERATE_INCOMING_ARC, call_back_auth)
+            event_params = ScEventSubscriptionParams(main_node, ScEventType.AFTER_GENERATE_INCOMING_ARC, call_back)
             client.events_create(event_params)
             client.template_generate(template)
 
             global payload
             if callback_event.wait(timeout=10):
+                print("here")
                 while not payload:
                     continue
+                print(payload['message'])
                 return payload
             else:
                 raise AgentError(524, "Timeout")
@@ -458,7 +405,7 @@ class Ostis:
                 "_main_node",
             )
 
-            event_params = ScEventSubscriptionParams(main_node, ScEventType.AFTER_GENERATE_INCOMING_ARC, call_back_reg)
+            event_params = ScEventSubscriptionParams(main_node, ScEventType.AFTER_GENERATE_INCOMING_ARC, call_back)
             client.events_create(event_params)
             client.template_generate(template)
 
@@ -481,9 +428,9 @@ class OstisAuthAgent(AuthAgent):
         global payload
         payload = None
         agent_response = self.ostis.call_auth_agent("action_authentication", username, password)
-        if agent_response == "Valid":
+        if agent_response['message'] == result.SUCCESS:
             return {"status": AuthStatus.VALID}
-        elif agent_response == "Invalid":
+        elif agent_response['message'] == result.FAILURE:
             return {
                 "status": AuthStatus.INVALID,
                 "message": "Invalid credentials",
@@ -517,9 +464,9 @@ class OstisRegAgent(RegAgent):
                                                    birthdate=birthdate,
                                                    reg_place=reg_place
                                                    )
-        if agent_response == "User created":
+        if agent_response['message'] == result.SUCCESS:
             return {"status": RegStatus.CREATED}
-        elif agent_response == "User exists":
+        elif agent_response['message'] == result.FAILURE:
             return {
                 "status": RegStatus.EXISTS,
                 "message": "User with that credentials already exists.",

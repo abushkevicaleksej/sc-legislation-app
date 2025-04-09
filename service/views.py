@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from flask import render_template
+from flask import render_template, redirect, url_for
 
 from .services import auth_agent, reg_agent
 
@@ -14,8 +14,12 @@ def auth():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        print(username, password)
-        auth_agent(username, password)
+        response = auth_agent(username, password)
+        print(f"response {response["status"]}")
+        if response["status"] == "Valid":
+            return redirect(url_for('main.directory'))
+        else:
+            return render_template("authorization.html")
     return render_template('authorization.html')
 
 @main.route("/reg", methods=['GET', 'POST'])
@@ -29,7 +33,20 @@ def reg():
         birthdate = request.form.get("birthdate")
         username = request.form.get('login')
         password = request.form.get('password')
-        reg_agent(gender=gender, surname=surname, name=name, fname=fname, reg_place=reg_place, birthdate=birthdate, username=username, password=password)
+        response = reg_agent(
+            gender=gender, 
+            surname=surname, 
+            name=name, 
+            fname=fname, 
+            reg_place=reg_place, 
+            birthdate=birthdate, 
+            username=username, 
+            password=password
+            )
+        if response["status"] == "Valid":
+            return redirect(url_for('main.directory'))
+        else:
+            return render_template('registration.html') 
     return render_template('registration.html')
 
 @main.route("/add-event")
