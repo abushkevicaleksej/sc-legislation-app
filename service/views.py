@@ -67,14 +67,14 @@ def templs():
 
 @main.route("/requests", methods=['GET', 'POST'])
 def requests():
-    print("GO")
     if request.method == 'POST':
-        print("GO")
         content = request.form.get("request_entry")
-        print(content)
         asked = user_request_agent(content)
         print(asked["message"])
-        return render_template("requests.html")
+        if asked["message"] is not None:
+            return redirect(url_for('main.requests_results'))
+        else:
+            return render_template("requests.html")
     return render_template("requests.html")
 
 @main.route("/requests_results")

@@ -12,7 +12,7 @@ def create_app():
     app.register_blueprint(main)
 
     app.config['agents'] = load_agents()
-
+    app.secret_key = 'secret_key'
     register_error_handlers(app)
 
     return app
