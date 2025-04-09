@@ -6,7 +6,9 @@ class Config:
     config.read('config.ini')
 
     AGENTS_TO_LOAD = {
-        "auth_agent": "service.agents.mock.OstisAuthAgent",
+        "auth_agent": "service.agents.ostis.OstisAuthAgent",
+        "reg_agent": "service.agents.ostis.OstisRegAgent",
+        "user_request_agent": "service.agents.ostis.OstisUserRequestAgent",
     }
     OSTIS_URL = config['DEFAULT']['ostis_url']
     PROTOCOL = config['SERVER']['SC_SERVER_PROTOCOL']

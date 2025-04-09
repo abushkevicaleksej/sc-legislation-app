@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Документ по шаблону</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+  <style>
+    /* Общие стили */
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f5f7fa;
+        overflow-x: hidden; /* Убираем горизонтальный скролл для всей страницы */
+    }
+
+    .container {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        max-width: 2000px;
+        margin: 0 auto;
+    }
+
+    /* Шапка */
+    header {
+        background-color: #E9E9FD;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+    }
+
+    .header-logo {
+        width: 130px;
+        height: 130px;
+        object-fit: contain;
+    }
+
+    /* Навигационная панель */
+    nav {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+    }
+
+    .nav-button {
+        background-color: #E9E9FD;
+        color: #222349;
+        border: none;
+        padding: 16px 32px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 16px;
+        height: 50px;
+        transition: background-color 0.3s ease;
+        white-space: nowrap;
+    }
+
+    .nav-button:hover {
+        background-color: #d8d8f0;
+    }
+
+    .nav-button:active {
+        background-color: #F5F7FA;
+    }
+
+    .nav-button.active {
+        background-color: #ffffff;
+        font-weight: 500;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-icon {
+        width: 40px;
+        height: 40px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-left: 20px;
+    }
+
+    /* Основное содержимое */
+    .document-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 40px;
+        position: relative;
+    }
+
+    .document-title {
+        font-size: 44px;
+        font-weight: 600;
+        color:#4D4FA3;
+        margin-bottom: 30px;
+        margin-left: 550px;
+    }
+
+    .document-paper {
+        width: 80%;
+        max-width: 900px;
+        height: 700px;
+        background-color: white;
+        border: 1px solid #E9E9FD;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 40px;
+        margin: 0 auto;
+        overflow-y: auto; /* Только вертикальный скролл */
+        overflow-x: hidden; /* Убираем горизонтальный скролл */
+    }
+
+    .document-content {
+        width: 100%;
+        height: 100%;
+        outline: none;
+        border: none;
+        resize: none;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+    }
+
+    /* Стили для скроллбара документа */
+    .document-paper::-webkit-scrollbar {
+        width: 15px; /* Ширина вертикального скроллбара */
+    }
+
+    .document-paper::-webkit-scrollbar-track {
+        background: #CBCCED;
+        border-radius: 6px;
+        margin: 10px 0;
+
+    }
+
+    .document-paper::-webkit-scrollbar-thumb {
+        background-color: #4D4FA3;
+        border-radius: 15px; /* Овальная форма */
+        height: 15px;
+        width: 15px;
+        border: 2px solid #f1f1f1; /* Отступ вокруг бегунка */
+    }
+
+    .document-paper::-webkit-scrollbar-thumb:hover {
+        background-color: #3a3c7d;
+    }
+
+    /* Блок скачивания в правом нижнем углу */
+    .download-container {
+        position: absolute;
+        right: 100px;
+        bottom: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 5px;
+    }
+
+    .download-button {
+        background-color: #4D4FA3;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: background-color 0.3s ease;
+    }
+
+    .download-button:hover {
+        background-color: #3a3c7d;
+    }
+
+    .download-icon {
+        width: 16px;
+        height: 16px;
+    }
+
+    .download-format {
+        color: #4D4FA3;
+        font-size: 14px;
+        text-align: right;
+    }
+
+    /* Подвал */
+    footer {
+        background-color: #222349;
+        height: 150px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
+        text-align: center;
+        color: #E9E9FD;
+        padding: 20px;
+    }
+
+    footer p {
+        margin-bottom: 2px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <img src="static/images/logo.png" alt="Логотип" class="header-logo">
+    <nav>
+      <a href="{{ url_for('main.requests') }}"><button class="nav-button">Запросы</button></a>
+      <a href="{{ url_for('main.directory') }}"><button class="nav-button">Справочник</button></a>
+      <a href="{{ url_for('main.show_calendar') }}"><button class="nav-button">Календарь</button></a>
+      <a href="{{ url_for('main.templates') }}"><button class="nav-button active">Шаблоны</button></a>
+      <a href="#">
+        <img src="static/images/user.png" alt="Профиль" class="user-icon">
+      </a>
+    </nav>
+  </header>
+
+  <div class="document-container">
+    <h1 class="document-title">Документ по шаблону</h1>
+
+    <div class="document-paper">
+      <textarea class="document-content" placeholder="Начните вводить текст здесь..."></textarea>
+    </div>
+
+    <div class="download-container">
+      <button class="download-button">
+        <svg class="download-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 15V3M12 15L8 11M12 15L16 11M21 15V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V15" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Скачать
+      </button>
+      <span class="download-format">В формате .docx</span>
+    </div>
+  </div>
+
+  <footer>
+    <p>Персональный ассистент по юриспруденции</p>
+    <p>Ostis 2025</p>
+  </footer>
+</div>
+</body>
+</html>

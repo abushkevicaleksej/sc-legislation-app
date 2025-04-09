@@ -13,4 +13,3 @@ if __name__ == "__main__":
             app.run()
     except:
         raise ScServerError
-    #todo fix sc disconnection bug

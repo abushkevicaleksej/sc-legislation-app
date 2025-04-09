@@ -30,3 +30,7 @@ class FieldRequiredError(APIError):
 class AgentError(APIError):
     code = 500
     message = "An unexpected agent error"
+
+class ParseDataError(APIError):
+    code = 666
+    message = "An unexpected iput data"    

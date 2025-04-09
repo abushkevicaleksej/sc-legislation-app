@@ -1,6 +1,7 @@
 from marshmallow import Schema, fields, validate
 
-from service.agents.abstract.auth_agent import AuthStatus, RegStatus
+from service.agents.abstract.auth_agent import AuthStatus
+from service.agents.abstract.reg_agent import RegStatus
 
 
 class AuthSchema(Schema):

@@ -2,12 +2,12 @@ from abc import ABC, abstractmethod
 from enum import StrEnum
 
 
-class AuthStatus(StrEnum):
+class RequestStatus(StrEnum):
     VALID = "valid"
     INVALID = "invalid"
 
 
-class AuthAgent(ABC):
+class RequestAgent(ABC):
     @abstractmethod
-    def auth_agent(self, username: str, password: str) -> dict:
+    def request_agent(self, content: str) -> dict:
         pass

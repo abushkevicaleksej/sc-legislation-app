@@ -1,9 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask import render_template
-from .schemas.input import AuthSchema as AuthInputSchema
-from .schemas.output import AuthSchema as AuthOutputSchema
-from .schemas.output import RegSchema as RegOutputSchema
-from .services import auth_agent, reg_agent
+
+from .services import auth_agent, reg_agent, user_request_agent
 
 main = Blueprint("main", __name__)
 
@@ -11,11 +9,72 @@ main = Blueprint("main", __name__)
 def index():
     return "Hello world!"
 
-@main.route("/auth")
+@main.route("/auth", methods=['GET', 'POST'])
 def auth():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        print(username, password)
+        auth_agent(username, password)
     return render_template('authorization.html')
 
-
-@main.route("/reg")
+@main.route("/reg", methods=['GET', 'POST'])
 def reg():
+    if request.method == 'POST':
+        gender = request.form.get("gender")
+        surname = request.form.get("surname")
+        name = request.form.get("name")
+        fname = request.form.get("patronymic")
+        reg_place = request.form.get("registration")
+        birthdate = request.form.get("birthdate")
+        username = request.form.get('login')
+        password = request.form.get('password')
+        reg_agent(gender=gender, surname=surname, name=name, fname=fname, reg_place=reg_place, birthdate=birthdate, username=username, password=password)
     return render_template('registration.html')
+
+<<<<<<< HEAD
+@main.route("/requests", methods=['GET', 'POST'])
+=======
+@main.route("/add-event")
+def add_event():
+    return render_template("add-event.html")
+
+@main.route("/show_calendar")
+def show_calendar():
+    return render_template("calendar.html")
+
+@main.route("/doc")
+def doc():
+    return render_template("document.html")
+
+@main.route("/templates")
+def templs():
+    return render_template("templates.html")
+
+@main.route("/requests")
+>>>>>>> feat/html_megring
+def requests():
+    print("GO")
+    if request.method == 'POST':
+        print("GO")
+        content = request.form.get("request_entry")
+        print(content)
+        user_request_agent(content)
+        return render_template("requests.html")
+    return render_template("requests.html")
+
+@main.route("/requests-results")
+def request_results():
+    return render_template("requests-results.html")
+
+@main.route("/directory")
+def directory():
+    return render_template("directory.html")
+
+@main.route("/templates")
+def templates():
+    return 'templ route'
+
+@main.route("/calendar")
+def calendar():
+    return 'calendar route'

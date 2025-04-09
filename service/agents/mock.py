@@ -1,11 +1,8 @@
-from .abstract.auth_agent import AuthAgent, RegStatus, AuthStatus
-
+from .abstract.auth_agent import AuthAgent, AuthStatus
+from .abstract.reg_agent import RegAgent, RegStatus
+from .abstract.user_request_agent import RequestAgent, RequestStatus
 
 class OstisAuthAgent(AuthAgent):
-    def reg_agent(self, username: str, password: str):
-        print(f"MockAgent: Pretend registering {username} - {password}")
-        return {"status": RegStatus.CREATED}
-
     def auth_agent(self, username: str, password: str):
         print(f"MockAgent: Pretend authenticating {username} - {password}")
         return {
@@ -13,4 +10,25 @@ class OstisAuthAgent(AuthAgent):
             "message": "Invalid credentials",
         }
     
-#TODO add more agents like dat ^_^
+class OstisRegAgent(RegAgent):
+    def reg_agent(
+        self,
+        gender, 
+        surname: str,
+        name: str,
+        fname: str,
+        birthdate,
+        reg_place: str,
+        username: str,
+        password: str
+        ):
+        print(f"MockAgent: Pretend registering {gender} - {surname} - {name} - {fname} - {birthdate} - {reg_place} - {username} - {password}")
+        return {"status": RegStatus.CREATED}
+    
+class OstisUserRequestAgent(RequestAgent):
+    def request_agent(
+            self,
+            content: str
+            ):
+        print(f"MockAgent: Pretend requesting {content}")
+        return {"status": RequestStatus.VALID}

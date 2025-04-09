@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Жилое помещение | Юридический справочник</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+    <style>
+        /* Общие стили */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            max-width: 2000px;
+            margin: 0 auto;
+        }
+
+        /* Шапка */
+        header {
+            background-color: #E9E9FD;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .header-logo {
+            width: 130px;
+            height: 130px;
+            object-fit: contain;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .nav-button {
+            background-color: #E9E9FD;
+            color: #222349;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            height: 50px;
+            transition: background-color 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .nav-button:hover {
+            background-color: #d8d8f0;
+        }
+
+        .user-icon {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-left: 20px;
+        }
+
+        /* Кнопка "Назад" */
+        .back-button {
+            display: flex;
+            align-items: center;
+            gap: 23px;
+
+            color: #4D4FA3;
+            font-size: 20px;
+            font-weight: 500;
+            text-decoration: none;
+            margin-bottom: 20px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+
+
+
+        .back-arrow {
+            width: 40px;
+            height: 20px;
+
+        }
+
+        /* Стили для контента статьи */
+        .article-content {
+
+            flex: 1;
+            padding: 40px 65px 50px;
+            max-width: 1200px;
+            margin-left: 0 auto;
+            font-weight:400;
+            width: 100%;
+            line-height: 24px;
+        }
+
+        .article-title {
+
+            font-size: 36px;
+            font-weight: 570;
+            margin-bottom: 100px;
+            text-align: left;
+            padding-left: 0px;
+        }
+
+        .article-text {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: justify;
+            font-weight:100;
+        }
+
+
+
+        /* Подвал */
+        footer {
+            background-color: #222349;
+            height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            text-align: center;
+            color: #E9E9FD;
+            padding: 20px;
+        }
+
+        footer p {
+            margin-bottom: 2px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <img src="logo.png" alt="Логотип" class="header-logo">
+        <nav>
+            <a href="request.html"><button class="nav-button">Запросы</button></a>
+            <a href="directory.html"><button class="nav-button">Справочник</button></a>
+            <a href="calendar.html"><button class="nav-button">Календарь</button></a>
+            <a href="templates.html"><button class="nav-button">Шаблоны</button></a>
+            <a href="#">
+                <img src="user.png" alt="Профиль" class="user-icon">
+            </a>
+        </nav>
+    </header>
+
+    <main class="article-content">
+        <a href="javascript:history.back()" class="back-button">
+            <img src="back.png" alt="Назад" class="back-arrow">
+            Жилое помещение
+        </a>
+
+        <h1 class="article-title">Жилое помещение</h1>
+
+
+            <p class="article-text">
+                Жилое помещение – предназначенное для проживания граждан помещение, отапливаемое, имеющее естественное освещение и соответствующее обязательным для соблюдения санитарным нормам и правилам, гигиеническим нормативам и иным обязательным для соблюдения техническим нормативным правовым актам, содержащим требования, предъявляемые к жилым помещениям (далее, если иное не установлено настоящим Кодексом, – установленные для проживания санитарные и технические требования).
+            </p>
+
+    </main>
+
+    <footer>
+        <p>Персональный ассистент по юриспруденции</p>
+        <p>Ostis 2025</p>
+    </footer>
+</div>
+</body>
+</html>
