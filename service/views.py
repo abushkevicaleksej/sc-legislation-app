@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask import render_template
 
-from .services import auth_agent, reg_agent, user_request_agent
+from .services import auth_agent, reg_agent
 
 main = Blueprint("main", __name__)
 
@@ -32,9 +32,6 @@ def reg():
         reg_agent(gender=gender, surname=surname, name=name, fname=fname, reg_place=reg_place, birthdate=birthdate, username=username, password=password)
     return render_template('registration.html')
 
-<<<<<<< HEAD
-@main.route("/requests", methods=['GET', 'POST'])
-=======
 @main.route("/add-event")
 def add_event():
     return render_template("add-event.html")
@@ -52,15 +49,7 @@ def templs():
     return render_template("templates.html")
 
 @main.route("/requests")
->>>>>>> feat/html_megring
 def requests():
-    print("GO")
-    if request.method == 'POST':
-        print("GO")
-        content = request.form.get("request_entry")
-        print(content)
-        user_request_agent(content)
-        return render_template("requests.html")
     return render_template("requests.html")
 
 @main.route("/requests-results")
@@ -73,8 +62,8 @@ def directory():
 
 @main.route("/templates")
 def templates():
-    return 'templ route'
+    return render_template("templates.html")
 
-@main.route("/calendar")
+@main.route("/show_calendar")
 def calendar():
-    return 'calendar route'
+    return render_template("calendar.html")
