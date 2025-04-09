@@ -59,11 +59,11 @@
         }
 
         .nav-button:hover {
-            background-color: #ffffff;
+            background-color: #d8d8f0;
         }
 
         .nav-button:active {
-            background-color: #ffffff;
+            background-color: #F5F7FA;
         }
 
         .user-icon {
@@ -78,7 +78,7 @@
         .main-content {
             flex: 1;
             padding: 40px;
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 0 auto;
             width: 100%;
         }
@@ -92,7 +92,7 @@
 
         .search-results-title {
             font-size: 24px;
-            font-weight: 600;
+            font-weight: 500;
             color: #333;
             white-space: nowrap;
         }
@@ -124,19 +124,18 @@
             align-items: center;
             justify-content: center;
         }
+
         .article-result {
-            margin-bottom: 30px;
-            padding-bottom: 20px;
+            margin-bottom: 50px;
+            padding-bottom: 40px;
             border-bottom: 1px solid #e0e0e0;
             background-color: #ffffff;
             border-radius: 10px;
         border: none;
-        padding: 16px 32px;
+        padding: 20px 40px;
         }
 
-
         .article-result:last-child {
-
             border-bottom: none;
             margin-bottom: 0;
             padding-bottom: 0;
@@ -151,11 +150,11 @@
             display: block;
             margin-bottom: 10px;
             background-color: #ffffff;
-
         }
 
         .article-title:hover {
             text-decoration: underline;
+            background-color: #ffffff;
         }
 
         .article-excerpt {
@@ -164,7 +163,7 @@
             line-height: 1.5;
         }
 
-
+        /* Подвал */
         footer {
             background-color: #222349;
             height: 150px;
@@ -180,51 +179,43 @@
         footer p {
             margin-bottom: 2px;
         }
-        .definitions-container {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            max-width: 1000px;
-            margin: 0 auto;
-
-        }
-
     </style>
 </head>
 <body>
 <div class="container">
     <header>
-        <img src="static/images/logo.png" alt="Логотип" class="header-logo">
+        <img src="logo.png" alt="Логотип" class="header-logo">
         <nav>
             <a href="{{ url_for('main.requests') }}"><button class="nav-button">Запросы</button></a>
             <a href="{{ url_for('main.directory') }}"><button class="nav-button">Справочник</button></a>
             <a href="{{ url_for('main.show_calendar') }}"><button class="nav-button">Календарь</button></a>
             <a href="{{ url_for('main.templates') }}"><button class="nav-button">Шаблоны</button></a>
             <a href="#">
-                <img src="static/images/user.png" alt="Профиль" class="user-icon">
+                <img src="user.png" alt="Профиль" class="user-icon">
             </a>
         </nav>
     </header>
 
     <main class="main-content">
         <div class="search-results-header">
-            <h2 class="search-results-title">Результаты поиска по запросу:</h2>
+            <h2 class="search-results-title">Результаты поиска:</h2>
             <div class="results-search-bar">
                 <input type="text" class="results-search-input" placeholder="Поиск..." id="resultsSearchInput">
                 <div class="results-search-icon" id="resultsSearchButton">
-                    <img src="static/images/search2.png" alt="Поиск">
+                    <img src="search2.png" alt="Поиск">
                 </div>
             </div>
         </div>
 
         <div id="searchResultsContainer">
-            <!-- TODO сюда рез работы агента вставляется -->
-        </div>
-        <p>Связанные понятия:</p>
-        <div class="article-result">
-            <!-- Аналогично -->
-        </div>
+            <div class="article-result">
+                <a href="328.html?id=328" class="article-title">Статья 328: Незаконный оборот наркотических средств, психотропных веществ, их прекурсоров и аналогов</a>
+                <p class="article-excerpt">
+                    Незаконные без цели сбыта изготовление, переработка, приобретение, хранение, перевозка или пересылка наркотических средств, психотропных веществ либо их прекурсоров или аналогов...
+                </p>
+            </div>
 
+        </div>
     </main>
 
     <footer>
@@ -233,8 +224,58 @@
     </footer>
 </div>
 <script>
-    // Скрипт остается без изменений
-    // ...
+    document.addEventListener('DOMContentLoaded', function() {
+        // Получаем параметры из URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const query = urlParams.get('query') || '';
+
+        const searchInput = document.getElementById('resultsSearchInput');
+        const searchButton = document.getElementById('resultsSearchButton');
+
+        // Устанавливаем значение поиска из параметров URL
+        searchInput.value = query;
+
+        // Функция для выполнения поиска
+        function performSearch() {
+            const searchQuery = searchInput.value.trim();
+            if (searchQuery) {
+                // Перенаправляем с новым поисковым запросом
+                window.location.href = `search-results.html?query=${encodeURIComponent(searchQuery)}`;
+            }
+        }
+
+        // Обработчики событий
+        searchButton.addEventListener('click', performSearch);
+        searchInput.addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        // Здесь должен быть код для загрузки реальных результатов с сервера
+        // Например:
+        // if (query) {
+        //     fetch(`/api/search?q=${query}`)
+        //         .then(response => response.json())
+        //         .then(data => displayResults(data));
+        // }
+
+        // Вместо этого используем статические данные для демонстрации
+        function displayResults(results) {
+            const container = document.getElementById('searchResultsContainer');
+            container.innerHTML = '';
+
+            results.forEach(result => {
+                const articleDiv = document.createElement('div');
+                articleDiv.className = 'article-result';
+                articleDiv.innerHTML = `
+                    <a href="article.html?id=${result.id}" class="article-title">${result.title}</a>
+                    <p class="article-excerpt">${result.excerpt}</p>
+                `;
+                container.appendChild(articleDiv);
+            });
+        }
+    });
 </script>
 </body>
 </html>

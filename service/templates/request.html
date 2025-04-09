@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Результаты поиска | Юридический справочник</title>
+    <title>Запросы | Юридический справочник</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
     <style>
         /* Общие стили */
@@ -59,11 +59,11 @@
         }
 
         .nav-button:hover {
-            background-color: #ffffff;
+            background-color: #d8d8f0;
         }
 
         .nav-button:active {
-            background-color: #ffffff;
+            background-color: #F5F7FA;
         }
 
         .user-icon {
@@ -75,96 +75,63 @@
         }
 
         /* Основное содержимое */
-        .main-content {
-            flex: 1;
-            padding: 40px;
-            max-width: 1200px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        .search-results-header {
+        .header-title {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            margin-bottom: 30px;
-            gap: 20px;
+            justify-content: center;
+            flex: 1;
+            text-align: center;
         }
 
-        .search-results-title {
-            font-size: 24px;
+        .main-heading {
+            color: #4D4FA3;
+            font-size: 46px;
+            font-family: 'Inter', sans-serif;
             font-weight: 600;
-            color: #333;
-            white-space: nowrap;
+            margin-bottom: 20px;
         }
 
-        .results-search-bar {
+        /* Поисковая строка */
+        .search-bar {
             display: flex;
-            width: 400px;
-            border: 4px solid #4D4FA3;
+            width: 800px;
+            border: 3px solid #4D4FA3;
             border-radius: 8px;
             background-color: #ffffff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
-        .results-search-input {
-            padding: 8px 12px;
+        .search-input {
+            color: #B5B6E2;
+            padding: 10px;
             border: none;
             border-radius: 6px 0 0 6px;
             width: 100%;
-            font-size: 14px;
+            font-size: 16px;
             outline: none;
         }
+        .search-input::placeholder {
+            color: #B5B6E2;
+            opacity: 1;
+        }
+        .nav-button.active {
+            background-color: #ffffff;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
 
-        .results-search-icon {
-            width: 50px;
+        .search-icon {
+            width: 55px;
             cursor: pointer;
             background-color: #4D4FA3;
-            border-radius: 0 2px 2px 0;
+            border-radius: 0 4px 4px 0;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        .article-result {
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #e0e0e0;
-            background-color: #ffffff;
-            border-radius: 10px;
-        border: none;
-        padding: 16px 32px;
-        }
 
-
-        .article-result:last-child {
-
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-            background-color: #ffffff;
-        }
-
-        .article-title {
-            color: #4D4FA3;
-            font-size: 18px;
-            font-weight: 600;
-            text-decoration: none;
-            display: block;
-            margin-bottom: 10px;
-            background-color: #ffffff;
-
-        }
-
-        .article-title:hover {
-            text-decoration: underline;
-        }
-
-        .article-excerpt {
-            color: #555;
-            font-size: 15px;
-            line-height: 1.5;
-        }
-
-
+        /* Подвал */
         footer {
             background-color: #222349;
             height: 150px;
@@ -180,15 +147,6 @@
         footer p {
             margin-bottom: 2px;
         }
-        .definitions-container {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            max-width: 1000px;
-            margin: 0 auto;
-
-        }
-
     </style>
 </head>
 <body>
@@ -196,7 +154,7 @@
     <header>
         <img src="static/images/logo.png" alt="Логотип" class="header-logo">
         <nav>
-            <a href="{{ url_for('main.requests') }}"><button class="nav-button">Запросы</button></a>
+            <a href="{{ url_for('main.requests') }}"><button class="nav-button active">Запросы</button></a>
             <a href="{{ url_for('main.directory') }}"><button class="nav-button">Справочник</button></a>
             <a href="{{ url_for('main.show_calendar') }}"><button class="nav-button">Календарь</button></a>
             <a href="{{ url_for('main.templates') }}"><button class="nav-button">Шаблоны</button></a>
@@ -206,26 +164,15 @@
         </nav>
     </header>
 
-    <main class="main-content">
-        <div class="search-results-header">
-            <h2 class="search-results-title">Результаты поиска по запросу:</h2>
-            <div class="results-search-bar">
-                <input type="text" class="results-search-input" placeholder="Поиск..." id="resultsSearchInput">
-                <div class="results-search-icon" id="resultsSearchButton">
-                    <img src="static/images/search2.png" alt="Поиск">
-                </div>
+    <div class="header-title">
+        <h1 class="main-heading">Запросы</h1>
+        <div class="search-bar">
+            <input type="text" placeholder="Что такое арендное жилье?" class="search-input" id="searchQuery">
+            <div class="search-icon" id="searchButton">
+                <img src="static/images/search2.png" alt="Поиск">
             </div>
         </div>
-
-        <div id="searchResultsContainer">
-            <!-- TODO сюда рез работы агента вставляется -->
-        </div>
-        <p>Связанные понятия:</p>
-        <div class="article-result">
-            <!-- Аналогично -->
-        </div>
-
-    </main>
+    </div>
 
     <footer>
         <p>Персональный ассистент по юриспруденции</p>
@@ -233,8 +180,25 @@
     </footer>
 </div>
 <script>
-    // Скрипт остается без изменений
-    // ...
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchQuery');
+        const searchButton = document.getElementById('searchButton');
+
+        function navigateToRequestsResult() {
+            const query = searchInput.value.trim();
+            if (query) {
+                // Переходим на страницу результата запроса
+                window.location.href = 'requests-results.html';
+            }
+        }
+
+        searchButton.addEventListener('click', navigateToZaprosyResult);
+        searchInput.addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                navigateToRequestsResult();
+            }
+        });
+    });
 </script>
 </body>
 </html>

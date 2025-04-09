@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Юридический справочник</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+    <style>
+        /* Стили для модального окна */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 12px;
+            width: 420px;
+            height: 420px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #4D4FA3;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .date-selected {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+            text-align: center;
+            padding: 10px;
+            background-color: #F5F7FA;
+            border-radius: 8px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            font-size: 16px;
+            font-weight: 500;
+            color: #4D4FA3;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .event-name-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #E9E9FD;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .event-description-input {
+            width: 100%;
+            height: 120px;
+            padding: 12px;
+            border: 1px solid #E9E9FD;
+            border-radius: 8px;
+            font-size: 14px;
+            resize: none;
+        }
+
+        .save-button {
+            background-color: #4D4FA3;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: auto;
+            transition: background-color 0.3s;
+        }
+
+        .save-button:hover {
+            background-color: #3A3B7D;
+        }
+
+        /* Остальные стили остаются без изменений */
+    </style>
+</head>
+<body>
+<!-- Остальная часть вашего HTML кода -->
+
+<!-- Модальное окно добавления события -->
+<div class="modal-overlay" id="event-modal">
+    <div class="modal-content">
+        <h3 class="modal-title">Добавление события</h3>
+        <div class="date-selected" id="selected-date">Выбранная дата: ДД-ММ-ГГГГ</div>
+
+        <div class="input-group">
+            <label class="input-label">Название события</label>
+            <input type="text" class="event-name-input" placeholder="Введите название события">
+        </div>
+
+        <div class="input-group">
+            <label class="input-label">Описание события</label>
+            <textarea class="event-description-input" placeholder="Описание"></textarea>
+        </div>
+
+        <button class="save-button">Сохранить</button>
+    </div>
+</div>
+
+<script>
+    // Функция для открытия модального окна
+    function openEventModal(date) {
+        const modal = document.getElementById('event-modal');
+        const dateElement = document.getElementById('selected-date');
+
+        // Устанавливаем выбранную дату
+        const formattedDate = formatDate(date);
+        dateElement.textContent = `Выбранная дата: ${formattedDate}`;
+
+        // Показываем модальное окно
+        modal.style.display = 'flex';
+    }
+
+    // Функция для форматирования даты в ДД-ММ-ГГГГ
+    function formatDate(date) {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+    }
+
+    // Функция для закрытия модального окна
+    function closeEventModal() {
+        const modal = document.getElementById('event-modal');
+        modal.style.display = 'none';
+    }
+
+    // Обработчик клика по ячейке календаря
+    document.querySelectorAll('.calendar-grid td').forEach(cell => {
+        cell.addEventListener('click', function() {
+            // Получаем дату из ячейки
+            const day = this.querySelector('.calendar-day').textContent;
+            const currentDate = new Date();
+            currentDate.setDate(parseInt(day));
+
+            // Открываем модальное окно
+            openEventModal(currentDate);
+        });
+    });
+
+    // Обработчик клика по кнопке "Сохранить"
+    document.querySelector('.save-button').addEventListener('click', function() {
+        // Здесь можно добавить логику сохранения события
+        closeEventModal();
+    });
+
+    // Закрытие модального окна при клике вне его
+    document.querySelector('.modal-overlay').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeEventModal();
+        }
+    });
+</script>
+</body>
+</html>

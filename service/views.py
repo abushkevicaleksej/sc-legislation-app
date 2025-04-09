@@ -32,7 +32,27 @@ def reg():
         reg_agent(gender=gender, surname=surname, name=name, fname=fname, reg_place=reg_place, birthdate=birthdate, username=username, password=password)
     return render_template('registration.html')
 
+<<<<<<< HEAD
 @main.route("/requests", methods=['GET', 'POST'])
+=======
+@main.route("/add-event")
+def add_event():
+    return render_template("add-event.html")
+
+@main.route("/show_calendar")
+def show_calendar():
+    return render_template("calendar.html")
+
+@main.route("/doc")
+def doc():
+    return render_template("document.html")
+
+@main.route("/templates")
+def templs():
+    return render_template("templates.html")
+
+@main.route("/requests")
+>>>>>>> feat/html_megring
 def requests():
     print("GO")
     if request.method == 'POST':
