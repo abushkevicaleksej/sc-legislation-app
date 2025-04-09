@@ -33,6 +33,9 @@ def reg():
     return render_template('registration.html')
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 463527f (fix)
 @main.route("/add-event")
 def add_event():
     return render_template("add-event.html")
@@ -49,8 +52,11 @@ def doc():
 def templs():
     return render_template("templates.html")
 
+<<<<<<< HEAD
 @main.route("/requests", methods=['GET', 'POST'])
 =======
+=======
+>>>>>>> 463527f (fix)
 @main.route("/requests")
 >>>>>>> 7dedd95 (view fixed)
 def requests():
