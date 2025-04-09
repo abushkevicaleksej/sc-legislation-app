@@ -475,12 +475,11 @@ class OstisUserRequestAgent(RequestAgent):
         global payload
         payload = None
         agent_response = self.ostis.call_user_request_agent(action_name="action_user_request", content=content)
-        if agent_response == "Valid":
+        if agent_response is not None:
             return {"status": RequestStatus.VALID,
                     "message": agent_response["message"]}
-        elif agent_response == "Invalid":
+        else:
             return {
                 "status": RequestStatus.INVALID,
                 "message": "Invalid credentials",
             }
-        raise AgentError

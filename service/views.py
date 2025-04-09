@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from flask import render_template
+from flask import render_template, redirect, url_for, session
 
 from .services import auth_agent, reg_agent, user_request_agent
 
@@ -50,18 +50,18 @@ def templs():
 
 @main.route("/requests", methods=['GET', 'POST'])
 def requests():
-    print("GO")
     if request.method == 'POST':
-        print("GO")
         content = request.form.get("request_entry")
-        print(content)
         asked = user_request_agent(content)
         print(asked["message"])
-        return render_template("requests.html")
+        if asked["message"] is not None:
+            return redirect(url_for('main.requests_results'))
+        else:
+            return render_template("requests.html")
     return render_template("requests.html")
 
-@main.route("/requests-results")
-def request_results():
+@main.route("/requests_results")
+def requests_results():
     return render_template("requests-results.html")
 
 @main.route("/directory")
