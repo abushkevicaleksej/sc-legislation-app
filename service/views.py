@@ -55,7 +55,8 @@ def requests():
         print("GO")
         content = request.form.get("request_entry")
         print(content)
-        user_request_agent(content)
+        asked = user_request_agent(content)
+        print(asked["message"])
         return render_template("requests.html")
     return render_template("requests.html")
 
