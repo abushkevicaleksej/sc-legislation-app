@@ -1,13 +1,8 @@
 from flask import current_app
 
-<<<<<<< HEAD
 from service.agents.abstract.auth_agent import AuthAgent
 from service.agents.abstract.reg_agent import RegAgent
 from service.agents.abstract.user_request_agent import RequestAgent
-=======
-from service.agents.abstract.auth_agent import AuthAgent, AuthStatus
-from service.agents.abstract.reg_agent import RegAgent, RegStatus
->>>>>>> 48097e9 (auth and reg works correctly. needs to reprint html)
 
 
 def reg_agent(gender, surname: str, name: str, fname: str, birthdate, reg_place: str, username: str, password: str):

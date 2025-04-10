@@ -119,7 +119,6 @@ def set_birthdate_content(client, birthdate) -> ScAddr:
 def call_back(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
     global payload
     callback_event.clear()  # Clear the event at the start of callback
-    content_list = []
     succ_node = client.resolve_keynodes(
         ScIdtfResolveParams(idtf='action_finished_successfully', type=sc_types.NODE_CONST_CLASS)
     )[0]
@@ -146,11 +145,6 @@ def call_back(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
             nrel_result
         )
-        # res_templ.triple(
-        #     "_res_struct",
-        #     sc_types.EDGE_ACCESS_VAR_POS_PERM,
-        #     sc_types.LINK_VAR >> "_link_res"
-        # )
         res_templ.triple(
             succ_node,
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
@@ -158,8 +152,6 @@ def call_back(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
         )
         gen_res = client.template_search(res_templ)[0]
         print(len(gen_res))
-        # link_res = gen_res.get("_link_res")
-        # link_data = client.get_link_content(link_res)[0].data
         payload = {"message": result.SUCCESS}
     elif trg.value == unsucc_node.value or trg.value == node_err.value:
         payload = {"message": result.FAILURE}
@@ -173,7 +165,7 @@ def call_back(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
 def call_back_request(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
     global payload
     callback_event.clear()  # Clear the event at the start of callback
-
+    content_list = []
     succ_node = client.resolve_keynodes(
         ScIdtfResolveParams(idtf='action_finished_successfully', type=sc_types.NODE_CONST_CLASS)
     )[0]
@@ -188,7 +180,6 @@ def call_back_request(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
     print(f'succ: {succ_node.value}')
 
     if trg.value == succ_node.value:
-        print("OK")
         nrel_result = client.resolve_keynodes(
             ScIdtfResolveParams(idtf='nrel_result', type=sc_types.NODE_CONST_CLASS)
         )[0]
@@ -205,13 +196,6 @@ def call_back_request(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
             sc_types.LINK_VAR >> "_link_res"
         )
-<<<<<<< HEAD
-        gen_res = client.template_search(res_templ)[0]
-        print(len(gen_res))
-        link_res = gen_res.get("_link_res")
-        link_data = client.get_link_content(link_res)[0].data
-        payload = {"message": result.SUCCESS}
-=======
         gen_res = client.template_search(res_templ)
         print(len(gen_res))
         for _ in gen_res:
@@ -219,12 +203,7 @@ def call_back_request(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
             link_data = client.get_link_content(link_res)[0].data
             content_list.append(link_data)
             print(link_data)
-        # gen_res = client.template_search(res_templ)[0]
-        # link_res = gen_res.get("_link_res")
-        # link_data = client.get_link_content(link_res)[0].data
-        # payload = {"message": link_data}
         payload = {"message": content_list}
->>>>>>> cba1516 ([fix] request error while parsing multiple answers)
     elif trg.value == unsucc_node.value or trg.value == node_err.value:
         payload = {"message": "Nothing"}
 
@@ -233,6 +212,7 @@ def call_back_request(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
     if not payload:
         return result.FAILURE
     return result.SUCCESS
+
 
 class result(Enum):
     SUCCESS = 0
@@ -467,7 +447,7 @@ class Ostis:
                 "_main_node",
             )
 
-            event_params = ScEventSubscriptionParams(main_node, ScEventType.AFTER_GENERATE_INCOMING_ARC, call_back)
+            event_params = ScEventSubscriptionParams(main_node, ScEventType.AFTER_GENERATE_INCOMING_ARC, call_back_request)
             client.events_create(event_params)
             client.template_generate(template)
 
@@ -546,8 +526,9 @@ class OstisUserRequestAgent(RequestAgent):
         if agent_response is not None:
             return {"status": RequestStatus.VALID,
                     "message": agent_response["message"]}
-        else:
+        elif agent_response is None:
             return {
                 "status": RequestStatus.INVALID,
                 "message": "Invalid credentials",
             }
+        raise AgentError
