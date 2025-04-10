@@ -156,6 +156,10 @@ def call_back(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
             link_data = client.get_link_content(link_res)[0].data
             content_list.append(link_data)
             print(link_data)
+        # gen_res = client.template_search(res_templ)[0]
+        # link_res = gen_res.get("_link_res")
+        # link_data = client.get_link_content(link_res)[0].data
+        # payload = {"message": link_data}
         payload = {"message": content_list}
     elif trg.value == unsucc_node.value or trg.value == node_err.value:
         payload = {"message": "Nothing"}
