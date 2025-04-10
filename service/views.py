@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from flask import render_template
+from flask import render_template, redirect, url_for, session
 
 from .services import auth_agent, reg_agent, user_request_agent
 
@@ -14,8 +14,12 @@ def auth():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        print(username, password)
-        auth_agent(username, password)
+        response = auth_agent(username, password)
+        print(f"response {response["status"]}")
+        if response["status"] == "Valid":
+            return redirect(url_for('main.directory'))
+        else:
+            return render_template("authorization.html")
     return render_template('authorization.html')
 
 @main.route("/reg", methods=['GET', 'POST'])
@@ -29,13 +33,22 @@ def reg():
         birthdate = request.form.get("birthdate")
         username = request.form.get('login')
         password = request.form.get('password')
-        reg_agent(gender=gender, surname=surname, name=name, fname=fname, reg_place=reg_place, birthdate=birthdate, username=username, password=password)
+        response = reg_agent(
+            gender=gender, 
+            surname=surname, 
+            name=name, 
+            fname=fname, 
+            reg_place=reg_place, 
+            birthdate=birthdate, 
+            username=username, 
+            password=password
+            )
+        if response["status"] == "Valid":
+            return redirect(url_for('main.directory'))
+        else:
+            return render_template('registration.html') 
     return render_template('registration.html')
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 463527f (fix)
 @main.route("/add-event")
 def add_event():
     return render_template("add-event.html")
@@ -52,13 +65,7 @@ def doc():
 def templs():
     return render_template("templates.html")
 
-<<<<<<< HEAD
 @main.route("/requests", methods=['GET', 'POST'])
-=======
-=======
->>>>>>> 463527f (fix)
-@main.route("/requests")
->>>>>>> 7dedd95 (view fixed)
 def requests():
     print("GO")
     if request.method == 'POST':
@@ -69,8 +76,8 @@ def requests():
         return render_template("requests.html")
     return render_template("requests.html")
 
-@main.route("/requests-results")
-def request_results():
+@main.route("/requests_results")
+def requests_results():
     return render_template("requests-results.html")
 
 @main.route("/directory")

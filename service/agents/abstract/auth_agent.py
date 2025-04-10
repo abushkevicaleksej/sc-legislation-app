@@ -3,8 +3,8 @@ from enum import StrEnum
 
 
 class AuthStatus(StrEnum):
-    VALID = "valid"
-    INVALID = "invalid"
+    VALID = "Valid"
+    INVALID = "Invalid"
 
 
 class AuthAgent(ABC):
