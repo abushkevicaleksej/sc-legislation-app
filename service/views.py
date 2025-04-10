@@ -1,7 +1,10 @@
 from flask import Blueprint, request, jsonify
-from flask import render_template, redirect, url_for, session
+from flask import render_template, redirect, url_for, session, flash
+from flask_login import current_user, login_user
+
 
 from .services import auth_agent, reg_agent, user_request_agent
+from .errors import ErrorMessages
 
 main = Blueprint("main", __name__)
 
@@ -17,9 +20,12 @@ def auth():
         response = auth_agent(username, password)
         print(f"response {response["status"]}")
         if response["status"] == "Valid":
+            #TODO обернуть абстракцию вокруг юзера
+            #TODO нужен манагер всех юзеров
+            #TODO login_user(user)
             return redirect(url_for('main.directory'))
         else:
-            return render_template("authorization.html")
+            flash(ErrorMessages.error_auth(ErrorMessages))
     return render_template('authorization.html')
 
 @main.route("/reg", methods=['GET', 'POST'])

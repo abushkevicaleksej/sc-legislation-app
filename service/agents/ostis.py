@@ -473,6 +473,7 @@ class OstisAuthAgent(AuthAgent):
         if agent_response['message'] == result.SUCCESS:
             return {"status": AuthStatus.VALID}
         elif agent_response['message'] == result.FAILURE:
+            print("here")
             return {
                 "status": AuthStatus.INVALID,
                 "message": "Invalid credentials",

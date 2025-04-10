@@ -4,6 +4,8 @@ from sc_kpm import ScServer
 import config
 from service.exceptions import ScServerError
 
+from flask_login import LoginManager
+
 app = create_app()
 
 if __name__ == "__main__":
