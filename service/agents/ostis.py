@@ -119,7 +119,7 @@ def set_birthdate_content(client, birthdate) -> ScAddr:
 def call_back(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
     global payload
     callback_event.clear()  # Clear the event at the start of callback
-
+    content_list = []
     succ_node = client.resolve_keynodes(
         ScIdtfResolveParams(idtf='action_finished_successfully', type=sc_types.NODE_CONST_CLASS)
     )[0]
@@ -205,13 +205,24 @@ def call_back_request(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
             sc_types.LINK_VAR >> "_link_res"
         )
+<<<<<<< HEAD
         gen_res = client.template_search(res_templ)[0]
         print(len(gen_res))
         link_res = gen_res.get("_link_res")
         link_data = client.get_link_content(link_res)[0].data
         payload = {"message": result.SUCCESS}
+=======
+        gen_res = client.template_search(res_templ)
+        print(len(gen_res))
+        for _ in gen_res:
+            link_res = _.get("_link_res")
+            link_data = client.get_link_content(link_res)[0].data
+            content_list.append(link_data)
+            print(link_data)
+        payload = {"message": content_list}
+>>>>>>> cba1516 ([fix] request error while parsing multiple answers)
     elif trg.value == unsucc_node.value or trg.value == node_err.value:
-        payload = {"message": "Agent error"}
+        payload = {"message": "Nothing"}
 
     callback_event.set()  # Signal the event when done
     print("Callback", payload)
@@ -529,7 +540,8 @@ class OstisUserRequestAgent(RequestAgent):
         payload = None
         agent_response = self.ostis.call_user_request_agent(action_name="action_user_request", content=content)
         if agent_response == "Valid":
-            return {"status": RequestStatus.VALID}
+            return {"status": RequestStatus.VALID,
+                    "message": agent_response["message"]}
         elif agent_response == "Invalid":
             return {
                 "status": RequestStatus.INVALID,
