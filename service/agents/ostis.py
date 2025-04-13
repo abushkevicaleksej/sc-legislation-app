@@ -467,10 +467,10 @@ class Ostis:
         else:
             raise ScServerError
         
-    def call_directory_agent(self, action_name, part: str, area: str, content: str) -> str:
+    def call_directory_agent(self, action_name, content: str) -> str:
         if is_connected():
-            part_lnk = create_link(client, part)
-            area_lnk = create_link(client, area)
+            part_node = ScKeynodes["CONCEPT_FULL_SEARCH"]
+            area_node = ScKeynodes["FULL_SEARCH"]
             content_lnk = create_link(client, content)
 
             rrel_1 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_1', type=sc_types.NODE_CONST_ROLE))[0]
@@ -485,14 +485,14 @@ class Ostis:
             template.triple_with_relation(
                 main_node >> "_main_node",
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
-                part_lnk,
+                part_node,
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
                 rrel_1
             )
             template.triple_with_relation(
                 main_node >> "_main_node",
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
-                area_lnk,
+                area_node,
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
                 rrel_2
             )
@@ -565,16 +565,17 @@ class OstisRegAgent(RegAgent):
         ):
         global payload
         payload = None
-        agent_response = self.ostis.call_reg_agent(action_name="action_register", 
-                                                   username=username, 
-                                                   password=password,
-                                                   gender=gender,
-                                                   surname=surname,
-                                                   name=name,
-                                                   fname=fname,
-                                                   birthdate=birthdate,
-                                                   reg_place=reg_place
-                                                   )
+        agent_response = self.ostis.call_reg_agent(
+            action_name="action_register", 
+            username=username, 
+            password=password,
+            gender=gender,
+            surname=surname,
+            name=name,
+            fname=fname,
+            birthdate=birthdate,
+            reg_place=reg_place
+            )
         if agent_response['message'] == result.SUCCESS:
             return {"status": RegStatus.CREATED}
         elif agent_response['message'] == result.FAILURE:
@@ -591,7 +592,10 @@ class OstisUserRequestAgent(RequestAgent):
     def request_agent(self, content: str):
         global payload
         payload = None
-        agent_response = self.ostis.call_user_request_agent(action_name="action_user_request", content=content)
+        agent_response = self.ostis.call_user_request_agent(
+            action_name="action_user_request", 
+            content=content
+            )
         if agent_response is not None:
             return {"status": RequestStatus.VALID,
                     "message": agent_response["message"]}
@@ -606,13 +610,11 @@ class OstisDirectoryAgent(DirectoryAgent):
     def __init__(self):
         self.ostis = Ostis(Config.OSTIS_URL)
 
-    def directory_agent(self, part: str, area: str, content: str):
+    def directory_agent(self, content: str):
         global payload
         payload = None
         agent_response = self.ostis.call_directory_agent(
             action_name="action_search",
-            part="CONCEPT_FULL_SEARCH", 
-            area="FULL_SEARCH", 
             content=content
             )
         if agent_response is not None:

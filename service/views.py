@@ -3,7 +3,7 @@ from flask import render_template, redirect, url_for, session, flash
 from flask_login import current_user, login_user
 
 
-from .services import auth_agent, reg_agent, user_request_agent
+from .services import auth_agent, reg_agent, user_request_agent, directory_agent
 from .errors import ErrorMessages
 
 main = Blueprint("main", __name__)
@@ -87,8 +87,17 @@ def requests():
 def requests_results():
     return render_template("requests-results.html")
 
-@main.route("/directory")
+@main.route("/directory", methods=['GET', 'POST'])
 def directory():
+    if request.method == 'POST':
+        content = request.form.get("directory_entry")
+        print(content)
+        asked = directory_agent(content=content)
+        print(asked["message"])
+        if asked["message"] is not None:
+            return redirect(url_for('main.directory_results'))
+        else:
+            return render_template("directory.html")
     return render_template("directory.html")
 
 @main.route("/directory_results")

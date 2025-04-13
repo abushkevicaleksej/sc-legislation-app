@@ -36,10 +36,8 @@ class OstisUserRequestAgent(RequestAgent):
     
 class OstisDirectoryAgent(DirectoryAgent):
     def directory_agent(
-            self,
-            part,
-            area, 
+            self, 
             content, 
             ):
-        print(f"MockAgent: Pretend requesting {part} - {area} - {content}")
+        print(f"MockAgent: Pretend requesting {content}")
         return {"status": DirectoryStatus.VALID}

@@ -9,5 +9,5 @@ class DirectoryStatus(StrEnum):
 
 class DirectoryAgent(ABC):
     @abstractmethod
-    def directory_agent(self, part: str, area: str, content: str) -> dict:
+    def directory_agent(self, content: str) -> dict:
         pass
