@@ -1,6 +1,7 @@
 from .abstract.auth_agent import AuthAgent, AuthStatus
 from .abstract.reg_agent import RegAgent, RegStatus
 from .abstract.user_request_agent import RequestAgent, RequestStatus
+from .abstract.directory_agent import DirectoryAgent, DirectoryStatus
 
 class OstisAuthAgent(AuthAgent):
     def auth_agent(self, username: str, password: str):
@@ -32,3 +33,13 @@ class OstisUserRequestAgent(RequestAgent):
             ):
         print(f"MockAgent: Pretend requesting {content}")
         return {"status": RequestStatus.VALID}
+    
+class OstisDirectoryAgent(DirectoryAgent):
+    def directory_agent(
+            self,
+            part,
+            area, 
+            content, 
+            ):
+        print(f"MockAgent: Pretend requesting {part} - {area} - {content}")
+        return {"status": DirectoryStatus.VALID}

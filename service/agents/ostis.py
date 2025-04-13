@@ -1,6 +1,9 @@
 from enum import Enum
+from threading import Event
+import re
+
 import sc_client.client as client
-from sc_client.client import generate_elements, resolve_keynodes, generate_by_template
+from sc_client.client import generate_by_template
 from ..exceptions import ScServerError
 from sc_client.client import is_connected
 from sc_client.models import (
@@ -14,16 +17,20 @@ from sc_client.models import (
 )
 from sc_client.constants.common import ScEventType
 from sc_client.constants import sc_types
-from sc_kpm.utils.common_utils import generate_node, generate_role_relation, get_link_content_data, get_element_system_identifier, generate_connector
+from sc_kpm.utils.common_utils import (
+    generate_node, 
+    generate_role_relation, 
+    get_link_content_data, 
+    get_element_system_identifier, 
+    )
 from sc_kpm import ScKeynodes
-from threading import Event
-import re
 
 from service.agents.abstract.auth_agent import AuthAgent, AuthStatus
 from service.agents.abstract.reg_agent import RegAgent, RegStatus
 from service.agents.abstract.user_request_agent import RequestAgent, RequestStatus
-from config import Config
+from service.agents.abstract.directory_agent import DirectoryAgent, DirectoryStatus
 from service.exceptions import AgentError, ParseDataError
+from config import Config
 
 payload = None
 callback_event = Event()
@@ -32,6 +39,10 @@ gender_dict = {
     "male": "мужчина",
     "female": "женщина"
 }
+
+class result(Enum):
+    SUCCESS = 0
+    FAILURE = 1
 
 def create_link(client, content: str):
     construction = ScConstruction()
@@ -212,11 +223,6 @@ def call_back_request(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
     if not payload:
         return result.FAILURE
     return result.SUCCESS
-
-
-class result(Enum):
-    SUCCESS = 0
-    FAILURE = 1
 
 class Ostis:
     def __init__(self, url):
@@ -460,7 +466,69 @@ class Ostis:
                 raise AgentError(524, "Timeout")
         else:
             raise ScServerError
+        
+    def call_directory_agent(self, action_name, part: str, area: str, content: str) -> str:
+        if is_connected():
+            part_lnk = create_link(client, part)
+            area_lnk = create_link(client, area)
+            content_lnk = create_link(client, content)
 
+            rrel_1 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_1', type=sc_types.NODE_CONST_ROLE))[0]
+            rrel_2 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_2', type=sc_types.NODE_CONST_ROLE))[0]
+            rrel_3 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_3', type=sc_types.NODE_CONST_ROLE))[0]
+
+            initiated_node = client.resolve_keynodes(ScIdtfResolveParams(idtf='action_initiated', type=sc_types.NODE_CONST_CLASS))[0]
+            action_agent = client.resolve_keynodes(ScIdtfResolveParams(idtf=action_name, type=sc_types.NODE_CONST_CLASS))[0]
+            main_node = get_node(client)
+
+            template = ScTemplate()
+            template.triple_with_relation(
+                main_node >> "_main_node",
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                part_lnk,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                rrel_1
+            )
+            template.triple_with_relation(
+                main_node >> "_main_node",
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                area_lnk,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                rrel_2
+            )
+            template.triple_with_relation(
+                main_node >> "_main_node",
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                content_lnk,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                rrel_3
+            )
+            template.triple(
+                action_agent,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                "_main_node",
+            )
+            template.triple(
+                initiated_node,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                "_main_node",
+            )
+
+            event_params = ScEventSubscriptionParams(main_node, ScEventType.AFTER_GENERATE_INCOMING_ARC, call_back_request)
+            client.events_create(event_params)
+            client.template_generate(template)
+
+            global payload
+            if callback_event.wait(timeout=10):
+                print("here")
+                while not payload:
+                    continue
+                print(payload['message'])
+                return payload
+            else:
+                raise AgentError(524, "Timeout")
+        else:
+            raise ScServerError
 
 class OstisAuthAgent(AuthAgent):
     def __init__(self):
@@ -530,6 +598,29 @@ class OstisUserRequestAgent(RequestAgent):
         elif agent_response is None:
             return {
                 "status": RequestStatus.INVALID,
+                "message": "Invalid credentials",
+            }
+        raise AgentError
+    
+class OstisDirectoryAgent(DirectoryAgent):
+    def __init__(self):
+        self.ostis = Ostis(Config.OSTIS_URL)
+
+    def directory_agent(self, part: str, area: str, content: str):
+        global payload
+        payload = None
+        agent_response = self.ostis.call_directory_agent(
+            action_name="action_search",
+            part="CONCEPT_FULL_SEARCH", 
+            area="FULL_SEARCH", 
+            content=content
+            )
+        if agent_response is not None:
+            return {"status": DirectoryStatus.VALID,
+                    "message": agent_response["message"]}
+        elif agent_response is None:
+            return {
+                "status": DirectoryStatus.INVALID,
                 "message": "Invalid credentials",
             }
         raise AgentError

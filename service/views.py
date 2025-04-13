@@ -91,6 +91,10 @@ def requests_results():
 def directory():
     return render_template("directory.html")
 
+@main.route("/directory_results")
+def directory_results():
+    return render_template("directory-results.html")
+
 @main.route("/templates")
 def templates():
     return render_template("templates.html")
