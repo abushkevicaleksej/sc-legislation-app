@@ -1,10 +1,8 @@
-from flask import Blueprint, request, jsonify
-from flask import render_template, redirect, url_for, session, flash
-from flask_login import current_user, login_user
-
-
+from flask import Blueprint, request, render_template, redirect, url_for, flash
+from flask_login import login_user, logout_user, login_required
 from .services import auth_agent, reg_agent, user_request_agent
-from .errors import ErrorMessages
+
+from .models import User, load_user
 
 main = Blueprint("main", __name__)
 
@@ -16,17 +14,29 @@ def index():
 def auth():
     if request.method == 'POST':
         username = request.form.get('username')
+        load_user(username)
         password = request.form.get('password')
-        response = auth_agent(username, password)
-        print(f"response {response["status"]}")
-        if response["status"] == "Valid":
-            #TODO обернуть абстракцию вокруг юзера
-            #TODO нужен манагер всех юзеров
-            #TODO login_user(user)
+        
+        auth_response = auth_agent(username, password)
+        print("USER", auth_response)
+        if auth_response["status"] == "Valid":
             return redirect(url_for('main.directory'))
         else:
-            flash(ErrorMessages.error_auth(ErrorMessages))
+            flash('Неверное имя пользователя или пароль')
+            return render_template('authorization.html', 
+                                username=username)
+    
     return render_template('authorization.html')
+
+@main.route("/logout")
+def logout():
+    logout_user()
+    return redirect(url_for('main.auth'))
+
+@main.route("/protected")
+@login_required
+def protected():
+    return "Только для авторизованных"
 
 @main.route("/reg", methods=['GET', 'POST'])
 def reg():

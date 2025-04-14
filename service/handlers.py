@@ -1,6 +1,5 @@
 from flask import jsonify
 from .exceptions import APIError, AgentError
-from .schemas.base import SchemaValidationError
 
 
 def register_error_handlers(app):
@@ -16,15 +15,7 @@ def register_error_handlers(app):
             "error": "not_found",
             "message": "The requested resource was not found."
         }), 404
-
-    @app.errorhandler(SchemaValidationError)
-    def handle_validation_error(error):
-        return jsonify({
-            "error": "validation_error",
-            "message": "Invalid input.",
-            "details": error.messages
-        }), 400
-
+    
     @app.errorhandler(AgentError)
     def handle_unexpected_error(error: AgentError):
         return jsonify({
