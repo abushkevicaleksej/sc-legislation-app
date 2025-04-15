@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_login import LoginManager
-
+from .encoder import SCJSONEncoder
 login_manager = LoginManager()
 
 def create_app():
@@ -14,7 +14,7 @@ def create_app():
 
     from .agent_factory import load_agents
     app.config['agents'] = load_agents()
-    
+    app.json_encoder = SCJSONEncoder
     app.secret_key = 'secret_key'
     
     from .handlers import register_error_handlers

@@ -1,24 +1,27 @@
+import uuid
+from typing import Optional
 from flask_login import UserMixin
 from service import login_manager
 
-from sc_client.client import generate_elements, search_links_by_contents, get_link_content, generate_by_template, search_by_template
-from sc_client.constants import sc_type
-from sc_client.models import ScLinkContent, ScLinkContentType, ScConstruction, ScTemplate, ScAddr
+from sc_client.client import get_link_content, search_by_template
+from sc_client.models import ScTemplate, ScAddr
 from sc_client.constants import sc_types
 from sc_kpm import ScKeynodes
 
 class User(UserMixin):
     def __init__(
         self,
+        sc_addr: str | None,
         gender: str,
         surname: str,
         name: str,
         fname: str,
-        birthdate,
+        birthdate: str,
         reg_place: str,
         username: str,
         password: str
     ):
+        self._sc_addr = sc_addr 
         self.gender = gender
         self.surname = surname
         self.name = name
@@ -28,8 +31,15 @@ class User(UserMixin):
         self.username = username
         self.password = password
 
+    @property
+    def get_sc_addr_str(self):
+        return self._sc_addr.value
+
+    def get_id(self):
+        return str(self.username)
+
     def __repr__(self):
-        return '<User {}>'.format(self.username)
+        return f'<User {self.username} [{self.sc_addr_str}]>'
 
 def collect_user_info(user: ScAddr) -> User:
     template = ScTemplate()
@@ -82,24 +92,28 @@ def collect_user_info(user: ScAddr) -> User:
         sc_types.EDGE_ACCESS_VAR_POS_PERM,
         ScKeynodes["nrel_user_gender"]
     )
+    template.triple_with_relation(
+        user,
+        sc_types.EDGE_D_COMMON_VAR,
+        sc_types.NODE_VAR >> "_birthdate",
+        sc_types.EDGE_ACCESS_VAR_POS_PERM,
+        ScKeynodes["nrel_user_birthdate"]
+    )
     result = search_by_template(template)[0]
-    user = User(
+    return User(
+        sc_addr=str(user.value),
         gender=result.get("_gender"),
         surname=result.get("_surname"),
         name=result.get("_name"),
         fname=result.get("_patronymic"),
-        birthdate=None,
+        birthdate=result.get("_birthdate"),
         reg_place=result.get("_address"),
         username=result.get("_login"),
         password=result.get("_password")
     )
-    print(user)
-    return user
 
-    
 @login_manager.user_loader
-def load_user(username):
-    current_user = None
+def load_user(username: str) -> Optional[User]:
     template = ScTemplate()
     template.triple(
         ScKeynodes["registered_jurisprudence_user"],
@@ -113,16 +127,35 @@ def load_user(username):
         sc_types.EDGE_ACCESS_VAR_POS_PERM,
         ScKeynodes["nrel_user_login"]
     )
-    
-    result = search_by_template(template)
-    result_item = search_by_template(template)[0]
-    for _ in result:
-        item = _.get("_login")
-        item_str = get_link_content(item)[0]
-        if item_str.data == username:
-            print("OK")
-            current_user = collect_user_info(result_item.get("_user"))
+    search_result = search_by_template(template)
+    for result in search_result:
+        # login_link = result.get("_login")
+        try:
+            # current_login = get_link_content(login_link)[0].data
+            # print("3")
+            # print(current_login)
+            # print(username)
+            # # if current_login == username:
+            # print("4")
+            return collect_user_info(result.get("_user"))
+        except Exception as e:
+            print(f"Error loading user: {e}")
+    return None
 
-        else:
-            print("False")
-    return current_user
+def find_user_by_username(username: str) -> Optional[User]:
+    template = ScTemplate()
+    template.triple_with_relation(
+        sc_types.NODE_VAR >> "_user",
+        sc_types.EDGE_D_COMMON_VAR,
+        sc_types.LINK_VAR >> "_login",
+        sc_types.EDGE_ACCESS_VAR_POS_PERM,
+        ScKeynodes["nrel_user_login"]
+    )
+    
+    results = search_by_template(template)
+    
+    for result in results:
+        login_content = get_link_content(result.get("_login"))[0].data
+        if login_content == username:
+            return collect_user_info(result.get("_user"))
+    return None

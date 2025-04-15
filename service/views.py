@@ -1,8 +1,9 @@
 from flask import Blueprint, request, render_template, redirect, url_for, flash
-from flask_login import login_user, logout_user, login_required
+from flask_login import login_user, logout_user, login_required, current_user
 from .services import auth_agent, reg_agent, user_request_agent
 
-from .models import User, load_user
+from .models import User, load_user, find_user_by_username
+from .forms import LoginForm
 
 main = Blueprint("main", __name__)
 
@@ -12,18 +13,20 @@ def index():
 
 @main.route("/auth", methods=['GET', 'POST'])
 def auth():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.directory'))
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
+        user = find_user_by_username(username)
         auth_response = auth_agent(username, password)
-        load_user(username)
         if auth_response["status"] == "Valid":
+            login_user(user)
+            print(f"User {username} logged in successfully")
             return redirect(url_for('main.directory'))
         else:
-            flash('Неверное имя пользователя или пароль')
-            return render_template('authorization.html', 
-                                username=username)
-    
+            flash('Неверные учетные данные')
+            return redirect(url_for('main.auth'))
     return render_template('authorization.html')
 
 @main.route("/logout")
