@@ -8,6 +8,7 @@ from .forms import LoginForm
 main = Blueprint("main", __name__)
 
 @main.route("/index")
+@login_required
 def index():
     return "Hello world!"
 
@@ -25,7 +26,6 @@ def auth():
             print(f"User {username} logged in successfully")
             return redirect(url_for('main.directory'))
         else:
-            flash('Неверные учетные данные')
             return redirect(url_for('main.auth'))
     return render_template('authorization.html')
 
@@ -41,6 +41,8 @@ def protected():
 
 @main.route("/reg", methods=['GET', 'POST'])
 def reg():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.directory'))
     if request.method == 'POST':
         gender = request.form.get("gender")
         surname = request.form.get("surname")
@@ -67,22 +69,27 @@ def reg():
     return render_template('registration.html')
 
 @main.route("/add-event")
+@login_required
 def add_event():
     return render_template("add-event.html")
 
 @main.route("/show_calendar")
+@login_required
 def show_calendar():
     return render_template("calendar.html")
 
 @main.route("/doc")
+@login_required
 def doc():
     return render_template("document.html")
 
 @main.route("/templates")
+@login_required
 def templs():
     return render_template("templates.html")
 
 @main.route("/requests", methods=['GET', 'POST'])
+@login_required
 def requests():
     if request.method == 'POST':
         content = request.form.get("request_entry")
@@ -95,17 +102,21 @@ def requests():
     return render_template("requests.html")
 
 @main.route("/requests_results")
+@login_required
 def requests_results():
     return render_template("requests-results.html")
 
 @main.route("/directory")
+@login_required
 def directory():
     return render_template("directory.html")
 
 @main.route("/templates")
+@login_required
 def templates():
     return render_template("templates.html")
 
 @main.route("/show_calendar")
+@login_required
 def calendar():
     return render_template("calendar.html")

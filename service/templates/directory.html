@@ -154,11 +154,11 @@
         <img src="/static/images/logo.png" alt="Логотип" class="header-logo">
         <nav>
             <a href="{{ url_for('main.requests') }}"><button class="nav-button">Запросы</button></a>
-            <a href="{{ url_for('main.directory') }}"><button class="nav-button active">Справочник</button></a>
-            <a href="{{ url_for('main.show_calendar') }}"><button class="nav-button">Календарь</button></a>
+            <a href="{{ url_for('main.directory') }}"><button class="nav-button">Справочник</button></a>
+            <a href="{{ url_for('main.show_calendar') }}"><button class="nav-button active">Календарь</button></a>
             <a href="{{ url_for('main.templates') }}"><button class="nav-button">Шаблоны</button></a>
-            <a href="#">
-                <img src="static/images/user.png" alt="Профиль" class="user-icon">
+            <a href="{{ url_for('main.logout') }}">
+                <img src="/static/images/logout.png" alt="Выйти" class="user-icon">
             </a>
         </nav>
     </header>
