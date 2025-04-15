@@ -14,11 +14,9 @@ def index():
 def auth():
     if request.method == 'POST':
         username = request.form.get('username')
-        load_user(username)
         password = request.form.get('password')
-        
         auth_response = auth_agent(username, password)
-        print("USER", auth_response)
+        load_user(username)
         if auth_response["status"] == "Valid":
             return redirect(url_for('main.directory'))
         else:
