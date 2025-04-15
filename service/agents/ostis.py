@@ -1,4 +1,3 @@
-from enum import Enum
 import sc_client.client as client
 from sc_client.client import generate_elements, resolve_keynodes, generate_by_template
 from ..exceptions import ScServerError
@@ -14,9 +13,17 @@ from sc_client.models import (
 )
 from sc_client.constants.common import ScEventType
 from sc_client.constants import sc_types
-from sc_kpm.utils.common_utils import generate_node, generate_role_relation, get_link_content_data, get_element_system_identifier, generate_connector
+from sc_kpm.utils.common_utils import (
+    generate_node, 
+    generate_role_relation, 
+    get_link_content_data, 
+    get_element_system_identifier
+    )
 from sc_kpm import ScKeynodes
+
+
 from threading import Event
+from enum import Enum
 import re
 
 from service.agents.abstract.auth_agent import AuthAgent, AuthStatus
@@ -128,12 +135,8 @@ def call_back(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
     node_err = client.resolve_keynodes(
         ScIdtfResolveParams(idtf='action_finished_with_error', type=sc_types.NODE_CONST_CLASS)
     )[0]
-    
-    print(f'trg: {trg.value}')
-    print(f'succ: {succ_node.value}')
 
     if trg.value == succ_node.value:
-        print("OK")
         nrel_result = client.resolve_keynodes(
             ScIdtfResolveParams(idtf='nrel_result', type=sc_types.NODE_CONST_CLASS)
         )[0]
@@ -151,20 +154,18 @@ def call_back(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
             src
         )
         gen_res = client.template_search(res_templ)[0]
-        print(len(gen_res))
         payload = {"message": result.SUCCESS}
     elif trg.value == unsucc_node.value or trg.value == node_err.value:
         payload = {"message": result.FAILURE}
 
-    callback_event.set()  # Signal the event when done
-    print("Callback", payload)
+    callback_event.set()
     if not payload:
         return result.FAILURE
     return result.SUCCESS
 
 def call_back_request(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
     global payload
-    callback_event.clear()  # Clear the event at the start of callback
+    callback_event.clear()
     content_list = []
     succ_node = client.resolve_keynodes(
         ScIdtfResolveParams(idtf='action_finished_successfully', type=sc_types.NODE_CONST_CLASS)
@@ -175,9 +176,6 @@ def call_back_request(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
     node_err = client.resolve_keynodes(
         ScIdtfResolveParams(idtf='action_finished_with_error', type=sc_types.NODE_CONST_CLASS)
     )[0]
-    
-    print(f'trg: {trg.value}')
-    print(f'succ: {succ_node.value}')
 
     if trg.value == succ_node.value:
         nrel_result = client.resolve_keynodes(
@@ -197,18 +195,15 @@ def call_back_request(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
             sc_types.LINK_VAR >> "_link_res"
         )
         gen_res = client.template_search(res_templ)
-        print(len(gen_res))
         for _ in gen_res:
             link_res = _.get("_link_res")
             link_data = client.get_link_content(link_res)[0].data
             content_list.append(link_data)
-            print(link_data)
         payload = {"message": content_list}
     elif trg.value == unsucc_node.value or trg.value == node_err.value:
         payload = {"message": "Nothing"}
 
-    callback_event.set()  # Signal the event when done
-    print("Callback", payload)
+    callback_event.set()
     if not payload:
         return result.FAILURE
     return result.SUCCESS
@@ -264,10 +259,8 @@ class Ostis:
 
             global payload
             if callback_event.wait(timeout=10):
-                print("here")
                 while not payload:
                     continue
-                print(payload['message'])
                 return payload
             else:
                 raise AgentError(524, "Timeout")
@@ -473,7 +466,6 @@ class OstisAuthAgent(AuthAgent):
         if agent_response['message'] == result.SUCCESS:
             return {"status": AuthStatus.VALID}
         elif agent_response['message'] == result.FAILURE:
-            print("here")
             return {
                 "status": AuthStatus.INVALID,
                 "message": "Invalid credentials",
