@@ -1,4 +1,4 @@
-from flask import Blueprint, request, render_template, redirect, url_for, flash
+from flask import Blueprint, request, render_template, redirect, url_for, flash, session
 from flask_login import login_user, logout_user, login_required, current_user
 from .services import auth_agent, reg_agent, user_request_agent
 
@@ -96,15 +96,20 @@ def requests():
         asked = user_request_agent(content)
         print(asked["message"])
         if asked["message"] is not None:
+            session['search_query'] = content
+            session['search_results'] = asked["message"]
             return redirect(url_for('main.requests_results'))
         else:
+            flash('Ничего не найдено', 'warning')
             return render_template("requests.html")
     return render_template("requests.html")
 
 @main.route("/requests_results")
 @login_required
 def requests_results():
-    return render_template("requests-results.html")
+    query = session.get('search_query', '')
+    results = session.get('search_results', [])
+    return render_template("requests-results.html", query=query, results=results)
 
 @main.route("/directory")
 @login_required

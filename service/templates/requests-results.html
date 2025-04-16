@@ -186,44 +186,69 @@
             min-height: 100vh;
             max-width: 1000px;
             margin: 0 auto;
+        }
+        #searchResultsContainer {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
 
+        .article-result {
+            margin: 15px 0;
+            padding: 15px;
+            border-left: 4px solid #4D4FA3;
+            transition: transform 0.2s;
+        }
+
+        .article-result:hover {
+            transform: translateX(5px);
+        }
+
+        .article-excerpt {
+            color: #444;
+            font-size: 16px;
+            line-height: 1.6;
+            margin: 0;
         }
 
     </style>
 </head>
 <body>
-<div class="container">
-    <header>
-        <img src="/static/images/logo.png" alt="Логотип" class="header-logo">
-        <nav>
-            <a href="{{ url_for('main.requests') }}"><button class="nav-button">Запросы</button></a>
-            <a href="{{ url_for('main.directory') }}"><button class="nav-button">Справочник</button></a>
-            <a href="{{ url_for('main.show_calendar') }}"><button class="nav-button active">Календарь</button></a>
-            <a href="{{ url_for('main.templates') }}"><button class="nav-button">Шаблоны</button></a>
-            <a href="{{ url_for('main.logout') }}">
-                <img src="/static/images/logout.png" alt="Выйти" class="user-icon">
-            </a>
-        </nav>
-    </header>
+    <div class="container">
+        <header>
+            <img src="/static/images/logo.png" alt="Логотип" class="header-logo">
+            <nav>
+                <a href="{{ url_for('main.requests') }}"><button class="nav-button">Запросы</button></a>
+                <a href="{{ url_for('main.directory') }}"><button class="nav-button">Справочник</button></a>
+                <a href="{{ url_for('main.show_calendar') }}"><button class="nav-button active">Календарь</button></a>
+                <a href="{{ url_for('main.templates') }}"><button class="nav-button">Шаблоны</button></a>
+                <a href="{{ url_for('main.logout') }}">
+                    <img src="/static/images/logout.png" alt="Выйти" class="user-icon">
+                </a>
+            </nav>
+        </header>
+    
+        <main class="main-content">
+            <div class="search-results-header">
+                <!-- Отображаем текст запроса -->
+                <h2 class="search-results-title">Результаты поиска по запросу: "{{ query }}"</h2>
 
-    <main class="main-content">
-        <div class="search-results-header">
-            <h2 class="search-results-title">Результаты поиска по запросу:</h2>
-            <div class="results-search-bar">
-                <input type="text" class="results-search-input" placeholder="Поиск..." id="resultsSearchInput">
-                <div class="results-search-icon" id="resultsSearchButton">
-                    <img src="static/images/search2.png" alt="Поиск">
-                </div>
             </div>
-        </div>
-
-        <div id="searchResultsContainer">
-            <!-- TODO сюда рез работы агента вставляется -->
-        </div>
-        <p>Связанные понятия:</p>
-        <div class="article-result">
-            <!-- Аналогично -->
-        </div>
+    
+            <div id="searchResultsContainer">
+                {% if results %}
+                    {% for item in results %}
+                    <div class="article-result">
+                        <p class="article-excerpt">{{ item }}</p>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="article-result">
+                        <p class="article-excerpt">Ничего не найдено</p>
+                    </div>
+                {% endif %}
+            </div>
 
     </main>
 
@@ -232,9 +257,5 @@
         <p>Ostis 2025</p>
     </footer>
 </div>
-<script>
-    // Скрипт остается без изменений
-    // ...
-</script>
 </body>
 </html>

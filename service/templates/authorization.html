@@ -4,65 +4,41 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Авторизация</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
+  <link rel="stylesheet" href="static/styles/style.css">
 </head>
 <body>
   <div class="container">
+    <!-- Header -->
+    <header>
+      <img src="static/images/logo.png" alt="Логотип" class="header-logo">
+      <nav>
+        <a href="{{ url_for('main.requests') }}"><button class="nav-button">Запросы</button></a>
+        <a href="{{ url_for('main.directory') }}"><button class="nav-button">Справочник</button></a>
+        <a href="{{ url_for('main.show_calendar') }}"><button class="nav-button">Календарь</button></a>
+        <a href="{{ url_for('main.templates') }}"><button class="nav-button">Шаблоны</button></a>
+        <img src="static/images/user.png" alt="Иконка пользователя" class="user-icon">
+      </nav>
+    </header>
+    <!-- Main -->
     <main>
-      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Логотип" class="main-logo">
+      <img src="static/images/logo.png" alt="Логотип" class="main-logo">
       <div class="auth-form">
         <h2>Авторизация</h2>
-        
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            {% for category, message in messages %}
-              <div class="alert alert-{{ category }}">
-                {{ message }}
-              </div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
-
         <form method="POST" action="{{ url_for('main.auth') }}">
-          {{ form.hidden_tag() }}
-          
-          <div class="form-group">
-            {{ form.username.label(class="form-label") }}
-            {{ form.username(class="form-control", placeholder="Введите ваш логин") }}
-            {% if form.username.errors %}
-              <div class="invalid-feedback">
-                {% for error in form.username.errors %}
-                  {{ error }}
-                {% endfor %}
-              </div>
-            {% endif %}
-          </div>
-          
-          <div class="form-group">
-            {{ form.password.label(class="form-label") }}
-            {{ form.password(class="form-control", placeholder="Введите ваш пароль") }}
-            {% if form.password.errors %}
-              <div class="invalid-feedback">
-                {% for error in form.password.errors %}
-                  {{ error }}
-                {% endfor %}
-              </div>
-            {% endif %}
-          </div>
-          
-          <div class="form-check mb-3">
-            {{ form.remember_me(class="form-check-input") }}
-            {{ form.remember_me.label(class="form-check-label") }}
-          </div>
-          
-          <button type="submit" class="btn btn-primary w-100">Войти</button>
+          <label for="login">Логин</label>
+          <input type="text" id="login" name="username" placeholder="Введите ваш логин">
+          <label for="password">Пароль</label>
+          <input type="password" id="password" name="password" placeholder="Введите ваш пароль">
+          <button type="submit">Войти</button>
         </form>
-        
-        <div class="mt-3 text-center">
-          Нет аккаунта? <a href="{{ url_for('main.reg') }}">Зарегистрироваться</a>
-        </div>
+        <a href="reg">Зарегистрироваться</a>
       </div>
     </main>
+    <!-- Footer -->
+    <footer>
+      <p>Персональный ассистент по юриспруденции</p>
+      <p>Ostis 2025</p>
+    </footer>
   </div>
 </body>
 </html>
