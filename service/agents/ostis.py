@@ -25,6 +25,7 @@ from sc_kpm.utils.common_utils import (
     )
 from sc_kpm import ScKeynodes
 
+from service.models import RequestResponse, DirectoryResponse
 from service.agents.abstract.auth_agent import AuthAgent, AuthStatus
 from service.agents.abstract.reg_agent import RegAgent, RegStatus
 from service.agents.abstract.user_request_agent import RequestAgent, RequestStatus
@@ -244,8 +245,6 @@ def call_back_directory(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
             sc_types.NODE_VAR >> "_article_node"
         )
         gen_res = client.template_search(res_templ)
-
-        print(len(gen_res))
         for _ in gen_res:
             node_res = _.get("_article_node")
             _templ = ScTemplate()
@@ -256,10 +255,48 @@ def call_back_directory(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
                 ScKeynodes["nrel_main_idtf"],
             )
+            _templ.triple(
+                ScKeynodes["lang_ru"],
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                "_title_link"
+            )
+            _templ.triple_with_relation(
+                sc_types.NODE_VAR >> "_1",
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                node_res,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                ScKeynodes["rrel_key_sc_element"]
+            )
+            _templ.triple_with_relation(
+                sc_types.NODE_VAR >> "_2",
+                sc_types.EDGE_D_COMMON_VAR,
+                "_1",
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                ScKeynodes["nrel_sc_text_translation"]
+            )
+            _templ.triple_with_relation(
+                "_2",
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                sc_types.LINK_VAR >> "_content_link",
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                ScKeynodes["rrel_example"]
+            )
+            _templ.triple(
+                ScKeynodes["lang_ru"],
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                "_content_link"
+            )
             _res = client.template_search(_templ)[0]
             _title_link = _res.get("_title_link")
-            link_data = client.get_link_content(_title_link)[0].data
-            content_list.append(link_data)
+            _content_link = _res.get("_content_link")
+            title_data = client.get_link_content(_title_link)[0].data
+            content_data = client.get_link_content(_content_link)[0].data
+            content_list.append(
+                # todo fix
+                DirectoryResponse(
+                    title=title_data[:300],
+                    content=content_data[:300])
+                )
         payload = {"message": content_list}
     elif trg.value == unsucc_node.value or trg.value == node_err.value:
         payload = {"message": "Nothing"}
@@ -563,10 +600,8 @@ class Ostis:
 
             global payload
             if callback_event.wait(timeout=10):
-                print("here")
                 while not payload:
                     continue
-                print(payload['message'])
                 return payload
             else:
                 raise AgentError(524, "Timeout")

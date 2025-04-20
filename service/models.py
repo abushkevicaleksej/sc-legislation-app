@@ -2,11 +2,28 @@ import uuid
 from typing import Optional
 from flask_login import UserMixin
 from service import login_manager
+from pydantic.dataclasses import dataclass
 
 from sc_client.client import get_link_content, search_by_template
 from sc_client.models import ScTemplate, ScAddr
 from sc_client.constants import sc_types
 from sc_kpm import ScKeynodes
+
+@dataclass
+class DirectoryResponse:
+    title: str
+    content: str
+
+    def __str__(self) -> str:
+        truncated = self.content[:30] + "..." if len(self.content) > 30 else self.content
+        return f"{self.title}: {truncated}"
+
+@dataclass
+class RequestResponse:
+    content:str
+
+    def __str__(self) -> str:
+        return f"{self.content}"
 
 class User(UserMixin):
     def __init__(
@@ -129,14 +146,7 @@ def load_user(username: str) -> Optional[User]:
     )
     search_result = search_by_template(template)
     for result in search_result:
-        # login_link = result.get("_login")
         try:
-            # current_login = get_link_content(login_link)[0].data
-            # print("3")
-            # print(current_login)
-            # print(username)
-            # # if current_login == username:
-            # print("4")
             return collect_user_info(result.get("_user"))
         except Exception as e:
             print(f"Error loading user: {e}")

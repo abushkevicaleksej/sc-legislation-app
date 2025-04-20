@@ -83,14 +83,14 @@
             width: 100%;
         }
 
-        .search-results-header {
+        .search-directory-results-header {
             display: flex;
             align-items: center;
             margin-bottom: 30px;
             gap: 20px;
         }
 
-        .search-results-title {
+        .search-directory-results-title {
             font-size: 24px;
             font-weight: 500;
             color: #333;
@@ -179,6 +179,52 @@
         footer p {
             margin-bottom: 2px;
         }
+
+        footer p {
+            margin-bottom: 2px;
+        }
+        .definitions-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        #searchResultsContainer {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .article-directory-result {
+            margin: 15px 0;
+            padding: 15px;
+            border-left: 4px solid #4D4FA3;
+            transition: transform 0.2s;
+        }
+
+        .article-directory-result:hover {
+            transform: translateX(5px);
+        }
+
+        .article-directory-excerpt {
+            color: #444;
+            font-size: 16px;
+            line-height: 1.6;
+            margin: 0;
+        }
+        .article-directory-title {
+        color: #4D4FA3;
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        }
+        .article-directory-content {
+        text-align: justify;
+        hyphens: auto;
+        margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
@@ -204,14 +250,15 @@
         <div id="searchDirectoryResultsContainer">
             {% if results %}
                 {% for item in results %}
-            <div class="article-directory-result">
-                <p class="article-directory-excerpt">{{ item }}</p>
-            </div>
+                <div class="article-directory-result">
+                    <div class="article-directory-title">{{ item.title }}</div>
+                    <p class="article-directory-content">{{ item.content }}</p>
+                </div>
                 {% endfor %}
             {% else %}
-            <div class="article-directory-result">
-                <p class="article-directory-excerpt">Ничего не найдено</p>
-            </div>
+                <div class="article-directory-result">
+                    <p class="article-directory-content">Ничего не найдено</p>
+                </div>
             {% endif %}
         </div>
     </main>

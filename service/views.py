@@ -94,7 +94,6 @@ def requests():
     if request.method == 'POST':
         content = request.form.get("request_entry")
         asked = user_request_agent(content)
-        print(asked["message"])
         if asked["message"] is not None:
             session['search_query'] = content
             session['search_results'] = asked["message"]
@@ -117,7 +116,6 @@ def directory():
     if request.method == 'POST':
         content = request.form.get("directory_entry")
         asked = directory_agent(content=content)
-        print(asked["message"])
         if asked["message"] is not None:
             session['search_query'] = content
             session['search_results'] = asked["message"]
