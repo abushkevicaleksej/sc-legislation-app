@@ -166,10 +166,14 @@
     <div class="header-title">
         <h1 class="main-heading">Справочник</h1>
         <div class="search-bar">
-            <input type="text" placeholder="Статья 328" class="search-input" id="searchQuery" >
-            <div class="search-icon" id="searchButton">
-                <img src="static/images/search2.png" alt="Поиск">
-            </div>
+            <form action="/directory" method="POST">
+                <input type="text" placeholder="Стандарт предприятия" class="search-input" id="searchQuery" name="directory_entry">
+                <div class="search-icon" id="searchButton">
+                    <button type="submit">
+                        <img src="/static/images/search2.png" alt="Поиск">
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -183,24 +187,18 @@
         const searchInput = document.getElementById('searchQuery');
         const searchButton = document.getElementById('searchButton');
 
-        // Загружаем предыдущий поисковый запрос, если есть
-        const savedQuery = localStorage.getItem('lastSearchQuery') || '';
-        searchInput.value = savedQuery;
-
-        function navigateToSearchResults() {
+        function navigateToRequestsResult() {
             const query = searchInput.value.trim();
             if (query) {
-                // Сохраняем запрос в localStorage
-                localStorage.setItem('lastSearchQuery', query);
-                // Переходим на страницу результатов
-                window.location.href = 'search-results.html?query=' + encodeURIComponent(query);
+                // Переходим на страницу результата запроса
+                window.location.href = 'directory-results.html';
             }
         }
 
-        searchButton.addEventListener('click', navigateToSearchResults);
+        searchButton.addEventListener('click', navigateToDirectoryResult);
         searchInput.addEventListener('keyup', function(event) {
             if (event.key === 'Enter') {
-                navigateToSearchResults();
+                navigateToDirectoryResult();
             }
         });
     });
