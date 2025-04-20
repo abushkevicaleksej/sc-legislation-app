@@ -197,24 +197,22 @@
     </header>
 
     <main class="main-content">
-        <div class="search-results-header">
-            <h2 class="search-results-title">Результаты поиска:</h2>
-            <div class="results-search-bar">
-                <input type="text" class="results-search-input" placeholder="Поиск..." id="resultsSearchInput">
-                <div class="results-search-icon" id="resultsSearchButton">
-                    <img src="static/images/search2.png" alt="Поиск">
-                </div>
-            </div>
+        <div class="search-directory-results-header">
+            <h2 class="search-directory-results-title">Результаты поиска по запросу: "{{ query }}"</h2>
         </div>
 
-        <div id="searchResultsContainer">
-            <div class="article-result">
-                <a href="328.html?id=328" class="article-title">Статья 328: Незаконный оборот наркотических средств, психотропных веществ, их прекурсоров и аналогов</a>
-                <p class="article-excerpt">
-                    Незаконные без цели сбыта изготовление, переработка, приобретение, хранение, перевозка или пересылка наркотических средств, психотропных веществ либо их прекурсоров или аналогов...
-                </p>
+        <div id="searchDirectoryResultsContainer">
+            {% if results %}
+                {% for item in results %}
+            <div class="article-directory-result">
+                <p class="article-directory-excerpt">{{ item }}</p>
             </div>
-
+                {% endfor %}
+            {% else %}
+            <div class="article-directory-result">
+                <p class="article-directory-excerpt">Ничего не найдено</p>
+            </div>
+            {% endif %}
         </div>
     </main>
 
@@ -223,59 +221,5 @@
         <p>Ostis 2025</p>
     </footer>
 </div>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Получаем параметры из URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const query = urlParams.get('query') || '';
-
-        const searchInput = document.getElementById('resultsSearchInput');
-        const searchButton = document.getElementById('resultsSearchButton');
-
-        // Устанавливаем значение поиска из параметров URL
-        searchInput.value = query;
-
-        // Функция для выполнения поиска
-        function performSearch() {
-            const searchQuery = searchInput.value.trim();
-            if (searchQuery) {
-                // Перенаправляем с новым поисковым запросом
-                window.location.href = `directory-results.html?query=${encodeURIComponent(searchQuery)}`;
-            }
-        }
-
-        // Обработчики событий
-        searchButton.addEventListener('click', performSearch);
-        searchInput.addEventListener('keyup', function(event) {
-            if (event.key === 'Enter') {
-                performSearch();
-            }
-        });
-
-        // Здесь должен быть код для загрузки реальных результатов с сервера
-        // Например:
-        // if (query) {
-        //     fetch(`/api/search?q=${query}`)
-        //         .then(response => response.json())
-        //         .then(data => displayResults(data));
-        // }
-
-        // Вместо этого используем статические данные для демонстрации
-        function displayResults(results) {
-            const container = document.getElementById('searchResultsContainer');
-            container.innerHTML = '';
-
-            results.forEach(result => {
-                const articleDiv = document.createElement('div');
-                articleDiv.className = 'article-result';
-                articleDiv.innerHTML = `
-                    <a href="article.html?id=${result.id}" class="article-title">${result.title}</a>
-                    <p class="article-excerpt">${result.excerpt}</p>
-                `;
-                container.appendChild(articleDiv);
-            });
-        }
-    });
-</script>
 </body>
 </html>

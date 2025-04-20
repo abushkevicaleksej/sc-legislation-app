@@ -169,7 +169,7 @@
         <div class="search-bar">
             <form action="/requests" method="POST">
                 <input type="text" placeholder="Что такое арендное жилье?" class="search-input" id="searchQuery" name="request_entry">
-                <div class="search-icon" id="searchButton">
+                <div class="search-icon">
                     <button type="submit">
                         <img src="/static/images/search2.png" alt="Поиск">
                     </button>
@@ -184,26 +184,5 @@
         <p>Ostis 2025</p>
     </footer>
 </div>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.getElementById('searchQuery');
-        const searchButton = document.getElementById('searchButton');
-
-        function navigateToRequestsResult() {
-            const query = searchInput.value.trim();
-            if (query) {
-                // Переходим на страницу результата запроса
-                window.location.href = 'requests-results.html';
-            }
-        }
-
-        searchButton.addEventListener('click', navigateToRequestsResult);
-        searchInput.addEventListener('keyup', function(event) {
-            if (event.key === 'Enter') {
-                navigateToRequestsResult();
-            }
-        });
-    });
-</script>
 </body>
 </html>

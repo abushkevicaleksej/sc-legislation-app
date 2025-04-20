@@ -1,19 +1,9 @@
-<<<<<<< HEAD
 from flask import Blueprint, request, render_template, redirect, url_for, flash, session
 from flask_login import login_user, logout_user, login_required, current_user
-from .services import auth_agent, reg_agent, user_request_agent
 
 from .models import User, load_user, find_user_by_username
-from .forms import LoginForm
-=======
-from flask import Blueprint, request, jsonify
-from flask import render_template, redirect, url_for, session, flash
-from flask_login import current_user, login_user
-
 
 from .services import auth_agent, reg_agent, user_request_agent, directory_agent
-from .errors import ErrorMessages
->>>>>>> feat/directory
 
 main = Blueprint("main", __name__)
 
@@ -121,27 +111,28 @@ def requests_results():
     results = session.get('search_results', [])
     return render_template("requests-results.html", query=query, results=results)
 
-<<<<<<< HEAD
-@main.route("/directory")
-@login_required
-=======
 @main.route("/directory", methods=['GET', 'POST'])
->>>>>>> feat/directory
+@login_required
 def directory():
     if request.method == 'POST':
         content = request.form.get("directory_entry")
-        print(content)
         asked = directory_agent(content=content)
         print(asked["message"])
         if asked["message"] is not None:
+            session['search_query'] = content
+            session['search_results'] = asked["message"]
             return redirect(url_for('main.directory_results'))
         else:
+            flash('Ничего не найдено', 'warning')
             return render_template("directory.html")
     return render_template("directory.html")
 
 @main.route("/directory_results")
+@login_required
 def directory_results():
-    return render_template("directory-results.html")
+    query = session.get('search_query', '')
+    results = session.get('search_results', [])
+    return render_template("directory-results.html", query=query, results=results)
 
 @main.route("/templates")
 @login_required

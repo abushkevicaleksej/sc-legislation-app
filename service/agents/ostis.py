@@ -1,10 +1,7 @@
-<<<<<<< HEAD
-=======
 from enum import Enum
 from threading import Event
 import re
 
->>>>>>> feat/directory
 import sc_client.client as client
 from sc_client.client import generate_by_template
 from ..exceptions import ScServerError
@@ -24,20 +21,9 @@ from sc_kpm.utils.common_utils import (
     generate_node, 
     generate_role_relation, 
     get_link_content_data, 
-<<<<<<< HEAD
-    get_element_system_identifier
-    )
-from sc_kpm import ScKeynodes
-
-
-from threading import Event
-from enum import Enum
-import re
-=======
     get_element_system_identifier, 
     )
 from sc_kpm import ScKeynodes
->>>>>>> feat/directory
 
 from service.agents.abstract.auth_agent import AuthAgent, AuthStatus
 from service.agents.abstract.reg_agent import RegAgent, RegStatus
@@ -216,6 +202,63 @@ def call_back_request(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
         for _ in gen_res:
             link_res = _.get("_link_res")
             link_data = client.get_link_content(link_res)[0].data
+            content_list.append(link_data)
+        payload = {"message": content_list}
+    elif trg.value == unsucc_node.value or trg.value == node_err.value:
+        payload = {"message": "Nothing"}
+
+    callback_event.set()
+    if not payload:
+        return result.FAILURE
+    return result.SUCCESS
+
+def call_back_directory(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
+    global payload
+    callback_event.clear()
+    content_list = []
+    succ_node = client.resolve_keynodes(
+        ScIdtfResolveParams(idtf='action_finished_successfully', type=sc_types.NODE_CONST_CLASS)
+    )[0]
+    unsucc_node = client.resolve_keynodes(
+        ScIdtfResolveParams(idtf='action_finished_unsuccessfully', type=sc_types.NODE_CONST_CLASS)
+    )[0]
+    node_err = client.resolve_keynodes(
+        ScIdtfResolveParams(idtf='action_finished_with_error', type=sc_types.NODE_CONST_CLASS)
+    )[0]
+
+    if trg.value == succ_node.value:
+        nrel_result = client.resolve_keynodes(
+            ScIdtfResolveParams(idtf='nrel_result', type=sc_types.NODE_CONST_CLASS)
+        )[0]
+        res_templ = ScTemplate()
+        res_templ.triple_with_relation(
+            src,
+            sc_types.EDGE_D_COMMON_VAR,
+            sc_types.NODE_VAR_STRUCT >> "_res_struct",
+            sc_types.EDGE_ACCESS_VAR_POS_PERM,
+            nrel_result
+        )
+        res_templ.triple(
+            "_res_struct",
+            sc_types.EDGE_ACCESS_VAR_POS_PERM,
+            sc_types.NODE_VAR >> "_article_node"
+        )
+        gen_res = client.template_search(res_templ)
+
+        print(len(gen_res))
+        for _ in gen_res:
+            node_res = _.get("_article_node")
+            _templ = ScTemplate()
+            _templ.triple_with_relation(
+                node_res,
+                sc_types.EDGE_D_COMMON_VAR,
+                sc_types.LINK_VAR >> "_title_link",
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                ScKeynodes["nrel_main_idtf"],
+            )
+            _res = client.template_search(_templ)[0]
+            _title_link = _res.get("_title_link")
+            link_data = client.get_link_content(_title_link)[0].data
             content_list.append(link_data)
         payload = {"message": content_list}
     elif trg.value == unsucc_node.value or trg.value == node_err.value:
@@ -514,7 +557,7 @@ class Ostis:
                 "_main_node",
             )
 
-            event_params = ScEventSubscriptionParams(main_node, ScEventType.AFTER_GENERATE_INCOMING_ARC, call_back_request)
+            event_params = ScEventSubscriptionParams(main_node, ScEventType.AFTER_GENERATE_INCOMING_ARC, call_back_directory)
             client.events_create(event_params)
             client.template_generate(template)
 
