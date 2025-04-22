@@ -203,7 +203,9 @@ def call_back_request(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
         for _ in gen_res:
             link_res = _.get("_link_res")
             link_data = client.get_link_content(link_res)[0].data
-            content_list.append(link_data)
+            content_list.append(RequestResponse(
+                content=link_data
+            ))
         payload = {"message": content_list}
     elif trg.value == unsucc_node.value or trg.value == node_err.value:
         payload = {"message": "Nothing"}
@@ -292,7 +294,6 @@ def call_back_directory(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
             title_data = client.get_link_content(_title_link)[0].data
             content_data = client.get_link_content(_content_link)[0].data
             content_list.append(
-                # todo fix
                 DirectoryResponse(
                     title=title_data[:300],
                     content=content_data[:300])

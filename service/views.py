@@ -93,7 +93,7 @@ def templs():
 def requests():
     if request.method == 'POST':
         content = request.form.get("request_entry")
-        asked = user_request_agent(content)
+        asked = user_request_agent(content=content)
         if asked["message"] is not None:
             session['search_query'] = content
             session['search_results'] = asked["message"]

@@ -13,7 +13,6 @@ from sc_kpm import ScKeynodes
 class DirectoryResponse:
     title: str
     content: str
-
     def __str__(self) -> str:
         truncated = self.content[:30] + "..." if len(self.content) > 30 else self.content
         return f"{self.title}: {truncated}"
