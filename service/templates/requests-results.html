@@ -231,7 +231,6 @@
     
         <main class="main-content">
             <div class="search-results-header">
-                <!-- Отображаем текст запроса -->
                 <h2 class="search-results-title">Результаты поиска по запросу: "{{ query }}"</h2>
 
             </div>
@@ -240,7 +239,7 @@
                 {% if results %}
                     {% for item in results %}
                     <div class="article-result">
-                        <p class="article-excerpt">{{ item }}</p>
+                        <p class="article-excerpt">{{ item.content }}</p>
                     </div>
                     {% endfor %}
                 {% else %}
@@ -258,4 +257,4 @@
     </footer>
 </div>
 </body>
-</html>
+</html> 
