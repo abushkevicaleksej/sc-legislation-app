@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Документ по шаблону</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="static/styles/document.css">
+</head>
+<body>
+<div class="container">
+    <header>
+        <img src="static/images/logo.png" alt="Логотип" class="header-logo">
+        <nav>
+            <a href="{{ url_for('main.requests') }}"><button class="nav-button">Запросы</button></a>
+            <a href="{{ url_for('main.directory') }}"><button class="nav-button">Справочник</button></a>
+            <a href="{{ url_for('main.show_calendar') }}"><button class="nav-button">Календарь</button></a>
+            <a href="{{ url_for('main.templates') }}"><button class="nav-button active">Шаблоны</button></a>
+            <a href="{{ url_for('main.logout') }}">
+                <img src="static/images/logout.png" alt="Выйти" class="user-icon">
+            </a>
+        </nav>
+    </header>
+
+  <div class="document-container">
+    <h1 class="document-title">Документ по шаблону</h1>
+
+    <div class="document-paper">
+      <textarea class="document-content" placeholder="Начните вводить текст здесь..."></textarea>
+    </div>
+
+    <div class="download-container">
+      <button class="download-button">
+        <svg class="download-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 15V3M12 15L8 11M12 15L16 11M21 15V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V15" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Скачать
+      </button>
+      <span class="download-format">В формате .docx</span>
+    </div>
+  </div>
+
+  <footer>
+    <p>Персональный ассистент по юриспруденции</p>
+    <p>Ostis 2025</p>
+  </footer>
+</div>
+</body>
+</html>

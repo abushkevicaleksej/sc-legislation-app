@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Результаты поиска | Юридический справочник</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="static/styles/direrctory-results.css">
+</head>
+<body>
+<div class="container">
+    <header>
+        <img src="static/images/logo.png" alt="Логотип" class="header-logo">
+        <nav>
+            <a href="{{ url_for('main.requests') }}"><button class="nav-button active">Запросы</button></a>
+            <a href="{{ url_for('main.directory') }}"><button class="nav-button">Справочник</button></a>
+            <a href="{{ url_for('main.show_calendar') }}"><button class="nav-button active">Календарь</button></a>
+            <a href="{{ url_for('main.templates') }}"><button class="nav-button">Шаблоны</button></a>
+            <a href="{{ url_for('main.logout') }}">
+                <img src="static/images/logout.png" alt="Выйти" class="user-icon">
+            </a>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <div class="search-directory-results-header">
+            <h2 class="search-directory-results-title">Результаты поиска по запросу: "{{ query }}"</h2>
+        </div>
+
+        <div id="searchDirectoryResultsContainer">
+            {% if results %}
+                {% for item in results %}
+                <div class="article-directory-result">
+                    <div class="article-directory-title">{{ item.title }}</div>
+                    <p class="article-directory-content">{{ item.content }}</p>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="article-directory-result">
+                    <p class="article-directory-content">Ничего не найдено</p>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <footer>
+        <p>Персональный ассистент по юриспруденции</p>
+        <p>Ostis 2025</p>
+    </footer>
+</div>
+</body>
+</html>

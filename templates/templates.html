@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Выбор шаблона</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="static/styles/templates.css">
+</head>
+<body>
+<div class="container">
+  <header>
+    <img src="static/images/logo.png" alt="Логотип" class="header-logo">
+    <nav>
+        <a href="{{ url_for('main.requests') }}"><button class="nav-button">Запросы</button></a>
+        <a href="{{ url_for('main.directory') }}"><button class="nav-button">Справочник</button></a>
+        <a href="{{ url_for('main.show_calendar') }}"><button class="nav-button">Календарь</button></a>
+        <a href="{{ url_for('main.templates') }}"><button class="nav-button active">Шаблоны</button></a>
+        <a href="{{ url_for('main.logout') }}">
+            <img src="static/images/logout.png" alt="Выйти" class="user-icon">
+        </a>
+    </nav>
+</header>
+
+  <div class="main-content">
+    <h1 class="header-title">Выберите шаблон</h1>
+    <div class="dropdown">
+      <select>
+        <option value="" disabled selectd>Шаблон 1</option>
+        <option value="template1">Шаблон 1</option>
+        <option value="template2">Шаблон 2</option>
+        <option value="template3">Шаблон 3</option>
+      </select>
+    </div>
+  </div>
+
+  <footer>
+    <p>Персональный ассистент по юриспруденции</p>
+    <p>Ostis 2025</p>
+  </footer>
+</div>
+</body>
+</html>
