@@ -5,6 +5,8 @@ from .models import User, load_user, find_user_by_username
 
 from .services import auth_agent, reg_agent, user_request_agent, directory_agent
 
+from .forms import LoginForm, RegistrationForm
+
 main = Blueprint("main", __name__)
 
 @main.route("/index")
@@ -12,22 +14,48 @@ main = Blueprint("main", __name__)
 def index():
     return "Hello world!"
 
-@main.route("/auth", methods=['GET', 'POST'])
+@main.route("/auth", methods=['POST'])
 def auth():
+    form = LoginForm()
+    if current_user.is_authenticated:
+        return redirect(url_for('main.directory'))
+    if form.validate_on_submit():
+        user = find_user_by_username(form.username.data)
+        auth_response = auth_agent(form.username.data, form.password.data)
+        if auth_response["status"] == "Valid":
+            login_user(user)
+            return redirect(url_for('main.directory'))
+    return render_template('authorization.html', form=form)
+
+@main.route("/reg", methods=['POST'])
+def reg():
+    form = RegistrationForm()
     if current_user.is_authenticated:
         return redirect(url_for('main.directory'))
     if request.method == 'POST':
-        username = request.form.get('username')
+        gender = request.form.get("gender")
+        surname = request.form.get("surname")
+        name = request.form.get("name")
+        fname = request.form.get("patronymic")
+        reg_place = request.form.get("registration")
+        birthdate = request.form.get("birthdate")
+        username = request.form.get('login')
         password = request.form.get('password')
-        user = find_user_by_username(username)
-        auth_response = auth_agent(username, password)
-        if auth_response["status"] == "Valid":
-            login_user(user)
-            print(f"User {username} logged in successfully")
+        response = reg_agent(
+            gender=gender, 
+            surname=surname, 
+            name=name, 
+            fname=fname, 
+            reg_place=reg_place, 
+            birthdate=birthdate, 
+            username=username, 
+            password=password
+            )
+        if response["status"] == "Valid":
             return redirect(url_for('main.directory'))
         else:
-            return redirect(url_for('main.auth'))
-    return render_template('authorization.html')
+            return render_template('registration.html') 
+    return render_template('registration.html')
 
 @main.route("/logout")
 def logout():

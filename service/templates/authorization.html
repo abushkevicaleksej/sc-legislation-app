@@ -25,11 +25,10 @@
       <div class="auth-form">
         <h2>Авторизация</h2>
         <form method="POST" action="{{ url_for('main.auth') }}">
-          <label for="login">Логин</label>
-          <input type="text" id="login" name="username" placeholder="Введите ваш логин">
-          <label for="password">Пароль</label>
-          <input type="password" id="password" name="password" placeholder="Введите ваш пароль">
-          <button type="submit">Войти</button>
+          {{ form.hidden_tag() }}
+          {{ form.username.label }} {{ form.username() }} <br>
+          {{ form.password.label }} {{ form.password() }} <br>
+          {{ form.submit() }}
         </form>
         <a href="reg">Зарегистрироваться</a>
       </div>
