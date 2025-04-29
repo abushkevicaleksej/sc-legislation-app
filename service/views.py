@@ -27,35 +27,30 @@ def auth():
             return redirect(url_for('main.directory'))
     return render_template('authorization.html', form=form)
 
-@main.route("/reg", methods=['POST'])
+@main.route("/reg", methods=['GET', 'POST'])
 def reg():
-    form = RegistrationForm()
     if current_user.is_authenticated:
         return redirect(url_for('main.directory'))
-    if request.method == 'POST':
-        gender = request.form.get("gender")
-        surname = request.form.get("surname")
-        name = request.form.get("name")
-        fname = request.form.get("patronymic")
-        reg_place = request.form.get("registration")
-        birthdate = request.form.get("birthdate")
-        username = request.form.get('login')
-        password = request.form.get('password')
+    
+    form = RegistrationForm()
+    
+    if form.validate_on_submit():
+        
         response = reg_agent(
-            gender=gender, 
-            surname=surname, 
-            name=name, 
-            fname=fname, 
-            reg_place=reg_place, 
-            birthdate=birthdate, 
-            username=username, 
-            password=password
-            )
+            gender=form.gender.data,
+            surname=form.surname.data,
+            name=form.name.data,
+            fname=form.patronymic.data,
+            reg_place=form.reg_place.data,
+            birthdate=form.birthdate.data,
+            username=form.username.data,
+            password=form.password.data
+        )
+        #todo fix birthdate
         if response["status"] == "Valid":
             return redirect(url_for('main.directory'))
-        else:
-            return render_template('registration.html') 
-    return render_template('registration.html')
+        
+    return render_template('registration.html', form=form)
 
 @main.route("/logout")
 def logout():
@@ -66,35 +61,6 @@ def logout():
 @login_required
 def protected():
     return "Только для авторизованных"
-
-@main.route("/reg", methods=['GET', 'POST'])
-def reg():
-    if current_user.is_authenticated:
-        return redirect(url_for('main.directory'))
-    if request.method == 'POST':
-        gender = request.form.get("gender")
-        surname = request.form.get("surname")
-        name = request.form.get("name")
-        fname = request.form.get("patronymic")
-        reg_place = request.form.get("registration")
-        birthdate = request.form.get("birthdate")
-        username = request.form.get('login')
-        password = request.form.get('password')
-        response = reg_agent(
-            gender=gender, 
-            surname=surname, 
-            name=name, 
-            fname=fname, 
-            reg_place=reg_place, 
-            birthdate=birthdate, 
-            username=username, 
-            password=password
-            )
-        if response["status"] == "Valid":
-            return redirect(url_for('main.directory'))
-        else:
-            return render_template('registration.html') 
-    return render_template('registration.html')
 
 @main.route("/add-event")
 @login_required
