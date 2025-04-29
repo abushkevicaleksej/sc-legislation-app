@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Юридический справочник</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="static/styles/calendar.css">
+</head>
+<body>
+<div class="container">
+    <header>
+        <img src="static/images/logo.png" alt="Логотип" class="header-logo">
+        <nav>
+            <a href="{{ url_for('main.requests') }}"><button class="nav-button">Запросы</button></a>
+            <a href="{{ url_for('main.directory') }}"><button class="nav-button">Справочник</button></a>
+            <a href="{{ url_for('main.show_calendar') }}"><button class="nav-button active">Календарь</button></a>
+            <a href="{{ url_for('main.templates') }}"><button class="nav-button">Шаблоны</button></a>
+            <a href="{{ url_for('main.logout') }}">
+                <img src="static/images/logout.png" alt="Выйти" class="user-icon">
+            </a>
+        </nav>
+    </header>
+
+    <div class="main-content">
+        <!-- Блок календаря -->
+        <div class="calendar-section">
+            <div class="calendar-header">
+                <div class="month-navigation-container">
+                    <div class="month-navigation">
+                        <span class="month-arrow" id="prev-month">
+                            ←
+                            <span class="month-name" id="prev-month-name"></span>
+                        </span>
+                        <span class="month-title" id="month-title">Февраль 2025</span>
+                        <span class="month-arrow" id="next-month">
+                            <span class="month-name" id="next-month-name"></span>
+                            →
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <table class="calendar-grid" id="calendar-grid">
+                <thead>
+                <tr>
+                    <th><div class="calendar-day">Пн</div></th>
+                    <th><div class="calendar-day">Вт</div></th>
+                    <th><div class="calendar-day">Ср</div></th>
+                    <th><div class="calendar-day">Чт</div></th>
+                    <th><div class="calendar-day">Пт</div></th>
+                    <th><div class="calendar-day">Сб</div></th>
+                    <th><div class="calendar-day">Вс</div></th>
+                </tr>
+                </thead>
+                <tbody id="calendar-body">
+                <!-- Динамическое содержимое календаря будет добавлено здесь -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Блок событий -->
+        <div class="events-section">
+            <h2 class="events-title">События</h2>
+            <div class="event-item">
+                <input type="text" class="event-name" placeholder="Название события">
+                <textarea class="event-description" placeholder="Описание события"></textarea>
+                <button class="delete-button">Удалить</button>
+            </div>
+            <div class="event-item">
+                <input type="text" class="event-name" placeholder="Название события">
+                <textarea class="event-description" placeholder="Описание события"></textarea>
+                <button class="delete-button">Удалить</button>
+            </div>
+            <button class="add-event-button" id="add-event-button">Добавить событие</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>Персональный ассистент по юриспруденции</p>
+        <p>Ostis 2025</p>
+    </footer>
+</div>
+
+<!-- Модальное окно добавления события -->
+<div class="modal-overlay" id="event-modal">
+    <div class="modal-content">
+        <h3 class="modal-title">Добавление события</h3>
+
+        <div class="date-selection">
+            <label class="date-label">Дата события</label>
+            <input type="date" class="date-input" id="event-date">
+        </div>
+
+        <div class="input-group">
+            <label class="input-label">Название события</label>
+            <input type="text" class="event-name-input" placeholder="Введите название события">
+        </div>
+
+        <div class="input-group">
+            <label class="input-label">Описание события</label>
+            <textarea class="event-description-input" placeholder="Описание"></textarea>
+        </div>
+
+        <div class="modal-footer">
+            <button class="save-button">Сохранить</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const monthTitle = document.getElementById('month-title');
+    const calendarBody = document.getElementById('calendar-body');
+    const prevMonthButton = document.getElementById('prev-month');
+    const nextMonthButton = document.getElementById('next-month');
+    const prevMonthName = document.getElementById('prev-month-name');
+    const nextMonthName = document.getElementById('next-month-name');
+    const addEventButton = document.getElementById('add-event-button');
+    const eventsContainer = document.querySelector('.events-section');
+    const eventModal = document.getElementById('event-modal');
+    const eventDateInput = document.getElementById('event-date');
+    const eventNameInput = document.querySelector('.event-name-input');
+    const eventDescInput = document.querySelector('.event-description-input');
+
+    let currentDate = new Date();
+
+    function getMonthName(date) {
+        const monthName = new Intl.DateTimeFormat('ru-RU', { month: 'long' }).format(date);
+        return monthName.charAt(0).toUpperCase() + monthName.slice(1);
+    }
+
+    function updateNavigation() {
+        // Текущий месяц
+        const currentMonthName = getMonthName(currentDate);
+        const currentYear = currentDate.getFullYear();
+        monthTitle.textContent = `${currentMonthName} ${currentYear}`;
+
+        // Предыдущий месяц
+        const prevDate = new Date(currentDate);
+        prevDate.setMonth(prevDate.getMonth() - 1);
+        prevMonthName.textContent = getMonthName(prevDate);
+
+        // Следующий месяц
+        const nextDate = new Date(currentDate);
+        nextDate.setMonth(nextDate.getMonth() + 1);
+        nextMonthName.textContent = getMonthName(nextDate);
+    }
+
+    function renderCalendar() {
+        updateNavigation();
+
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+
+        // Очистка предыдущего содержимого
+        calendarBody.innerHTML = '';
+
+        // Получение первого дня месяца
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const daysInMonth = lastDay.getDate();
+        const startDay = firstDay.getDay(); // 0 (воскресенье) - 6 (суббота)
+
+        // Заполнение ячеек пустыми днями до первого дня месяца
+        const emptyCells = startDay === 0 ? 6 : startDay - 1;
+        const rows = Math.ceil((daysInMonth + emptyCells) / 7);
+        let cellIndex = 0;
+
+        for (let i = 0; i < rows; i++) {
+            const row = document.createElement('tr');
+            for (let j = 0; j < 7; j++) {
+                const cell = document.createElement('td');
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day';
+
+                if (cellIndex < emptyCells) {
+                    // Дни предыдущего месяца
+                    const prevMonthDay = new Date(year, month, 0).getDate() - (emptyCells - cellIndex - 1);
+                    dayDiv.textContent = prevMonthDay;
+                    dayDiv.classList.add('other-month');
+                } else if (cellIndex < daysInMonth + emptyCells) {
+                    // Дни текущего месяца
+                    const day = cellIndex - emptyCells + 1;
+                    dayDiv.textContent = day;
+
+                    // Добавление обработчика событий для выделения дня
+                    cell.addEventListener('click', function() {
+                        const selected = document.querySelector('.calendar-grid td.selected');
+                        if (selected) {
+                            selected.classList.remove('selected');
+                        }
+                        cell.classList.add('selected');
+                    });
+                } else {
+                    // Дни следующего месяца
+                    const nextMonthDay = cellIndex - (daysInMonth + emptyCells) + 1;
+                    dayDiv.textContent = nextMonthDay;
+                    dayDiv.classList.add('other-month');
+                }
+
+                cell.appendChild(dayDiv);
+                row.appendChild(cell);
+                cellIndex++;
+            }
+            calendarBody.appendChild(row);
+        }
+    }
+
+    // Функция для форматирования даты в ДД-ММ-ГГГГ
+    function formatDate(dateString) {
+        const [year, month, day] = dateString.split('-');
+        return `${day}-${month}-${year}`;
+    }
+
+    // Функция для открытия модального окна
+    function openEventModal() {
+        // Устанавливаем текущую дату по умолчанию
+        const today = new Date();
+        const formattedDate = today.toISOString().substr(0, 10);
+        eventDateInput.value = formattedDate;
+
+        // Очищаем поля
+        eventNameInput.value = '';
+        eventDescInput.value = '';
+
+        // Показываем модальное окно
+        eventModal.style.display = 'flex';
+    }
+
+    // Функция для закрытия модального окна
+    function closeEventModal() {
+        eventModal.style.display = 'none';
+    }
+
+    // Функция для добавления нового события
+    function addNewEvent() {
+        const date = eventDateInput.value;
+        const name = eventNameInput.value.trim();
+        const description = eventDescInput.value.trim();
+
+        if (!name) {
+            alert('Пожалуйста, введите название события');
+            return;
+        }
+
+        const eventItem = document.createElement('div');
+        eventItem.className = 'event-item';
+        eventItem.innerHTML = `
+            <input type="text" class="event-name" value="${name}" readonly>
+            <textarea class="event-description" readonly>${description}</textarea>
+            <button class="delete-button">Удалить</button>
+        `;
+
+        // Добавляем перед кнопкой "Добавить событие"
+        eventsContainer.insertBefore(eventItem, addEventButton);
+
+        // Добавляем обработчик для новой кнопки удаления
+        eventItem.querySelector('.delete-button').addEventListener('click', function() {
+            eventItem.remove();
+        });
+
+        closeEventModal();
+    }
+
+    // Обработчики событий
+    prevMonthButton.addEventListener('click', () => {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        renderCalendar();
+    });
+
+    nextMonthButton.addEventListener('click', () => {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        renderCalendar();
+    });
+
+    // Открытие модального окна при нажатии на кнопку "Добавить событие"
+    addEventButton.addEventListener('click', openEventModal);
+
+    // Обработчик сохранения события
+    document.querySelector('.save-button').addEventListener('click', addNewEvent);
+
+    // Закрытие модального окна при клике вне его
+    eventModal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeEventModal();
+        }
+    });
+
+    // Добавляем обработчики для существующих кнопок удаления
+    document.querySelectorAll('.delete-button').forEach(button => {
+        button.addEventListener('click', function() {
+            this.closest('.event-item').remove();
+        });
+    });
+
+    // Начальная отрисовка календаря
+    renderCalendar();
+</script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Авторизация</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="static/styles/authorization.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <img src="static/images/logo.png" alt="Логотип" class="header-logo">
+      <nav>
+        <a href="{{ url_for('main.requests') }}"><button class="nav-button">Запросы</button></a>
+        <a href="{{ url_for('main.directory') }}"><button class="nav-button">Справочник</button></a>
+        <a href="{{ url_for('main.show_calendar') }}"><button class="nav-button">Календарь</button></a>
+        <a href="{{ url_for('main.templates') }}"><button class="nav-button">Шаблоны</button></a>
+        <img src="static/images/logout.png" alt="Иконка пользователя" class="user-icon">
+      </nav>
+    </header>
+    <!-- Main -->
+    <main>
+      <img src="static/images/logo.png" alt="Логотип" class="main-logo">
+      <div class="auth-form">
+        <h2>Авторизация</h2>
+        <form method="POST" action="{{ url_for('main.auth') }}">
+          <label for="login">Логин</label>
+          <input type="text" id="login" name="username" placeholder="Введите ваш логин">
+          <label for="password">Пароль</label>
+          <input type="password" id="password" name="password" placeholder="Введите ваш пароль">
+          <button type="submit">Войти</button>
+        </form>
+        <a href="reg">Зарегистрироваться</a>
+      </div>
+    </main>
+    <!-- Footer -->
+    <footer>
+      <p>Персональный ассистент по юриспруденции</p>
+      <p>Ostis 2025</p>
+    </footer>
+  </div>
+</body>
+</html>
