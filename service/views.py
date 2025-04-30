@@ -3,6 +3,8 @@ from flask_login import login_user, logout_user, login_required, current_user
 
 from .models import User, load_user, find_user_by_username
 
+from .utils.string_processing import string_processing
+
 from .services import auth_agent, reg_agent, user_request_agent, directory_agent
 
 from .forms import LoginForm, RegistrationForm
@@ -35,7 +37,6 @@ def reg():
     form = RegistrationForm()
     
     if form.validate_on_submit():
-        print("here")        
         response = reg_agent(
             gender=form.gender.data,
             surname=form.surname.data,
@@ -86,14 +87,19 @@ def templs():
 def requests():
     if request.method == 'POST':
         content = request.form.get("request_entry")
-        asked = user_request_agent(content=content)
-        if asked["message"] is not None:
-            session['search_query'] = content
-            session['search_results'] = asked["message"]
+        asked_list = []
+        content = string_processing(content)
+        for item in content:
+            print(item)
+            asked = user_request_agent(content=item)
+            asked_list.append(asked)
+        # if asked["message"] is not None:
+        #     session['search_query'] = content
+        #     session['search_results'] = asked["message"]
             return redirect(url_for('main.requests_results'))
-        else:
-            flash('Ничего не найдено', 'warning')
-            return render_template("requests.html")
+        # else:
+        #     flash('Ничего не найдено', 'warning')
+        #     return render_template("requests.html")
     return render_template("requests.html")
 
 @main.route("/requests_results")

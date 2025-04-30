@@ -343,36 +343,13 @@ class Ostis:
         ):
         if is_connected():
             username_lnk = create_link(client, username)
-            print("OK")
             password_lnk = create_link(client, password)
-            print("OK")
             gender_node = set_gender_content(gender)
-            print("OK")
             surname_lnk = create_link(client, surname)
-            print("OK")
             name_lnk = create_link(client, name)
-            print("OK")
             fname_lnk = create_link(client, fname)
-            print("OK")
             day_lnk, month_lnk, year_lnk = set_birthdate_content(client, birthdate)
-            print("OK")
             reg_place_lnk = create_link(client, reg_place)
-            print("OK")
-
-            args = [
-                get_link_content_data(username_lnk),
-                get_link_content_data(password_lnk),
-                get_element_system_identifier(gender_node),
-                get_link_content_data(surname_lnk),
-                get_link_content_data(name_lnk),
-                get_link_content_data(fname_lnk),
-                get_link_content_data(reg_place_lnk),
-                get_link_content_data(day_lnk),
-                get_link_content_data(month_lnk),
-                get_link_content_data(year_lnk),
-            ]
-            for _ in args:
-                print(_)
 
             rrel_1 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_1', type=sc_types.NODE_CONST_ROLE))[0]
             rrel_2 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_2', type=sc_types.NODE_CONST_ROLE))[0]
@@ -619,7 +596,6 @@ class OstisRegAgent(RegAgent):
         ):
         global payload
         payload = None
-        print("GGGG")
         agent_response = self.ostis.call_reg_agent(
             action_name="action_register", 
             username=username, 
