@@ -81,49 +81,17 @@ def set_gender_content(gender) -> ScAddr:
     else:
         raise ParseDataError(666, "Failed to parse args")
 
-def set_birthdate_content(client, birthdate) -> ScAddr:
+def set_birthdate_content(client, birthdate):
     pattern = r'(\d{2})\.(\d{2})\.(\d{4})'
     match = re.match(pattern, birthdate)
-    day_node = generate_node(sc_types.NODE_CONST)
-    month_node = generate_node(sc_types.NODE_CONST)
-    year_node = generate_node(sc_types.NODE_CONST)
     if match:
         day, month, year = map(int, match.groups())
-        day_lnk = create_link(client, day)
-        month_lnk = create_link(client, month)
-        year_lnk = create_link(client, year)
+        print(day, month, year)
+        _day_lnk = create_link(client, day)
+        _month_lnk = create_link(client, month)
+        _year_lnk = create_link(client, year)
 
-        day_template = ScTemplate()
-        day_template.quintuple(
-            day_node,
-            sc_types.EDGE_D_COMMON_VAR,
-            day_lnk,
-            sc_types.EDGE_ACCESS_VAR_POS_PERM,
-            ScKeynodes['nrel_main_idtf']
-        )
-        day_res = generate_by_template(day_template)
-
-        month_template = ScTemplate()
-        month_template.quintuple(
-            month_node,
-            sc_types.EDGE_D_COMMON_VAR,
-            month_lnk,
-            sc_types.EDGE_ACCESS_VAR_POS_PERM,
-            ScKeynodes['nrel_main_idtf']
-        )
-        month_res = generate_by_template(month_template)
-
-        year_template = ScTemplate()
-        year_template.quintuple(
-            year_node,
-            sc_types.EDGE_D_COMMON_VAR,
-            year_lnk,
-            sc_types.EDGE_ACCESS_VAR_POS_PERM,
-            ScKeynodes['nrel_main_idtf']
-        )
-        year_res = generate_by_template(year_template)
-
-        return day_res[0], month_res[0], year_res[0]
+        return _day_lnk, _month_lnk, _year_lnk
     else:
         raise ParseDataError(666, "Failed to parse args") 
 
@@ -375,13 +343,21 @@ class Ostis:
         ):
         if is_connected():
             username_lnk = create_link(client, username)
+            print("OK")
             password_lnk = create_link(client, password)
+            print("OK")
             gender_node = set_gender_content(gender)
+            print("OK")
             surname_lnk = create_link(client, surname)
+            print("OK")
             name_lnk = create_link(client, name)
+            print("OK")
             fname_lnk = create_link(client, fname)
-            day_node, month_node, year_node = set_birthdate_content(client, birthdate)
+            print("OK")
+            day_lnk, month_lnk, year_lnk = set_birthdate_content(client, birthdate)
+            print("OK")
             reg_place_lnk = create_link(client, reg_place)
+            print("OK")
 
             args = [
                 get_link_content_data(username_lnk),
@@ -391,9 +367,9 @@ class Ostis:
                 get_link_content_data(name_lnk),
                 get_link_content_data(fname_lnk),
                 get_link_content_data(reg_place_lnk),
-                get_main_idtf(day_node),
-                get_main_idtf(month_node),
-                get_main_idtf(year_node),
+                get_link_content_data(day_lnk),
+                get_link_content_data(month_lnk),
+                get_link_content_data(year_lnk),
             ]
             for _ in args:
                 print(_)
@@ -416,9 +392,9 @@ class Ostis:
             main_node = get_node(client)
 
             birthdate_con = generate_node(sc_types.NODE_CONST_TUPLE)
-            generate_role_relation(birthdate_con, day_node, rrel_user_day)
-            generate_role_relation(birthdate_con, month_node, rrel_user_month)
-            generate_role_relation(birthdate_con, year_node, rrel_user_year)
+            generate_role_relation(birthdate_con, day_lnk, rrel_user_day)
+            generate_role_relation(birthdate_con, month_lnk, rrel_user_month)
+            generate_role_relation(birthdate_con, year_lnk, rrel_user_year)
 
             template = ScTemplate()
             template.triple_with_relation(
@@ -643,6 +619,7 @@ class OstisRegAgent(RegAgent):
         ):
         global payload
         payload = None
+        print("GGGG")
         agent_response = self.ostis.call_reg_agent(
             action_name="action_register", 
             username=username, 

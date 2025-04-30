@@ -14,11 +14,11 @@ main = Blueprint("main", __name__)
 def index():
     return "Hello world!"
 
-@main.route("/auth", methods=['POST'])
+@main.route("/auth", methods=['GET','POST'])
 def auth():
-    form = LoginForm()
     if current_user.is_authenticated:
         return redirect(url_for('main.directory'))
+    form = LoginForm()
     if form.validate_on_submit():
         user = find_user_by_username(form.username.data)
         auth_response = auth_agent(form.username.data, form.password.data)
@@ -35,7 +35,7 @@ def reg():
     form = RegistrationForm()
     
     if form.validate_on_submit():
-        
+        print("here")        
         response = reg_agent(
             gender=form.gender.data,
             surname=form.surname.data,
@@ -46,7 +46,6 @@ def reg():
             username=form.username.data,
             password=form.password.data
         )
-        #todo fix birthdate
         if response["status"] == "Valid":
             return redirect(url_for('main.directory'))
         
