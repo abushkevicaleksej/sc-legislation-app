@@ -21,11 +21,15 @@ def auth():
     if current_user.is_authenticated:
         return redirect(url_for('main.directory'))
     form = LoginForm()
+    print("here")
     if form.validate_on_submit():
+        print("here")
         user = find_user_by_username(form.username.data)
         auth_response = auth_agent(form.username.data, form.password.data)
+        print(auth_response)
         if auth_response["status"] == "Valid":
             login_user(user)
+            print("oks")
             return redirect(url_for('main.directory'))
     return render_template('authorization.html', form=form)
 
@@ -93,6 +97,7 @@ def requests():
             print(item)
             asked = user_request_agent(content=item)
             asked_list.append(asked)
+            #todo need to finish this agent
         # if asked["message"] is not None:
         #     session['search_query'] = content
         #     session['search_results'] = asked["message"]

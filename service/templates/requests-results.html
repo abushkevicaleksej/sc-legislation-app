@@ -4,227 +4,19 @@
     <meta charset="UTF-8">
     <title>Результаты поиска | Юридический справочник</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
-    <style>
-        /* Общие стили */
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f7fa;
-        }
-
-        .container {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            max-width: 2000px;
-            margin: 0 auto;
-        }
-
-        /* Шапка */
-        header {
-            background-color: #E9E9FD;
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-        }
-
-        .header-logo {
-            width: 130px;
-            height: 130px;
-            object-fit: contain;
-        }
-
-        /* Навигационная панель */
-        nav {
-            display: flex;
-            align-items: center;
-            gap: 3px;
-        }
-
-        .nav-button {
-            background-color: #E9E9FD;
-            color: #222349;
-            border: none;
-            padding: 16px 32px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 16px;
-            height: 50px;
-            transition: background-color 0.3s ease;
-            white-space: nowrap;
-        }
-
-        .nav-button:hover {
-            background-color: #ffffff;
-        }
-
-        .nav-button:active {
-            background-color: #ffffff;
-        }
-
-        .user-icon {
-            width: 40px;
-            height: 40px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-left: 20px;
-        }
-
-        /* Основное содержимое */
-        .main-content {
-            flex: 1;
-            padding: 40px;
-            max-width: 1200px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        .search-results-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 30px;
-            gap: 20px;
-        }
-
-        .search-results-title {
-            font-size: 24px;
-            font-weight: 600;
-            color: #333;
-            white-space: nowrap;
-        }
-
-        .results-search-bar {
-            display: flex;
-            width: 400px;
-            border: 4px solid #4D4FA3;
-            border-radius: 8px;
-            background-color: #ffffff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .results-search-input {
-            padding: 8px 12px;
-            border: none;
-            border-radius: 6px 0 0 6px;
-            width: 100%;
-            font-size: 14px;
-            outline: none;
-        }
-
-        .results-search-icon {
-            width: 50px;
-            cursor: pointer;
-            background-color: #4D4FA3;
-            border-radius: 0 2px 2px 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .article-result {
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #e0e0e0;
-            background-color: #ffffff;
-            border-radius: 10px;
-        border: none;
-        padding: 16px 32px;
-        }
-
-
-        .article-result:last-child {
-
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-            background-color: #ffffff;
-        }
-
-        .article-title {
-            color: #4D4FA3;
-            font-size: 18px;
-            font-weight: 600;
-            text-decoration: none;
-            display: block;
-            margin-bottom: 10px;
-            background-color: #ffffff;
-
-        }
-
-        .article-title:hover {
-            text-decoration: underline;
-        }
-
-        .article-excerpt {
-            color: #555;
-            font-size: 15px;
-            line-height: 1.5;
-        }
-
-
-        footer {
-            background-color: #222349;
-            height: 150px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            align-items: center;
-            text-align: center;
-            color: #E9E9FD;
-            padding: 20px;
-        }
-
-        footer p {
-            margin-bottom: 2px;
-        }
-        .definitions-container {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-        #searchResultsContainer {
-            background-color: #fff;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .article-result {
-            margin: 15px 0;
-            padding: 15px;
-            border-left: 4px solid #4D4FA3;
-            transition: transform 0.2s;
-        }
-
-        .article-result:hover {
-            transform: translateX(5px);
-        }
-
-        .article-excerpt {
-            color: #444;
-            font-size: 16px;
-            line-height: 1.6;
-            margin: 0;
-        }
-
-    </style>
+    <link rel="stylesheet" href="static/styles/requests-results.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <img src="/static/images/logo.png" alt="Логотип" class="header-logo">
+            <img src="static/images/logo.png" alt="Логотип" class="header-logo">
             <nav>
-                <a href="{{ url_for('main.requests') }}"><button class="nav-button">Запросы</button></a>
+                <a href="{{ url_for('main.requests') }}"><button class="nav-button active">Запросы</button></a>
                 <a href="{{ url_for('main.directory') }}"><button class="nav-button">Справочник</button></a>
                 <a href="{{ url_for('main.show_calendar') }}"><button class="nav-button active">Календарь</button></a>
                 <a href="{{ url_for('main.templates') }}"><button class="nav-button">Шаблоны</button></a>
                 <a href="{{ url_for('main.logout') }}">
-                    <img src="/static/images/logout.png" alt="Выйти" class="user-icon">
+                    <img src="static/images/logout.png" alt="Выйти" class="user-icon">
                 </a>
             </nav>
         </header>
@@ -232,7 +24,6 @@
         <main class="main-content">
             <div class="search-results-header">
                 <h2 class="search-results-title">Результаты поиска по запросу: "{{ query }}"</h2>
-
             </div>
     
             <div id="searchResultsContainer">
