@@ -20,7 +20,7 @@ class DirectoryResponse:
 @dataclass
 class RequestResponse:
     content:str
-
+    
     def __str__(self) -> str:
         return f"{self.content}"
 

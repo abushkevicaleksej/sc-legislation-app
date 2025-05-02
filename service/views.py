@@ -21,15 +21,11 @@ def auth():
     if current_user.is_authenticated:
         return redirect(url_for('main.directory'))
     form = LoginForm()
-    print("here")
     if form.validate_on_submit():
-        print("here")
         user = find_user_by_username(form.username.data)
         auth_response = auth_agent(form.username.data, form.password.data)
-        print(auth_response)
         if auth_response["status"] == "Valid":
             login_user(user)
-            print("oks")
             return redirect(url_for('main.directory'))
     return render_template('authorization.html', form=form)
 
@@ -41,7 +37,7 @@ def reg():
     form = RegistrationForm()
     
     if form.validate_on_submit():
-        response = reg_agent(
+        reg_response = reg_agent(
             gender=form.gender.data,
             surname=form.surname.data,
             name=form.name.data,
@@ -51,9 +47,10 @@ def reg():
             username=form.username.data,
             password=form.password.data
         )
-        if response["status"] == "Valid":
+        if reg_response["status"] == "Valid":
+            user = find_user_by_username(form.username.data)
+            login_user(user)
             return redirect(url_for('main.directory'))
-        
     return render_template('registration.html', form=form)
 
 @main.route("/logout")
@@ -91,20 +88,17 @@ def templs():
 def requests():
     if request.method == 'POST':
         content = request.form.get("request_entry")
-        asked_list = []
         content = string_processing(content)
         for item in content:
             print(item)
             asked = user_request_agent(content=item)
-            asked_list.append(asked)
-            #todo need to finish this agent
-        # if asked["message"] is not None:
-        #     session['search_query'] = content
-        #     session['search_results'] = asked["message"]
-            return redirect(url_for('main.requests_results'))
-        # else:
-        #     flash('Ничего не найдено', 'warning')
-        #     return render_template("requests.html")
+            print(asked["message"])
+            if asked["message"] is not None:
+                session['search_query'] = item
+                session['search_results'] = asked["message"]
+            else:
+                return render_template("requests.html")
+        return redirect(url_for('main.requests_results'))
     return render_template("requests.html")
 
 @main.route("/requests_results")
