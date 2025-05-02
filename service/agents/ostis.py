@@ -157,6 +157,13 @@ def call_back_request(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
         res_templ = ScTemplate()
         res_templ.triple_with_relation(
             src,
+            sc_types.EDGE_ACCESS_VAR_POS_PERM,
+            sc_types.LINK_VAR >> "_src_link",
+            sc_types.EDGE_ACCESS_VAR_POS_PERM,
+            ScKeynodes["rrel_1"]
+        )
+        res_templ.triple_with_relation(
+            src,
             sc_types.EDGE_D_COMMON_VAR,
             sc_types.NODE_VAR_STRUCT >> "_res_struct",
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
@@ -169,9 +176,14 @@ def call_back_request(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
         )
         gen_res = client.template_search(res_templ)
         for _ in gen_res:
+            src_link = _.get("_src_link")
             link_res = _.get("_link_res")
+
+            src_data = client.get_link_content(src_link)[0].data
             link_data = client.get_link_content(link_res)[0].data
-            content_list.append(RequestResponse(content=link_data))
+            content_list.append(RequestResponse(
+                term=src_data,
+                content=link_data))
         payload = {"message": content_list}
     elif trg.value == unsucc_node.value or trg.value == node_err.value:
         payload = {"message": "Nothing"}

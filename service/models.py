@@ -19,10 +19,11 @@ class DirectoryResponse:
 
 @dataclass
 class RequestResponse:
+    term: str
     content:str
     
     def __str__(self) -> str:
-        return f"{self.content}"
+        return f"{self.term} {self.content}"
 
 class User(UserMixin):
     def __init__(

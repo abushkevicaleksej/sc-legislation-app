@@ -83,22 +83,30 @@ def doc():
 def templs():
     return render_template("templates.html")
 
+#todo RAG
 @main.route("/requests", methods=['GET', 'POST'])
 @login_required
 def requests():
     if request.method == 'POST':
         content = request.form.get("request_entry")
-        content = string_processing(content)
-        for item in content:
-            print(item)
-            asked = user_request_agent(content=item)
-            print(asked["message"])
-            if asked["message"] is not None:
-                session['search_query'] = item
-                session['search_results'] = asked["message"]
-            else:
-                return render_template("requests.html")
-        return redirect(url_for('main.requests_results'))
+        processed_terms = string_processing(content)
+        
+        all_results = []
+        all_queries = []
+        
+        for term in processed_terms:
+            response = user_request_agent(content=term)
+            if response["message"] is not None:
+                all_results.extend(response["message"])
+                all_queries.append(term)
+        
+        if all_results:
+            session['search_query'] = ", ".join(all_queries)
+            session['search_results'] = all_results
+            return redirect(url_for('main.requests_results'))
+        
+        return render_template("requests.html")
+    
     return render_template("requests.html")
 
 @main.route("/requests_results")
