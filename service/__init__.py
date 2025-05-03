@@ -1,8 +1,13 @@
 from flask import Flask
 from flask_login import LoginManager
 from .encoder import SCJSONEncoder
+
 login_manager = LoginManager()
+
 login_manager.login_view = 'main.auth'
+
+MAX_SESSION_SIZE = 4096
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object("config.Config")

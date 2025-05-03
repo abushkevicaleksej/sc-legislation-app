@@ -26,7 +26,7 @@ class RegistrationForm(FlaskForm):
     def validate_birthdate(self, field):
         try:
             day, month, year = map(int, field.data.split('.'))
-            datetime(year, month, day)  # Проверка существования даты
+            datetime(year, month, day)
             if datetime(year, month, day).date() > datetime.today().date():
                 raise ValidationError("Дата не может быть в будущем")
         except ValueError:

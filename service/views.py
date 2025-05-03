@@ -1,7 +1,7 @@
 from flask import Blueprint, request, render_template, redirect, url_for, flash, session
 from flask_login import login_user, logout_user, login_required, current_user
 
-from .models import User, load_user, find_user_by_username
+from .models import find_user_by_username
 
 from .utils.string_processing import string_processing
 
@@ -15,6 +15,15 @@ main = Blueprint("main", __name__)
 @login_required
 def index():
     return "Hello world!"
+
+@main.route("/protected")
+@login_required
+def protected():
+    return "Только для авторизованных"
+
+@main.route("/about")
+def about():
+    return f"<pre>{str(current_user)}</pre>"
 
 @main.route("/auth", methods=['GET','POST'])
 def auth():
@@ -57,11 +66,6 @@ def reg():
 def logout():
     logout_user()
     return redirect(url_for('main.auth'))
-
-@main.route("/protected")
-@login_required
-def protected():
-    return "Только для авторизованных"
 
 @main.route("/add-event")
 @login_required

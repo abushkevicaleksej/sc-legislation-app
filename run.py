@@ -1,12 +1,12 @@
 from sc_kpm import ScServer
-import config
+from config import Config
 from service import create_app
 
 if __name__ == "__main__":
     app = create_app()
     
     try:
-        server = ScServer(f"{config.Config.PROTOCOL_DEFAULT}://{config.Config.HOST_DEFAULT}:{config.Config.PORT_DEFAULT}")
+        server = ScServer(f"{Config.PROTOCOL_DEFAULT}://{Config.HOST_DEFAULT}:{Config.PORT_DEFAULT}")
         with server.connect():
             app.run()
     except:

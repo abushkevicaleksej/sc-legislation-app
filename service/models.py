@@ -1,4 +1,3 @@
-import uuid
 from typing import Optional
 from flask_login import UserMixin
 from service import login_manager
@@ -14,8 +13,7 @@ class DirectoryResponse:
     title: str
     content: str
     def __str__(self) -> str:
-        truncated = self.content[:30] + "..." if len(self.content) > 30 else self.content
-        return f"{self.title}: {truncated}"
+        return f"{self.title}: {self.content}"
 
 @dataclass
 class RequestResponse:
@@ -57,6 +55,19 @@ class User(UserMixin):
 
     def __repr__(self):
         return f'<User {self.username} [{self.sc_addr_str}]>'
+    
+    def __str__(self):
+        return (
+            f"User: {self._sc_addr}\n"
+            f"Gender: {self.gender}\n"
+            f"Surname: {get_link_content(self.surname)[0].data}\n"
+            f"Name: {get_link_content(self.name)[0].data}\n"
+            f"Father's Name: {get_link_content(self.fname)[0].data}\n"
+            f"Birthdate: {get_link_content(self.birthdate)[0].data}\n"
+            f"Registration Place: {get_link_content(self.reg_place)[0].data}\n"
+            f"Username: {get_link_content(self.username)[0].data}\n"
+            f"Password: {get_link_content(self.password)[0].data}"
+        )
 
 def collect_user_info(user: ScAddr) -> User:
     template = ScTemplate()
