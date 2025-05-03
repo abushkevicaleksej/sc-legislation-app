@@ -1,7 +1,7 @@
 from flask import Blueprint, request, render_template, redirect, url_for, flash, session
 from flask_login import login_user, logout_user, login_required, current_user
 
-from .models import find_user_by_username
+from .models import find_user_by_username, RequestResponse
 
 from .utils.string_processing import string_processing
 
@@ -87,12 +87,17 @@ def doc():
 def templs():
     return render_template("templates.html")
 
-#todo RAG
+
+#todo fix all
 @main.route("/requests", methods=['GET', 'POST'])
 @login_required
 def requests():
     if request.method == 'POST':
         content = request.form.get("request_entry")
+    else:
+        content = request.args.get('q')
+
+    if content:
         processed_terms = string_processing(content)
         
         all_results = []
@@ -101,7 +106,18 @@ def requests():
         for term in processed_terms:
             response = user_request_agent(content=term)
             if response["message"] is not None:
-                all_results.extend(response["message"])
+                try:
+                    results = [{
+                        'term': item.term,
+                        'content': item.content,
+                        'related_concepts': item.related_concepts,
+                        'related_articles': item.related_articles
+                    } for item in response["message"]]
+                except AttributeError as e:
+                    print(f"Ошибка формата данных: {e}")
+                    results = []
+
+                all_results.extend(results)
                 all_queries.append(term)
         
         if all_results:
@@ -118,7 +134,10 @@ def requests():
 def requests_results():
     query = session.get('search_query', '')
     results = session.get('search_results', [])
-    return render_template("requests-results.html", query=query, results=results)
+
+    return render_template("requests-results.html", 
+                         query=query, 
+                         results=results)
 
 @main.route("/directory", methods=['GET', 'POST'])
 @login_required

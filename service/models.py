@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from flask_login import UserMixin
 from service import login_manager
 from pydantic.dataclasses import dataclass
@@ -18,8 +18,15 @@ class DirectoryResponse:
 @dataclass
 class RequestResponse:
     term: str
-    content:str
-    
+    content: str
+    related_concepts: List[str] = None  # Множественное число
+    related_articles: List[str] = None  # Множественное число
+
+    def __post_init__(self):
+        # Гарантируем инициализацию списков
+        self.related_concepts = self.related_concepts or []
+        self.related_articles = self.related_articles or []
+
     def __str__(self) -> str:
         return f"{self.term} {self.content}"
 

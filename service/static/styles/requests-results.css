@@ -157,3 +157,91 @@ footer p {
 .article-result:hover {
     transform: translateX(5px);
 }
+
+.article-result {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    background: white;
+}
+
+.term-title {
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+
+.content-block {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+.related-concepts h4,
+.related-articles h4 {
+    color: #34495e;
+    margin: 10px 0;
+}
+
+.related-concepts ul,
+.related-articles ul {
+    list-style-type: none;
+    padding-left: 20px;
+}
+
+.related-concepts li::before {
+    content: "•";
+    color: #3498db;
+    margin-right: 8px;
+}
+
+.related-articles li::before {
+    content: "📄";
+    margin-right: 8px;
+}
+
+.no-results {
+    color: #e74c3c;
+    text-align: center;
+    padding: 20px;
+}
+
+.concept-link, .article-link {
+    color: #2c3e50;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.concept-link {
+    cursor: pointer;
+    color: #0066cc;
+    text-decoration: underline;
+    transition: color 0.3s;
+}
+
+.concept-link:hover {
+    color: #004499;
+}
+
+.article-link:hover {
+    color: #27ae60;
+    text-decoration: underline;
+}
+
+.related-articles h4 {
+    margin-top: 15px;
+    color: #333;
+}
+
+.article-link {
+    cursor: pointer;
+    color: #009933;
+    text-decoration: underline;
+    transition: color 0.3s;
+    margin: 5px 0;
+}
+
+.article-link:hover {
+    color: #006622;
+}

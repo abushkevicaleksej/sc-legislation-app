@@ -1,6 +1,6 @@
 from enum import Enum
 from threading import Event
-import re
+from collections import defaultdict
 
 import sc_client.client as client
 from ..exceptions import ScServerError
@@ -8,10 +8,7 @@ from sc_client.client import is_connected
 from sc_client.models import (
     ScAddr,
     ScEventSubscriptionParams,
-    ScConstruction,
     ScIdtfResolveParams,
-    ScLinkContent,
-    ScLinkContentType,
     ScTemplate,
 )
 from sc_client.constants.common import ScEventType
@@ -27,12 +24,13 @@ from service.agents.abstract.auth_agent import AuthAgent, AuthStatus
 from service.agents.abstract.reg_agent import RegAgent, RegStatus
 from service.agents.abstract.user_request_agent import RequestAgent, RequestStatus
 from service.agents.abstract.directory_agent import DirectoryAgent, DirectoryStatus
-from service.exceptions import AgentError, ParseDataError
+from service.exceptions import AgentError
 from service.utils.ostis_utils import(
     create_link,
     get_node,
     set_gender_content,
-    set_birthdate_content
+    set_birthdate_content,
+    get_main_idtf
 )
 from config import Config
 
@@ -92,6 +90,10 @@ def call_back_request(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
     global payload
     callback_event.clear()
     content_list = []
+    content_dict = defaultdict(lambda: {
+    'related_concepts': set(),
+    'related_articles': set()
+})
     succ_node = client.resolve_keynodes(
         ScIdtfResolveParams(idtf='action_finished_successfully', type=sc_types.NODE_CONST_CLASS)
     )[0]
@@ -126,16 +128,46 @@ def call_back_request(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
             sc_types.LINK_VAR >> "_link_res"
         )
+        res_templ.triple(
+            "_res_struct",
+            sc_types.EDGE_ACCESS_VAR_POS_PERM,
+            sc_types.NODE_VAR_CLASS >> "_concept_res"
+        )
+        res_templ.triple(
+            "_res_struct",
+            sc_types.EDGE_ACCESS_VAR_POS_PERM,
+            sc_types.NODE_VAR >> "_article_res"
+        )
         gen_res = client.template_search(res_templ)
         for _ in gen_res:
             src_link = _.get("_src_link")
             link_res = _.get("_link_res")
+            concept_res = _.get("_concept_res")
+            article_res = _.get("_article_res")
 
             src_data = client.get_link_content(src_link)[0].data
             link_data = client.get_link_content(link_res)[0].data
+            concept_data = get_main_idtf(concept_res)
+            article_data = get_main_idtf(article_res)
+            print(concept_data)                        
+            print(article_data)            
+            key = (src_data, link_data)
+            
+            if concept_data:
+                content_dict[key]['related_concepts'].add(concept_data)
+            if article_data:
+                content_dict[key]['related_articles'].add(article_data)
+
+        content_list = []
+        for (term, content), values in content_dict.items():
             content_list.append(RequestResponse(
                 term=src_data,
-                content=link_data))
+                content=link_data,
+                related_concepts=[concept_data],
+                related_articles=[article_data]
+            ))
+
+        print(content_list)
         payload = {"message": content_list}
     elif trg.value == unsucc_node.value or trg.value == node_err.value:
         payload = {"message": "Nothing"}

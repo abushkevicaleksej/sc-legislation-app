@@ -20,24 +20,67 @@
                 </a>
             </nav>
         </header>
-    
         <main class="main-content">
-            
+            <!-- Скрытая форма для поиска -->
+            <form id="hiddenSearchForm" action="/requests" method="POST" style="display: none;">
+                <input type="hidden" name="request_entry" id="hiddenSearchInput">
+            </form>
+
+            <form id="hiddenDirectoryForm" action="/directory" method="POST" style="display: none;">
+                <input type="hidden" name="article_entry" id="hiddenDirectoryInput">
+            </form>
+        
+            <div class="search-results-header">
+                <h2 class="search-results-title">Результаты поиска: "{{ query }}"</h2>
+            </div>
+        
             <div id="searchResultsContainer">
                 {% if results %}
                     {% for item in results %}
                     <div class="article-result">
-                        <p class="article-excerpt">{{ item.content }}</p>
+                        <h3 class="term-title">{{ item.term }}</h3>
+                        <div class="content-block">
+                            <p class="content-text">{{ item.content }}</p>
+                        </div>
+                        
+                        {% if item.related_concepts %}
+                        <div class="related-concepts">
+                            <h4>Связанные понятия:</h4>
+                            <ul>
+                                {% for concept in item.related_concepts %}
+                                <li class="concept-link" onclick="searchConcept('{{ concept }}')">{{ concept }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+        
+                        {% if item.related_articles %}
+                        <div class="related-articles">
+                            <h4>Связанные статьи:</h4>
+                            <ul>
+                                {% for article in item.related_articles %}
+                                <li class="article-link" onclick="searchArticle('{{ article }}')">{{ article }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
                     </div>
                     {% endfor %}
-                {% else %}
-                    <div class="article-result">
-                        <p class="article-excerpt">Ничего не найдено</p>
-                    </div>
                 {% endif %}
             </div>
+        </main>
+        
+        <script>
+        function searchConcept(concept) {
+            document.getElementById('hiddenSearchInput').value = concept;
+            document.getElementById('hiddenSearchForm').submit();
+        }
 
-    </main>
+        function searchArticle(article) {
+            document.getElementById('hiddenDirectoryInput').value = article;
+            document.getElementById('hiddenDirectoryForm').submit();
+        }
+        </script>
 
     <footer>
         <p>Персональный ассистент по юриспруденции</p>
