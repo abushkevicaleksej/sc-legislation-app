@@ -10,6 +10,16 @@ from sc_client.models import (
 )
 from sc_client.constants import sc_types
 from sc_kpm import ScKeynodes
+from sc_kpm.utils.common_utils import (
+    generate_node, 
+    generate_role_relation,
+    generate_non_role_relation,
+    generate_connector,
+    check_connector,
+    check_edge, 
+    search_connector,
+    generate_link
+)
 
 from service.exceptions import ParseDataError
 
@@ -41,6 +51,57 @@ def get_main_idtf(node: ScAddr) -> str:
         value = client.get_link_content(template_result[0].get('_value'))[0].data
     return value
 
+def get_system_idtf(node: ScAddr) -> str:
+    template = ScTemplate()
+    template.quintuple(
+        node,
+        sc_types.EDGE_D_COMMON_VAR,
+        '_value',
+        sc_types.EDGE_ACCESS_VAR_POS_PERM,
+        ScKeynodes['nrel_system_idtf']
+        )
+    template_result = client.template_search(template)
+    value = ''
+    if len(template_result):
+        value = client.get_link_content(template_result[0].get('_value'))[0].data
+    return value
+
+def set_system_idtf(content: str) -> ScAddr:
+
+    _link = generate_link(content)
+
+    template = ScTemplate()
+
+    template.quintuple(
+        sc_types.NODE_VAR >> "_node",
+        sc_types.EDGE_D_COMMON_VAR,
+        _link >> "_link",
+        sc_types.EDGE_ACCESS_VAR_POS_PERM,
+        ScKeynodes["nrel_system_identifier"]
+    )
+    
+    result = client.generate_by_template(template)
+    
+    return result.get("_node")
+
+def set_main_idtf(content: str) -> ScAddr:
+
+    _link = generate_link(content)
+
+    template = ScTemplate()
+
+    template.quintuple(
+        sc_types.NODE_VAR >> "_node",
+        sc_types.EDGE_D_COMMON_VAR,
+        _link >> "_link",
+        sc_types.EDGE_ACCESS_VAR_POS_PERM,
+        ScKeynodes["nrel_main_identifier"]
+    )
+    
+    result = client.generate_by_template(template)
+    
+    return result.get("_node")
+
 def set_gender_content(gender) -> ScAddr:
     if gender == "male":
         return ScKeynodes['concept_man']
@@ -49,16 +110,11 @@ def set_gender_content(gender) -> ScAddr:
     else:
         raise ParseDataError(666, "Failed to parse args")
 
-def set_birthdate_content(client, birthdate):
+def split_date_content(birthdate):
     pattern = r'(\d{2})\.(\d{2})\.(\d{4})'
     match = re.match(pattern, birthdate)
     if match:
         day, month, year = map(int, match.groups())
-        print(day, month, year)
-        _day_lnk = create_link(client, day)
-        _month_lnk = create_link(client, month)
-        _year_lnk = create_link(client, year)
-
-        return _day_lnk, _month_lnk, _year_lnk
+        return day, month, year
     else:
         raise ParseDataError(666, "Failed to parse args")

@@ -24,13 +24,22 @@ from service.agents.abstract.auth_agent import AuthAgent, AuthStatus
 from service.agents.abstract.reg_agent import RegAgent, RegStatus
 from service.agents.abstract.user_request_agent import RequestAgent, RequestStatus
 from service.agents.abstract.directory_agent import DirectoryAgent, DirectoryStatus
+from service.agents.abstract.event_agents import (
+    AddEventAgent,
+    AddEventStatus,
+    DeleteEventAgent,
+    DeleteEventStatus,
+    ShowEventAgent,
+    ShowEventStatus
+)
 from service.exceptions import AgentError
 from service.utils.ostis_utils import(
     create_link,
     get_node,
     set_gender_content,
-    set_birthdate_content,
-    get_main_idtf
+    split_date_content,
+    get_main_idtf,
+    set_system_idtf
 )
 from config import Config
 
@@ -336,13 +345,16 @@ class Ostis:
             password: str
         ):
         if is_connected():
+            day, month, year = split_date_content(birthdate)
             username_lnk = create_link(client, username)
             password_lnk = create_link(client, password)
             gender_node = set_gender_content(gender)
             surname_lnk = create_link(client, surname)
             name_lnk = create_link(client, name)
             fname_lnk = create_link(client, fname)
-            day_lnk, month_lnk, year_lnk = set_birthdate_content(client, birthdate)
+            day_node = set_system_idtf(day)
+            month_node = set_system_idtf(month)
+            year_node = set_system_idtf(year)
             reg_place_lnk = create_link(client, reg_place)
 
             rrel_1 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_1', type=sc_types.NODE_CONST_ROLE))[0]
@@ -361,11 +373,6 @@ class Ostis:
             initiated_node = client.resolve_keynodes(ScIdtfResolveParams(idtf='action_initiated', type=sc_types.NODE_CONST_CLASS))[0]
             action_agent = client.resolve_keynodes(ScIdtfResolveParams(idtf=action_name, type=sc_types.NODE_CONST_CLASS))[0]
             main_node = get_node(client)
-
-            birthdate_con = generate_node(sc_types.NODE_CONST_TUPLE)
-            generate_role_relation(birthdate_con, day_lnk, rrel_user_day)
-            generate_role_relation(birthdate_con, month_lnk, rrel_user_month)
-            generate_role_relation(birthdate_con, year_lnk, rrel_user_year)
 
             template = ScTemplate()
             template.triple_with_relation(
@@ -406,9 +413,30 @@ class Ostis:
             template.triple_with_relation(
                 main_node >> "_main_node",
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
-                birthdate_con,
+                sc_types.NODE_VAR_TUPLE >> "_tuple",
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
                 rrel_6
+            )
+            template.triple_with_relation(
+                "_tuple",
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                day_node,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                rrel_user_day
+            )
+            template.triple_with_relation(
+                "_tuple",
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                month_node,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                rrel_user_month
+            )
+            template.triple_with_relation(
+                "_tuple",
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                year_node,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                rrel_user_year
             )
             template.triple_with_relation(
                 main_node >> "_main_node",
@@ -495,7 +523,7 @@ class Ostis:
         else:
             raise ScServerError
         
-    def call_directory_agent(self, action_name, content: str) -> str:
+    def call_directory_agent(self, action_name: str, content: str) -> str:
         if is_connected():
             part_node = ScKeynodes["CONCEPT_FULL_SEARCH"]
             area_node = ScKeynodes["FULL_SEARCH"]
@@ -555,6 +583,90 @@ class Ostis:
                 raise AgentError(524, "Timeout")
         else:
             raise ScServerError
+
+    def call_add_event_agent(self, action_name: str, user, event_name: str, event_date, event_description: str) -> str:
+        if is_connected():
+            event_name_lnk = create_link(client, event_name)
+            day_lnk, month_lnk, year_lnk = set_date_content(client, event_date)
+            event_description_lnk = create_link(client, event_description)
+
+            rrel_1 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_1', type=sc_types.NODE_CONST_ROLE))[0]
+            rrel_2 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_2', type=sc_types.NODE_CONST_ROLE))[0]
+            rrel_3 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_3', type=sc_types.NODE_CONST_ROLE))[0]
+            rrel_4 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_4', type=sc_types.NODE_CONST_ROLE))[0]
+
+            rrel_user_day = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_user_day', type=sc_types.NODE_CONST_ROLE))[0]
+            rrel_user_month = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_user_month', type=sc_types.NODE_CONST_ROLE))[0]
+            rrel_user_year = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_user_year', type=sc_types.NODE_CONST_ROLE))[0]
+
+            initiated_node = client.resolve_keynodes(ScIdtfResolveParams(idtf='action_initiated', type=sc_types.NODE_CONST_CLASS))[0]
+            action_agent = client.resolve_keynodes(ScIdtfResolveParams(idtf=action_name, type=sc_types.NODE_CONST_CLASS))[0]
+            main_node = get_node(client)
+
+            date_con = generate_node(sc_types.NODE_CONST_TUPLE)
+            generate_role_relation(date_con, day_lnk, rrel_user_day)
+            generate_role_relation(date_con, month_lnk, rrel_user_month)
+            generate_role_relation(date_con, year_lnk, rrel_user_year)
+
+            template = ScTemplate()
+            template.triple_with_relation(
+                main_node >> "_main_node",
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                user,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                rrel_1
+            )
+            template.triple_with_relation(
+                main_node >> "_main_node",
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                event_name_lnk,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                rrel_2
+            )
+            template.triple_with_relation(
+                main_node >> "_main_node",
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                event_date,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                rrel_3
+            )
+            template.triple_with_relation(
+                main_node >> "_main_node",
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                event_description_lnk,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                rrel_4
+            )
+            template.triple(
+                action_agent,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                "_main_node",
+            )
+            template.triple(
+                initiated_node,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                "_main_node",
+            )
+
+            event_params = ScEventSubscriptionParams(main_node, ScEventType.AFTER_GENERATE_INCOMING_ARC, call_back)
+            client.events_create(event_params)
+            client.template_generate(template)
+
+            global payload
+            if callback_event.wait(timeout=10):
+                while not payload:
+                    continue
+                return payload
+            else:
+                raise AgentError(524, "Timeout")
+        else:
+            raise ScServerError
+
+    def call_delete_event_agent(self, action_name: str, event_name: str) -> str:
+        pass
+
+    def call_show_event_agent(self, action_name: str, user) -> str:
+        pass
 
 class OstisAuthAgent(AuthAgent):
     def __init__(self):
@@ -651,3 +763,77 @@ class OstisDirectoryAgent(DirectoryAgent):
                 "message": "Invalid credentials",
             }
         raise AgentError
+    
+class OstisAddEventAgent(AddEventAgent):
+    def __init__(self):
+        self.ostis = Ostis(Config.OSTIS_URL)
+
+    def add_event_agent(self, 
+                        user: ScAddr, 
+                        event_name: str, 
+                        event_date, 
+                        event_description: str
+                        ):
+        global payload
+        payload = None
+        agent_response = self.ostis.call_add_event_agent(
+            action_name="action_add_event",
+            user=user,
+            event_name=event_name,
+            event_date=event_date,
+            event_description=event_description
+            )
+        if agent_response is not None:
+            return {"status": AddEventStatus.VALID,
+                    "message": agent_response["message"]}
+        elif agent_response is None:
+            return {
+                "status": AddEventStatus.INVALID,
+                "message": "Invalid credentials",
+            }
+        raise AgentError
+    
+class OstisDeleteEventAgent(DeleteEventAgent):
+    def __init__(self):
+        self.ostis = Ostis(Config.OSTIS_URL)
+
+    def delete_event_agent(self,
+                        event_name: str, 
+                        ):
+        global payload
+        payload = None
+        agent_response = self.ostis.call_delete_event_agent(
+            action_name="action_del_event",
+            event_name=event_name,
+            )
+        if agent_response is not None:
+            return {"status": DeleteEventStatus.VALID,
+                    "message": agent_response["message"]}
+        elif agent_response is None:
+            return {
+                "status": DeleteEventStatus.INVALID,
+                "message": "Invalid credentials",
+            }
+        raise AgentError
+
+class OstisShowEventAgent(ShowEventAgent):
+    def __init__(self):
+        self.ostis = Ostis(Config.OSTIS_URL)
+
+    def show_event_agent(self,
+                        user 
+                        ):
+        global payload
+        payload = None
+        agent_response = self.ostis.call_show_event_agent(
+            action_name="action_user_events",
+            user=user
+            )
+        if agent_response is not None:
+            return {"status": ShowEventStatus.VALID,
+                    "message": agent_response["message"]}
+        elif agent_response is None:
+            return {
+                "status": ShowEventStatus.INVALID,
+                "message": "Invalid credentials",
+            }

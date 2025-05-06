@@ -11,7 +11,7 @@
 <div class="modal-overlay" id="event-modal">
     <div class="modal-content">
         <h3 class="modal-title">Добавление события</h3>
-        <div class="date-selected" id="selected-date">Выбранная дата: ДД-ММ-ГГГГ</div>
+        <!-- <div class="date-selected" id="selected-date">Выбранная дата: ДД-ММ-ГГГГ</div>
 
         <div class="input-group">
             <label class="input-label">Название события</label>
@@ -23,7 +23,11 @@
             <textarea class="event-description-input" placeholder="Описание"></textarea>
         </div>
 
-        <button class="save-button">Сохранить</button>
+        <button class="save-button">Сохранить</button> -->
+        {{ form.event_name.label }} {{ form.event_name }} <br>
+        {{ form.event_date.label }} {{ form.event_date }} <br>
+        {{ form.event_description.label }} {{ form.event_description }} <br>
+        {{ form.submit() }} <br>
     </div>
 </div>
 

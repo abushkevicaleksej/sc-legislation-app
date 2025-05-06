@@ -2,7 +2,15 @@ from .abstract.auth_agent import AuthAgent, AuthStatus
 from .abstract.reg_agent import RegAgent, RegStatus
 from .abstract.user_request_agent import RequestAgent, RequestStatus
 from .abstract.directory_agent import DirectoryAgent, DirectoryStatus
-
+from .abstract.event_agents import (
+    AddEventStatus,
+    AddEventAgent,
+    DeleteEventStatus,
+    DeleteEventAgent,
+    ShowEventStatus,
+    ShowEventAgent
+)
+from sc_client.models import ScAddr
 class OstisAuthAgent(AuthAgent):
     def auth_agent(self, username: str, password: str):
         print(f"MockAgent: Pretend authenticating {username} - {password}")
@@ -41,3 +49,27 @@ class OstisDirectoryAgent(DirectoryAgent):
             ):
         print(f"MockAgent: Pretend requesting {content}")
         return {"status": DirectoryStatus.VALID}
+
+class OstisAddEventAgent(AddEventAgent):
+    def add_event_agent(self, 
+                        user: ScAddr, 
+                        event_name: str, 
+                        event_date, 
+                        event_description: str
+                        ):
+        print(f"MockAgent: Pretend requesting {event_name} {event_description}")
+        return {"status": AddEventStatus.VALID}
+    
+class OstisDeleteEventAgent(DeleteEventAgent):
+    def delete_event_agent(self, 
+                        event_name: str, 
+                        ):
+        print(f"MockAgent: Pretend requesting {event_name}")
+        return {"status": DeleteEventStatus.VALID}
+
+class OstisShowEventAgent(ShowEventAgent):
+    def show_event_agent(self, 
+                        user: ScAddr, 
+                        ):
+        print(f"MockAgent: Pretend requesting {user}")
+        return {"status": ShowEventStatus.VALID}

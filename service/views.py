@@ -1,11 +1,19 @@
 from flask import Blueprint, request, render_template, redirect, url_for, flash, session
 from flask_login import login_user, logout_user, login_required, current_user
 
-from .models import find_user_by_username, RequestResponse
+from .models import find_user_by_username
 
 from .utils.string_processing import string_processing
 
-from .services import auth_agent, reg_agent, user_request_agent, directory_agent
+from .services import (
+    auth_agent, 
+    reg_agent, 
+    user_request_agent, 
+    directory_agent, 
+    add_event_agent, 
+    delete_event_agent, 
+    show_event_agent
+)
 
 from .forms import LoginForm, RegistrationForm
 
@@ -69,7 +77,7 @@ def logout():
 
 @main.route("/add-event")
 @login_required
-def add_event():
+def add_event():      
     return render_template("add-event.html")
 
 @main.route("/show_calendar")
@@ -169,4 +177,5 @@ def templates():
 @main.route("/show_calendar")
 @login_required
 def calendar():
+    print(current_user)
     return render_template("calendar.html")
