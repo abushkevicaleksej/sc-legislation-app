@@ -98,11 +98,13 @@ def call_back(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
 def call_back_request(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
     global payload
     callback_event.clear()
+
+    term: str
+    content: str
+    related_article = []
+    related_term = []
     content_list = []
-    content_dict = defaultdict(lambda: {
-    'related_concepts': set(),
-    'related_articles': set()
-})
+
     succ_node = client.resolve_keynodes(
         ScIdtfResolveParams(idtf='action_finished_successfully', type=sc_types.NODE_CONST_CLASS)
     )[0]
@@ -117,64 +119,96 @@ def call_back_request(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
         nrel_result = client.resolve_keynodes(
             ScIdtfResolveParams(idtf='nrel_result', type=sc_types.NODE_CONST_CLASS)
         )[0]
-        res_templ = ScTemplate()
-        res_templ.triple_with_relation(
+        body_template = ScTemplate()
+        related_article_template = ScTemplate()
+        related_concept_template = ScTemplate()
+
+        body_template.triple_with_relation(
             src,
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
             sc_types.LINK_VAR >> "_src_link",
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
             ScKeynodes["rrel_1"]
         )
-        res_templ.triple_with_relation(
+        body_template.triple_with_relation(
             src,
             sc_types.EDGE_D_COMMON_VAR,
             sc_types.NODE_VAR_STRUCT >> "_res_struct",
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
             nrel_result
         )
-        res_templ.triple(
+        body_template.triple(
             "_res_struct",
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
-            sc_types.LINK_VAR >> "_link_res"
+            sc_types.LINK_VAR >> "_link_body"
         )
-        res_templ.triple(
-            "_res_struct",
-            sc_types.EDGE_ACCESS_VAR_POS_PERM,
-            sc_types.NODE_VAR_CLASS >> "_concept_res"
-        )
-        res_templ.triple(
-            "_res_struct",
-            sc_types.EDGE_ACCESS_VAR_POS_PERM,
-            sc_types.NODE_VAR >> "_article_res"
-        )
-        gen_res = client.template_search(res_templ)
-        for _ in gen_res:
-            src_link = _.get("_src_link")
-            link_res = _.get("_link_res")
-            concept_res = _.get("_concept_res")
-            article_res = _.get("_article_res")
 
-            src_data = client.get_link_content(src_link)[0].data
-            link_data = client.get_link_content(link_res)[0].data
-            concept_data = get_main_idtf(concept_res)
-            article_data = get_main_idtf(article_res)
-            print(concept_data)                        
-            print(article_data)            
-            key = (src_data, link_data)
+        related_article_template.triple_with_relation(
+            src,
+            sc_types.EDGE_D_COMMON_VAR,
+            sc_types.NODE_VAR_STRUCT >> "_res_struct",
+            sc_types.EDGE_ACCESS_VAR_POS_PERM,
+            nrel_result
+        )
+        related_article_template.triple(
+            "_res_struct",
+            sc_types.EDGE_ACCESS_VAR_POS_PERM,
+            sc_types.NODE_VAR >> "_related_article"
+        )
+        related_article_template.triple(
+            ScKeynodes["belarus_legal_article"],
+            sc_types.EDGE_ACCESS_VAR_POS_PERM,
+            "_related_article",
+        )
+
+        related_concept_template.triple_with_relation(
+            src,
+            sc_types.EDGE_D_COMMON_VAR,
+            sc_types.NODE_VAR_STRUCT >> "_res_struct",
+            sc_types.EDGE_ACCESS_VAR_POS_PERM,
+            nrel_result
+        )
+        related_concept_template.triple(
+            "_res_struct",
+            sc_types.EDGE_ACCESS_VAR_POS_PERM,
+            sc_types.NODE_VAR_CLASS >> "_related_term"
+        )
+
+        body_result = client.template_search(body_template)
+        for _body in body_result:
+            src_link = _body.get("_src_link")
+            link = _body.get("_link_body")
+            term = client.get_link_content(src_link)[0].data
+            content = client.get_link_content(link)[0].data
+
+            related_articles = []
+            related_concepts = []
+
+            article_result = client.template_search(related_article_template)
+            for _article in article_result:
+                article_node = _article.get("_related_article")
+                if article_node:
+                    article_data = get_main_idtf(article_node)
+                    if article_data:
+                        related_articles.append(article_data)
+
+            concept_result = client.template_search(related_concept_template)
+            for _concept in concept_result:
+                concept_node = _concept.get("_related_term")
+                if concept_node:
+                    concept_data = get_main_idtf(concept_node)
+                    if concept_data:
+                        related_concepts.append(concept_data)
+
+            response = RequestResponse(
+                term=term,
+                content=content,
+                related_articles=related_articles,
+                related_concepts=related_concepts
+            )
             
-            if concept_data:
-                content_dict[key]['related_concepts'].add(concept_data)
-            if article_data:
-                content_dict[key]['related_articles'].add(article_data)
+            content_list.append(response)
 
-        content_list = []
-        for (term, content), values in content_dict.items():
-            content_list.append(RequestResponse(
-                term=src_data,
-                content=link_data,
-                related_concepts=[concept_data],
-                related_articles=[article_data]
-            ))
         payload = {"message": content_list}
     elif trg.value == unsucc_node.value or trg.value == node_err.value:
         payload = {"message": "Nothing"}

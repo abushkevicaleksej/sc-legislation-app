@@ -26,7 +26,7 @@
         </div>
         <div class="header-title">
             <h1 class="main-heading">Запросы</h1>
-            <form class="search-bar" action="/requests" method="POST">
+            <form class="search-bar" action="{{ url_for('main.requests') }}" method="POST">
                 <input type="text" placeholder="Что такое арендное жилье?" class="search-input" id="searchQuery" name="request_entry">
                 <div class="search-icon" id="searchButton">
                     <button class="search-button" type="submit">
