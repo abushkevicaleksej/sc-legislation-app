@@ -85,28 +85,28 @@ def logout():
 @login_required
 def show_calendar():
     user = get_link_content(current_user.username)[0].data
-    print(user)
-    response = show_event_agent(username=user)
-    return render_template("calendar.html")
+    selected_date = request.args.get("selected_date")
+    
+    events = get_event_by_date(selected_date, user) if selected_date else []
+    
+    return render_template("calendar.html", 
+                         events=events.events if events else [],
+                         form=AddEventForm(),
+                         selected_date=selected_date)
 
-@main.route("/date")
-@login_required
-def date():
-    user = get_link_content(current_user.username)[0].data
-    response = get_event_by_date("12.04.2025", user)
-    return "ok"
-
-@main.route("/add_event")
+@main.route("/add_event", methods=["POST"])
 @login_required
 def add_event():
-    user = get_link_content(current_user.username)[0].data
-    print(user)
-    response = add_event_agent(user_name=user, 
-                               event_name="event1", 
-                               event_date="12.04.2025", 
-                               event_description="hahaha"
-                               )
-    return redirect(url_for('main.show_calendar'))
+    form = AddEventForm()
+    if form.validate_on_submit():
+        user = get_link_content(current_user.username)[0].data
+        add_event_agent(
+            user_name=user,
+            event_name=form.title.data,
+            event_date=form.date.data,
+            event_description=form.description.data
+        )
+    return redirect(url_for('main.show_calendar', selected_date=form.date.data))
 
 @main.route("/delete_event")
 @login_required

@@ -115,9 +115,14 @@ def set_gender_content(gender) -> ScAddr:
 
 def split_date_content(birthdate):
     pattern = r'(\d{2})\.(\d{2})\.(\d{4})'
+    pattern_2 = r'(\d{4})\-(\d{2})\-(\d{2})'
     match = re.match(pattern, birthdate)
+    match_2 = re.match(pattern_2, birthdate)
     if match:
         day, month, year = map(int, match.groups())
+        return day, month, year
+    elif match_2:
+        day, month, year = map(int, match_2.groups()[::-1])
         return day, month, year
     else:
         raise ParseDataError(666, "Failed to parse args")

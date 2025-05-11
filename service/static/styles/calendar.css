@@ -368,12 +368,13 @@ footer p {
     display: block;
 }
 
+
 .date-input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #E9E9FD;
-    border-radius: 8px;
-    font-size: 14px;
+    color: #333;
+    background: #fff;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
 }
 
 .input-group {
