@@ -1,9 +1,14 @@
 import configparser
-
+from flask_caching import Cache
 class Config:
     config = configparser.ConfigParser()
     config.read('config.ini')
 
+    config = {
+        "DEBUG": True,          # some Flask specific configs
+        "CACHE_TYPE": "SimpleCache",  # Flask-Caching related configs
+        "CACHE_DEFAULT_TIMEOUT": 300
+    } 
     AGENTS_TO_LOAD = {
         "auth_agent": "service.agents.ostis.OstisAuthAgent",
         "reg_agent": "service.agents.ostis.OstisRegAgent",
@@ -21,3 +26,4 @@ class Config:
     HOST_DEFAULT = config['SERVER']['SC_SERVER_HOST_DEFAULT']
     PORT_DEFAULT = config['SERVER']['SC_SERVER_PORT_DEFAULT']
     MAX_SESSION_SIZE = 4093
+    cache = Cache(app)

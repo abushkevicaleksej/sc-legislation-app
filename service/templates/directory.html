@@ -7,66 +7,119 @@
     <link rel="stylesheet" href="static/styles/directory.css">
 </head>
 <body>
-<div class="container">
-    <header>
-        <img src="static/images/logo.png" alt="Логотип" class="header-logo">
-        <nav>
-            <a href="{{ url_for('main.requests') }}"><button class="nav-button">Запросы</button></a>
-            <a href="{{ url_for('main.directory') }}"><button class="nav-button active">Справочник</button></a>
-            <a href="{{ url_for('main.show_calendar') }}"><button class="nav-button">Календарь</button></a>
-            <a href="{{ url_for('main.templates') }}"><button class="nav-button">Шаблоны</button></a>
-            <a href="{{ url_for('main.logout') }}">
-                <img src="static/images/logout.png" alt="Выйти" class="user-icon">
-            </a>
-        </nav>
-    </header>
-    <div id="loading-overlay" style="display: none;">
-        <div class="spinner"></div>
+    <div class="container">
+        <header>
+            <img src="static/images/logo.png" alt="Логотип" class="header-logo">
+            <nav>
+                <a href="{{ url_for('main.requests') }}"><button class="nav-button">Запросы</button></a>
+                <a href="{{ url_for('main.directory') }}"><button class="nav-button active">Справочник</button></a>
+                <a href="{{ url_for('main.show_calendar') }}"><button class="nav-button">Календарь</button></a>
+                <a href="{{ url_for('main.templates') }}"><button class="nav-button">Шаблоны</button></a>
+                <a href="{{ url_for('main.logout') }}">
+                    <img src="static/images/logout.png" alt="Выйти" class="user-icon">
+                </a>
+            </nav>
+        </header>
+        <div id="loading-overlay" style="display: none;">
+            <div class="spinner"></div>
+        </div>
+        <div class="header-title">
+            <h1 class="main-heading">Справочник</h1>
+            <form class="search-bar" action="/directory" method="POST">
+                <input type="text" placeholder="Стандарт предприятия" class="search-input" id="searchQuery" name="directory_entry" autocomplete="off">
+                <div class="search-icon" id="searchButton">
+                    <button class="search-button" type="submit">
+                        <img src="static/images/search.png" alt="Поиск">
+                    </button>
+                </div>
+                <div id="suggestions" class="suggestions-container"></div>
+            </form>
+        </div>
+    
+        <footer>
+            <p>Персональный ассистент по юриспруденции</p>
+            <p>Ostis 2025</p>
+        </footer>
     </div>
-    <div class="header-title">
-        <h1 class="main-heading">Справочник</h1>
-        <form class="search-bar" action="/directory" method="POST">
-            <input type="text" placeholder="Стандарт предприятия" class="search-input" id="searchQuery" name="directory_entry">
-            <div class="search-icon" id="searchButton">
-                <button class="search-button" type="submit">
-                    <img src="static/images/search.png" alt="Поиск">
-                </button>
-            </div>
-        </form>
-    </div>
-
-    <footer>
-        <p>Персональный ассистент по юриспруденции</p>
-        <p>Ostis 2025</p>
-    </footer>
-</div>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.getElementById('searchQuery');
-        const searchButton = document.getElementById('searchButton');
-
-        function navigateToRequestsResult() {
-            const query = searchInput.value.trim();
-            if (query) {
-                // Переходим на страницу результата запроса
-                window.location.href = 'directory-results.html';
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchQuery');
+            const searchButton = document.getElementById('searchButton');
+            const suggestionsContainer = document.getElementById('suggestions');
+    
+            // Примерный список подсказок (в реальном приложении это может приходить с сервера)
+            const mockSuggestions = [
+                'Стандарт предприятия по документообороту',
+                'Стандарт предприятия по безопасности',
+                'Стандарт предприятия по качеству',
+                'Стандарт предприятия по охране труда',
+                'Стандарт предприятия по экологии'
+            ];
+    
+            function showSuggestions(query) {
+                const matchingSuggestions = mockSuggestions.filter(suggestion =>
+                    suggestion.toLowerCase().includes(query.toLowerCase())
+                );
+    
+                suggestionsContainer.innerHTML = '';
+                
+                if (query.length > 0 && matchingSuggestions.length > 0) {
+                    matchingSuggestions.forEach(suggestion => {
+                        const div = document.createElement('div');
+                        div.className = 'suggestion-item';
+                        div.textContent = suggestion;
+                        div.addEventListener('click', () => {
+                            searchInput.value = suggestion;
+                            suggestionsContainer.style.display = 'none';
+                        });
+                        suggestionsContainer.appendChild(div);
+                    });
+                    suggestionsContainer.style.display = 'block';
+                } else {
+                    suggestionsContainer.style.display = 'none';
+                }
             }
-        }
-
-        searchButton.addEventListener('click', navigateToDirectoryResult);
-        searchInput.addEventListener('keyup', function(event) {
-            if (event.key === 'Enter') {
-                navigateToDirectoryResult();
+    
+            function navigateToDirectoryResult() {
+                const query = searchInput.value.trim();
+                if (query) {
+                    // Переходим на страницу результата запроса
+                    window.location.href = 'directory-results.html';
+                }
             }
+    
+            searchInput.addEventListener('input', function() {
+                showSuggestions(this.value);
+            });
+    
+            searchInput.addEventListener('focus', function() {
+                if (this.value) {
+                    showSuggestions(this.value);
+                }
+            });
+    
+            // Закрываем подсказки при клике вне поля поиска
+            document.addEventListener('click', function(e) {
+                if (!searchInput.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+                    suggestionsContainer.style.display = 'none';
+                }
+            });
+    
+            searchButton.addEventListener('click', navigateToDirectoryResult);
+            searchInput.addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    navigateToDirectoryResult();
+                }
+            });
         });
-    });
-    window.addEventListener('beforeunload', function() {
-        document.getElementById('loading-overlay').style.display = 'flex';
-    });
-
-    window.addEventListener('load', function() {
-        document.getElementById('loading-overlay').style.display = 'none';
-    });
-</script>
-</body>
+    
+        window.addEventListener('beforeunload', function() {
+            document.getElementById('loading-overlay').style.display = 'flex';
+        });
+    
+        window.addEventListener('load', function() {
+            document.getElementById('loading-overlay').style.display = 'none';
+        });
+    </script>
+    </body>
 </html>
