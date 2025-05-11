@@ -4,11 +4,11 @@ from sc_client.client import get_link_content, search_by_template
 
 from .models import (
     find_user_by_username, 
-    collect_user_info
+    collect_user_info,
     )
 
 from .utils.string_processing import string_processing
-from .utils.ostis_utils import get_term_titles
+from .utils.ostis_utils import get_term_titles, get_event_by_date
 from .services import (
     auth_agent, 
     reg_agent, 
@@ -88,6 +88,13 @@ def show_calendar():
     print(user)
     response = show_event_agent(username=user)
     return render_template("calendar.html")
+
+@main.route("/date")
+@login_required
+def date():
+    user = get_link_content(current_user.username)[0].data
+    response = get_event_by_date("12.04.2025", user)
+    return "ok"
 
 @main.route("/add_event")
 @login_required

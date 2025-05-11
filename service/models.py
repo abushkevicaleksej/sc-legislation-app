@@ -31,7 +31,7 @@ class RequestResponse:
     
 @dataclass   
 class UserEvent:
-    user: str
+    username: str
     title: str
     date: str
     content: str
