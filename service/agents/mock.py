@@ -52,9 +52,9 @@ class OstisDirectoryAgent(DirectoryAgent):
 
 class OstisAddEventAgent(AddEventAgent):
     def add_event_agent(self, 
-                        user: ScAddr, 
+                        user_name: str, 
                         event_name: str, 
-                        event_date, 
+                        event_date: str, 
                         event_description: str
                         ):
         print(f"MockAgent: Pretend requesting {event_name} {event_description}")

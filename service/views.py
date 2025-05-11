@@ -89,8 +89,13 @@ def show_calendar():
 @main.route("/add_event")
 @login_required
 def add_event():
-    user = find_user_by_username(get_link_content(current_user.username)[0].data)
-    response = add_event_agent(user, "event1", "12.04.2025", "hahaha")
+    user = get_link_content(current_user.username)[0].data
+    print(user)
+    response = add_event_agent(user_name=user, 
+                               event_name="event1", 
+                               event_date="12.04.2025", 
+                               event_description="hahaha"
+                               )
     return redirect(url_for('main.show_calendar'))
 
 @main.route("/requests", methods=['GET', 'POST'])

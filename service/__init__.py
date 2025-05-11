@@ -8,8 +8,6 @@ login_manager = LoginManager()
 login_manager.login_view = 'main.auth'
 cache = Cache(config={'CACHE_TYPE': 'SimpleCache'})
 
-MAX_SESSION_SIZE = 4096
-
 def create_app():
     app = Flask(__name__)
     app.config.from_object("config.Config")

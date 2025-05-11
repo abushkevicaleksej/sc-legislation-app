@@ -36,10 +36,10 @@ def directory_agent(content: str):
         content=content
         )
 
-def add_event_agent(user, event_name: str, event_date, event_description: str):
+def add_event_agent(user_name: str, event_name: str, event_date: str, event_description: str):
     agent: AddEventAgent = current_app.config['agents']['add_event_agent']
     return agent.add_event_agent(
-        user=user,
+        user_name=user_name,
         event_name=event_name,
         event_date=event_date,
         event_description=event_description

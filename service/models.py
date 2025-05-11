@@ -3,7 +3,7 @@ from flask_login import UserMixin
 from service import login_manager
 from pydantic.dataclasses import dataclass
 
-from sc_client.client import get_link_content, search_by_template
+from sc_client.client import get_link_content, search_by_template, search_links_by_contents
 from sc_client.models import ScTemplate, ScAddr
 from sc_client.constants import sc_types
 from sc_kpm import ScKeynodes
@@ -39,6 +39,7 @@ class UserEvent:
 @dataclass
 class EventResponse:
     events: list[UserEvent]
+
 class User(UserMixin):
     def __init__(
         self,
@@ -184,3 +185,24 @@ def find_user_by_username(username: str) -> Optional[User]:
         if login_content == username:
             return collect_user_info(result.get("_user"))
     return None
+
+def get_user_by_login(username: str) -> ScAddr:
+    _user_link = search_links_by_contents(username)[0]
+
+    template = ScTemplate()
+    template.triple_with_relation(
+        sc_types.NODE_VAR >> "_user",
+        sc_types.EDGE_D_COMMON_VAR,
+        sc_types.LINK_VAR >> "_login",
+        sc_types.EDGE_ACCESS_VAR_POS_PERM,
+        ScKeynodes["nrel_user_login"]
+    )
+    results = search_by_template(template)
+    for result in results:
+        login_content = get_link_content(result.get("_login"))[0].data
+        if login_content == username:
+            return result.get("_user")
+
+    print(f"result {results}")
+    return results[0].get("_user")
+    

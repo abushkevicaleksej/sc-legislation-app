@@ -8,7 +8,7 @@ class AddEventStatus(StrEnum):
 
 class AddEventAgent(ABC):
     @abstractmethod
-    def add_event_agent(self, user: ScAddr, event_name: str, event_date, event_description: str):
+    def add_event_agent(self, user_name: str, event_name: str, event_date: str, event_description: str):
         pass
 
 class DeleteEventStatus(StrEnum):
