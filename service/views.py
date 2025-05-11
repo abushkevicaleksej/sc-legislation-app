@@ -159,6 +159,9 @@ def requests():
             response = user_request_agent(content=term)
             if response["message"] is not None:
                 try:
+                    if len(response["message"]) == 0:
+                        flash(f"По вашему запросу ничего не найдено", category="empty-result-error")
+                        return render_template("requests.html")
                     results = [{
                         'term': item.term,
                         'content': item.content,

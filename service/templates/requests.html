@@ -41,6 +41,14 @@
                 {% endfor %}
               {% endif %}
             {% endwith %}
+
+            {% with messages = get_flashed_messages(with_categories=true, category_filter=['empty-result-error']) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                    <div class="error-message">{{ message }}</div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
         </div>
         <script>
             window.addEventListener('beforeunload', function() {
