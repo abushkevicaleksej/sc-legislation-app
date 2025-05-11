@@ -3,19 +3,19 @@ from flask_login import login_user, logout_user, login_required, current_user
 from sc_client.client import get_link_content, search_by_template
 
 from .models import (
-    find_user_by_username, 
+    find_user_by_username,
     collect_user_info
     )
 
 from .utils.string_processing import string_processing
 from .utils.ostis_utils import get_term_titles
 from .services import (
-    auth_agent, 
-    reg_agent, 
-    user_request_agent, 
-    directory_agent, 
-    add_event_agent, 
-    delete_event_agent, 
+    auth_agent,
+    reg_agent,
+    user_request_agent,
+    directory_agent,
+    add_event_agent,
+    delete_event_agent,
     show_event_agent
 )
 
@@ -35,12 +35,20 @@ def protected():
 
 @main.route("/about")
 def about():
-    users = get_term_titles() 
+    """
+    Метод для реализации ендпоинта, который выводит текущего пользователя
+    :return: Разметка страницы
+    """
+    users = get_term_titles()
     print(users)
     return f"<pre>{str(current_user)}</pre>"
 
 @main.route("/auth", methods=['GET','POST'])
 def auth():
+    """
+    Метод для реализации эндпоинта аутентификации
+    :return: Разметка страницы
+    """
     if current_user.is_authenticated:
         return redirect(url_for('main.directory'))
     form = LoginForm()
@@ -54,6 +62,10 @@ def auth():
 
 @main.route("/reg", methods=['GET', 'POST'])
 def reg():
+    """
+    Метод для реализации эндпоинта регистрации
+    :return: Разметка страницы
+    """
     if current_user.is_authenticated:
         return redirect(url_for('main.directory'))
     
@@ -78,18 +90,30 @@ def reg():
 
 @main.route("/logout")
 def logout():
+    """
+    Метод для реализации эндпоинта выхода с профиля
+    :return: Разметка страницы
+    """
     logout_user()
     return redirect(url_for('main.auth'))
 
 @main.route("/show_calendar")
 @login_required
 def show_calendar():
+    """
+    Метод для реализации эндпоинта календаря
+    :return: Разметка страницы
+    """
     print(get_link_content(current_user.username)[0].data)
     events = show_event_agent(find_user_by_username(get_link_content(current_user.username)[0].data))
     return render_template("calendar.html", events=events)
 
 @main.route("/add_event", methods = ['POST'])
 def add_event():
+    """
+    Метод для реализации эндпоинта добавления события
+    :return: Разметка страницы
+    """
     form = AddEventForm()
 
     if form.validate_on_submit():
@@ -100,7 +124,7 @@ def add_event():
         except Exception as e:
             flash('Ошибка при сохранении события', 'error')
         return redirect(url_for('main.show_calendar'))
-    
+
     flash('Пожалуйста, проверьте введенные данные', 'error')
     return redirect(url_for('main.show_calendar'))
 
@@ -108,8 +132,14 @@ def add_event():
 @main.route("/requests", methods=['GET', 'POST'])
 @login_required
 def requests():
+    """
+    Метод для реализации эндпоинта юридических запросов
+    :return: Разметка страницы
+    """
     if request.method == 'POST':
         content = request.form.get("request_entry")
+        if content == '':
+            flash(f"Для поиска по справочнику требуется ввести текст", category="empty-text-error")
     else:
         content = request.args.get('q')
 
@@ -148,6 +178,10 @@ def requests():
 @main.route("/requests_results")
 @login_required
 def requests_results():
+    """
+    Метод для реализации эндпоинта просмотра результатов юридических запросов
+    :return: Разметка страницы
+    """
     query = session.get('search_query', '')
     results = session.get('search_results', [])
 
@@ -158,12 +192,19 @@ def requests_results():
 @main.route("/directory", methods=['GET', 'POST'])
 @login_required
 def directory():
+    """
+    Метод для реализации эндпоинта поиска
+    :return: Разметка страницы
+    """
     term_titles = get_term_titles()
     if request.method == 'POST':
         content = request.form.get("directory_entry")
+        if content == '':
+            flash(f"Для поиска по справочнику требуется ввести текст", category="empty-text-error")
+            return render_template("directory.html", term_titles=term_titles)
         print(content)
         asked = directory_agent(content=content)
-        
+
         if asked["message"] is not None:
             session['search_query'] = content
             session['search_results'] = asked["message"]
@@ -171,12 +212,16 @@ def directory():
         else:
             flash('Ничего не найдено', 'warning')
             return render_template("directory.html", term_titles=term_titles)
-    
+
     return render_template("directory.html", term_titles=term_titles)
 
 @main.route("/directory_results")
 @login_required
 def directory_results():
+    """
+    Метод для реализации эндпоинта просмотра результатов поиска
+    :return: Разметка страницы
+    """
     query = session.get('search_query', '')
     results = session.get('search_results', [])
     return render_template("directory-results.html", query=query, results=results)
@@ -184,4 +229,8 @@ def directory_results():
 @main.route("/templates")
 @login_required
 def templates():
+    """
+    Метод для реализации эндпоинта шаблонов
+    :return: Разметка страницы
+    """
     return render_template("templates.html")

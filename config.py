@@ -1,8 +1,10 @@
 import configparser
+
+
 class Config:
     config = configparser.ConfigParser()
     config.read('config.ini')
-    
+
     AGENTS_TO_LOAD = {
         "auth_agent": "service.agents.ostis.OstisAuthAgent",
         "reg_agent": "service.agents.ostis.OstisRegAgent",
@@ -21,3 +23,6 @@ class Config:
     PORT_DEFAULT = config['SERVER']['SC_SERVER_PORT_DEFAULT']
     MAX_SESSION_SIZE = 4093
 
+
+class TestingConfig(Config):
+    TESTING = True

@@ -82,10 +82,10 @@
 <div class="modal-overlay" id="event-modal">
     <div class="modal-content">
         <h3 class="modal-title">Добавление события</h3>
-        
+
         <form method="POST" action="{{ url_for('main.add_event') }}">
             {{ form.hidden_tag() }}
-            
+
             <div class="date-selection">
                 <label class="date-label">Дата события</label>
                 {{ form.date(class="date-input", readonly=true) }}
@@ -166,7 +166,7 @@
                 dayDiv.className = 'calendar-day';
 
                 let cellYear, cellMonth, cellDay;
-                
+
                 if (cellIndex < emptyCells) {
                     // Дни предыдущего месяца
                     const prevMonthLastDay = new Date(year, month, 0).getDate();
@@ -187,9 +187,9 @@
 
                 // Форматируем дату без учета времени и часового пояса
                 const date = new Date(cellYear, cellMonth, cellDay);
-                const formattedDate = 
+                const formattedDate =
                     `${String(cellDay).padStart(2, '0')}.${String(cellMonth + 1).padStart(2, '0')}.${cellYear}`;
-                
+
                 // Сохраняем дату в атрибуте в формате ДД.ММ.ГГГГ
                 cell.setAttribute('data-date', formattedDate);
                 dayDiv.textContent = cellDay;

@@ -10,9 +10,15 @@ cache = Cache(config={'CACHE_TYPE': 'SimpleCache'})
 
 MAX_SESSION_SIZE = 4096
 
-def create_app():
+
+def create_app(config_path: str = 'config.Config'):
+    """
+    Метод для создания и конфигурации приложения
+    :param config_path: Путь к конфигу приложения
+    :return: Приложение
+    """
     app = Flask(__name__)
-    app.config.from_object("config.Config")
+    app.config.from_object(config_path)
     cache.init_app(app)
     login_manager.init_app(app)
     from .views import main

@@ -14,6 +14,11 @@ syntax_parser = NewsSyntaxParser(emb)
 morph_vocab = MorphVocab()
 
 def string_processing(text):
+    """
+    Метод для обработки текста
+    :param text: Текст для обработки
+    :return: Обработанный текст
+    """
     doc = Doc(text)
     doc.segment(segmenter)
     doc.tag_morph(morph_tagger)
