@@ -8,7 +8,7 @@ from .models import (
     )
 
 from .utils.string_processing import string_processing
-
+from .utils.ostis_utils import get_term_titles
 from .services import (
     auth_agent, 
     reg_agent, 
@@ -35,6 +35,8 @@ def protected():
 
 @main.route("/about")
 def about():
+    users = get_term_titles() 
+    print(users)
     return f"<pre>{str(current_user)}</pre>"
 
 @main.route("/auth", methods=['GET','POST'])
@@ -156,17 +158,21 @@ def requests_results():
 @main.route("/directory", methods=['GET', 'POST'])
 @login_required
 def directory():
+    term_titles = get_term_titles()
     if request.method == 'POST':
         content = request.form.get("directory_entry")
+        print(content)
         asked = directory_agent(content=content)
+        
         if asked["message"] is not None:
             session['search_query'] = content
             session['search_results'] = asked["message"]
             return redirect(url_for('main.directory_results'))
         else:
             flash('Ничего не найдено', 'warning')
-            return render_template("directory.html")
-    return render_template("directory.html")
+            return render_template("directory.html", term_titles=term_titles)
+    
+    return render_template("directory.html", term_titles=term_titles)
 
 @main.route("/directory_results")
 @login_required

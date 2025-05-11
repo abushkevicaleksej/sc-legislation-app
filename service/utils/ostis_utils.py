@@ -119,5 +119,20 @@ def split_date_content(birthdate):
     else:
         raise ParseDataError(666, "Failed to parse args")
     
-def get_term_titles():
-    pass
+def get_term_titles() -> list[str]:
+    template =  ScTemplate()
+    term_list = []
+    template.triple(
+        ScKeynodes["belarus_legal_article"],
+        sc_types.EDGE_ACCESS_VAR_POS_PERM,
+        sc_types.NODE_VAR >> "_term_node"
+    )
+
+    template_result = client.template_search(template)
+    print(f'total terms {len(template_result)}')
+    for _ in template_result:
+        node = _.get("_term_node")
+        term_list.append(get_main_idtf(node))
+    return term_list
+
+

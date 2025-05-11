@@ -15,7 +15,6 @@ def create_app():
     app.config.from_object("config.Config")
     cache.init_app(app)
     login_manager.init_app(app)
-    
     from .views import main
     app.register_blueprint(main)
 

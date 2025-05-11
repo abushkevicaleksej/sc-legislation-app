@@ -21,13 +21,12 @@
             </nav>
         </header>
         <main class="main-content">
-            <!-- Скрытая форма для поиска -->
-            <form id="hiddenSearchForm" action="/requests" method="POST" style="display: none;">
+            <form id="hiddenSearchForm" action="{{ url_for('main.requests') }}" method="POST" style="display: none;">
                 <input type="hidden" name="request_entry" id="hiddenSearchInput">
             </form>
 
-            <form id="hiddenDirectoryForm" action="/directory" method="POST" style="display: none;">
-                <input type="hidden" name="article_entry" id="hiddenDirectoryInput">
+            <form id="hiddenDirectoryForm" action="{{ url_for('main.directory') }}" method="POST" style="display: none;">
+                <input type="hidden" name="directory_entry" id="hiddenDirectoryInput">
             </form>
         
             <div class="search-results-header">

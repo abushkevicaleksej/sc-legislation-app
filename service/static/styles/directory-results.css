@@ -86,7 +86,14 @@ nav {
     font-size: 24px;
     font-weight: 600;
     color: #333;
-    white-space: nowrap;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
+    max-width: 100%;
+    display: block;
+    margin: 0 0 10px 0;
 }
 
 .results-search-bar {

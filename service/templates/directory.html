@@ -44,23 +44,15 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('searchQuery');
-            const searchButton = document.getElementById('searchButton');
             const suggestionsContainer = document.getElementById('suggestions');
-    
-            // Примерный список подсказок (в реальном приложении это может приходить с сервера)
-            const mockSuggestions = [
-                'Стандарт предприятия по документообороту',
-                'Стандарт предприятия по безопасности',
-                'Стандарт предприятия по качеству',
-                'Стандарт предприятия по охране труда',
-                'Стандарт предприятия по экологии'
-            ];
-    
+            
+            const realSuggestions = {{ term_titles | tojson | safe }};
+            
             function showSuggestions(query) {
-                const matchingSuggestions = mockSuggestions.filter(suggestion =>
+                const matchingSuggestions = realSuggestions.filter(suggestion =>
                     suggestion.toLowerCase().includes(query.toLowerCase())
                 );
-    
+                
                 suggestionsContainer.innerHTML = '';
                 
                 if (query.length > 0 && matchingSuggestions.length > 0) {
