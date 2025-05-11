@@ -9,6 +9,9 @@ class Config:
         "reg_agent": "service.agents.ostis.OstisRegAgent",
         "user_request_agent": "service.agents.ostis.OstisUserRequestAgent",
         "directory_agent": "service.agents.ostis.OstisDirectoryAgent",
+        "add_event_agent": "service.agents.ostis.OstisAddEventAgent",
+        "delete_event_agent": "service.agents.ostis.OstisDeleteEventAgent",
+        "show_event_agent": "service.agents.ostis.OstisShowEventAgent"
     }
     OSTIS_URL = config['DEFAULT']['ostis_url']
     PROTOCOL = config['SERVER']['SC_SERVER_PROTOCOL']

@@ -165,6 +165,8 @@ width: 20px;
     color: #4D4FA3;
     text-decoration: underline;
     font-size: 16px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .date-picker {
@@ -209,6 +211,8 @@ width: 20px;
 .date-picker .calendar {
     width: 24px;
     height: 24px;
+    object-fit: contain;
+    vertical-align: middle;
 }
 
 .date-picker input[type="date"] {

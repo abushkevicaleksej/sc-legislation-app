@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, RadioField
+from wtforms import StringField, PasswordField, SubmitField, RadioField, HiddenField, TextAreaField
 from wtforms.validators import DataRequired, Length, ValidationError, Regexp
 from datetime import datetime
 
@@ -33,19 +33,6 @@ class RegistrationForm(FlaskForm):
             raise ValidationError("Некорректная дата")
         
 class AddEventForm(FlaskForm):
-    event_name = StringField('Название события', validators=[DataRequired()])
-    event_date = StringField('Дата события', validators=[
-        DataRequired(),
-        Regexp(r'^\d{2}\.\d{2}\.\d{4}$', message="Формат даты: ДД.ММ.ГГГГ")
-    ])
-    event_description = StringField('Описание события', validators=[DataRequired()])
-    submit = SubmitField('Добавить событие')
-
-    def validate_date(self, field):
-        try:
-            day, month, year = map(int, field.data.split('.'))
-            datetime(year, month, day)
-            if datetime(year, month, day).date() < datetime.today().date():
-                raise ValidationError("Дата события не может быть в прошлом")
-        except ValueError:
-            raise ValidationError("Некорректная дата")
+    date = HiddenField('Дата', validators=[DataRequired()])
+    title = StringField('Название', validators=[DataRequired()])
+    description = TextAreaField('Описание')

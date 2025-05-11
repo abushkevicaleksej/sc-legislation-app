@@ -19,16 +19,26 @@ class DirectoryResponse:
 class RequestResponse:
     term: str
     content: str
-    related_concepts: List[str] = None  # Множественное число
-    related_articles: List[str] = None  # Множественное число
+    related_concepts: List[str] = None
+    related_articles: List[str] = None
 
     def __post_init__(self):
-        # Гарантируем инициализацию списков
         self.related_concepts = self.related_concepts or []
         self.related_articles = self.related_articles or []
 
     def __str__(self) -> str:
         return f"{self.term} {self.content}"
+    
+@dataclass   
+class AppEvent:
+    user: str
+    title: str
+    date: str
+    content: str
+
+@dataclass
+class EventResponse:
+    events: list[AppEvent]
 
 class User(UserMixin):
     def __init__(

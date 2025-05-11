@@ -1,7 +1,11 @@
 from flask import Blueprint, request, render_template, redirect, url_for, flash, session
 from flask_login import login_user, logout_user, login_required, current_user
+from sc_client.client import get_link_content, search_by_template
 
-from .models import find_user_by_username
+from .models import (
+    find_user_by_username, 
+    collect_user_info
+    )
 
 from .utils.string_processing import string_processing
 
@@ -15,7 +19,7 @@ from .services import (
     show_event_agent
 )
 
-from .forms import LoginForm, RegistrationForm
+from .forms import LoginForm, RegistrationForm, AddEventForm
 
 main = Blueprint("main", __name__)
 
@@ -75,26 +79,28 @@ def logout():
     logout_user()
     return redirect(url_for('main.auth'))
 
-@main.route("/add-event")
-@login_required
-def add_event():      
-    return render_template("add-event.html")
-
 @main.route("/show_calendar")
 @login_required
 def show_calendar():
-    return render_template("calendar.html")
+    print(get_link_content(current_user.username)[0].data)
+    events = show_event_agent(find_user_by_username(get_link_content(current_user.username)[0].data))
+    return render_template("calendar.html", events=events)
 
-@main.route("/doc")
-@login_required
-def doc():
-    return render_template("document.html")
+@main.route("/add_event", methods = ['POST'])
+def add_event():
+    form = AddEventForm()
 
-@main.route("/templates")
-@login_required
-def templs():
-    return render_template("templates.html")
+    if form.validate_on_submit():
+        try:
+            event_response = add_event_agent()
+            flash('Событие успешно добавлено', 'success')
 
+        except Exception as e:
+            flash('Ошибка при сохранении события', 'error')
+        return redirect(url_for('main.show_calendar'))
+    
+    flash('Пожалуйста, проверьте введенные данные', 'error')
+    return redirect(url_for('main.show_calendar'))
 
 #todo fix all
 @main.route("/requests", methods=['GET', 'POST'])
@@ -173,9 +179,3 @@ def directory_results():
 @login_required
 def templates():
     return render_template("templates.html")
-
-@main.route("/show_calendar")
-@login_required
-def calendar():
-    print(current_user)
-    return render_template("calendar.html")

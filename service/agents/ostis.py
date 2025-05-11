@@ -19,7 +19,7 @@ from sc_kpm.utils.common_utils import (
     )
 from sc_kpm import ScKeynodes
 
-from service.models import RequestResponse, DirectoryResponse
+from service.models import RequestResponse, DirectoryResponse, EventResponse, AppEvent
 from service.agents.abstract.auth_agent import AuthAgent, AuthStatus
 from service.agents.abstract.reg_agent import RegAgent, RegStatus
 from service.agents.abstract.user_request_agent import RequestAgent, RequestStatus
@@ -57,7 +57,7 @@ class result(Enum):
 
 def call_back(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
     global payload
-    callback_event.clear()  # Clear the event at the start of callback
+    callback_event.clear()
     succ_node = client.resolve_keynodes(
         ScIdtfResolveParams(idtf='action_finished_successfully', type=sc_types.NODE_CONST_CLASS)
     )[0]
@@ -175,8 +175,6 @@ def call_back_request(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
                 related_concepts=[concept_data],
                 related_articles=[article_data]
             ))
-
-        print(content_list)
         payload = {"message": content_list}
     elif trg.value == unsucc_node.value or trg.value == node_err.value:
         payload = {"message": "Nothing"}
@@ -272,6 +270,46 @@ def call_back_directory(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
         payload = {"message": content_list}
     elif trg.value == unsucc_node.value or trg.value == node_err.value:
         payload = {"message": "Nothing"}
+
+    callback_event.set()
+    if not payload:
+        return result.FAILURE
+    return result.SUCCESS
+
+def call_back_get_events(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
+    global payload
+    callback_event.clear()
+    succ_node = client.resolve_keynodes(
+        ScIdtfResolveParams(idtf='action_finished_successfully', type=sc_types.NODE_CONST_CLASS)
+    )[0]
+    unsucc_node = client.resolve_keynodes(
+        ScIdtfResolveParams(idtf='action_finished_unsuccessfully', type=sc_types.NODE_CONST_CLASS)
+    )[0]
+    node_err = client.resolve_keynodes(
+        ScIdtfResolveParams(idtf='action_finished_with_error', type=sc_types.NODE_CONST_CLASS)
+    )[0]
+
+    if trg.value == succ_node.value:
+        nrel_result = client.resolve_keynodes(
+            ScIdtfResolveParams(idtf='nrel_result', type=sc_types.NODE_CONST_CLASS)
+        )[0]
+        res_templ = ScTemplate()
+        res_templ.triple_with_relation(
+            src,
+            sc_types.EDGE_D_COMMON_VAR,
+            sc_types.NODE_VAR_STRUCT >> "_res_struct",
+            sc_types.EDGE_ACCESS_VAR_POS_PERM,
+            nrel_result
+        )
+        res_templ.triple(
+            succ_node,
+            sc_types.EDGE_ACCESS_VAR_POS_PERM,
+            src
+        )
+        gen_res = client.template_search(res_templ)[0]
+        payload = {"message": result.SUCCESS}
+    elif trg.value == unsucc_node.value or trg.value == node_err.value:
+        payload = {"message": result.FAILURE}
 
     callback_event.set()
     if not payload:
@@ -666,7 +704,46 @@ class Ostis:
         pass
 
     def call_show_event_agent(self, action_name: str, user) -> str:
-        pass
+        if is_connected():
+
+            rrel_1 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_1', type=sc_types.NODE_CONST_ROLE))[0]
+
+            initiated_node = client.resolve_keynodes(ScIdtfResolveParams(idtf='action_initiated', type=sc_types.NODE_CONST_CLASS))[0]
+            action_agent = client.resolve_keynodes(ScIdtfResolveParams(idtf=action_name, type=sc_types.NODE_CONST_CLASS))[0]
+            main_node = get_node(client)
+
+            template = ScTemplate()
+            template.triple_with_relation(
+                main_node >> "_main_node",
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                user,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                rrel_1
+            )
+            template.triple(
+                action_agent,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                "_main_node",
+            )
+            template.triple(
+                initiated_node,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                "_main_node",
+            )
+
+            event_params = ScEventSubscriptionParams(main_node, ScEventType.AFTER_GENERATE_INCOMING_ARC, call_back)
+            client.events_create(event_params)
+            client.template_generate(template)
+
+            global payload
+            if callback_event.wait(timeout=10):
+                while not payload:
+                    continue
+                return payload
+            else:
+                raise AgentError(524, "Timeout")
+        else:
+            raise ScServerError
 
 class OstisAuthAgent(AuthAgent):
     def __init__(self):

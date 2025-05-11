@@ -118,3 +118,6 @@ def split_date_content(birthdate):
         return day, month, year
     else:
         raise ParseDataError(666, "Failed to parse args")
+    
+def get_term_titles():
+    pass

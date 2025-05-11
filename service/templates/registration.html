@@ -25,18 +25,24 @@
         <form method="POST" action="{{ url_for('main.reg') }}">
           <h2>Регистрация</h2>
           
-          <label>Ваш пол:</label>
-          <div class="radio-group">
-            {% for subfield in form.gender %}
-              {{ subfield }}
-              {{ subfield.label }}
-            {% endfor %}
-          </div>
+        <div class="form-group">
+            <label>Ваш пол:</label>
+            <div class="radio-group">
+                {% for subfield in form.gender %}
+                <div class="radio-item">
+                    {{ subfield(id="gender-" + loop.index|string) }}
+                    {{ subfield.label(for="gender-" + loop.index|string) }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
 
-          {{ form.csrf_token }}
-          {{ form.surname.label }} {{ form.surname }}
-          {{ form.name.label }} {{ form.name }}
-          {{ form.patronymic.label }} {{ form.patronymic }}
+        {{ form.csrf_token }}
+        <div class="form-group">
+            {{ form.surname.label }} {{ form.surname}}
+            {{ form.name.label }} {{ form.name }}
+            {{ form.patronymic.label }} {{ form.patronymic }}
+        </div>
           
           <label for="birthdate-text">Дата рождения</label>
           <div class="date-picker">
@@ -46,11 +52,11 @@
             </button>
             <input type="date" id="birthdate" name="birthdate" hidden>
           </div>
-
-          {{ form.reg_place.label }} {{ form.reg_place }}
-          {{ form.username.label }} {{ form.username }}
-          {{ form.password.label }} {{ form.password }}
-          
+          <div class="form-group">
+            {{ form.reg_place.label }} {{ form.reg_place }}
+            {{ form.username.label }} {{ form.username }}
+            {{ form.password.label }} {{ form.password }}
+          </div>
           {{ form.submit }}
           <a href="auth">Войти</a>
         </form>
@@ -92,7 +98,5 @@
         }
     });
 });
-
-
 </script>
 </html>
