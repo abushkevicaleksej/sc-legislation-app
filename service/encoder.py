@@ -12,6 +12,7 @@ class SCJSONEncoder(JSONEncoder):
         :param obj: Объект для коди
         :return: Объект в JSON-формате
         """
+        print(f"Serializing: {type(obj)}")  # Отладочный вывод
         if isinstance(obj, ScAddr):
             return obj.value
         return super().default(obj)

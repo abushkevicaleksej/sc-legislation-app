@@ -83,28 +83,24 @@
     <div class="modal-content">
         <h3 class="modal-title">Добавление события</h3>
 
-        <form method="POST" action="{{ url_for('main.add_event') }}">
-            {{ form.hidden_tag() }}
+        <div class="date-selection">
+            <label class="date-label">Дата события</label>
+            <input type="date" class="date-input" id="event-date">
+        </div>
 
-            <div class="date-selection">
-                <label class="date-label">Дата события</label>
-                {{ form.date(class="date-input", readonly=true) }}
-            </div>
+        <div class="input-group">
+            <label class="input-label">Название события</label>
+            <input type="text" class="event-name-input" placeholder="Введите название события">
+        </div>
 
-            <div class="input-group">
-                <label class="input-label">Название события</label>
-                {{ form.title(class="event-name-input", placeholder="Введите название события") }}
-            </div>
+        <div class="input-group">
+            <label class="input-label">Описание события</label>
+            <textarea class="event-description-input" placeholder="Описание"></textarea>
+        </div>
 
-            <div class="input-group">
-                <label class="input-label">Описание события</label>
-                {{ form.description(class="event-description-input", placeholder="Описание") }}
-            </div>
-
-            <div class="modal-footer">
-                <button type="submit" class="save-button">Сохранить</button>
-            </div>
-        </form>
+        <div class="modal-footer">
+            <button class="save-button">Сохранить</button>
+        </div>
     </div>
 </div>
 
@@ -123,7 +119,6 @@
     const eventDescInput = document.querySelector('.event-description-input');
 
     let currentDate = new Date();
-    let selectedDate = null;
 
     function getMonthName(date) {
         const monthName = new Intl.DateTimeFormat('ru-RU', { month: 'long' }).format(date);
@@ -131,14 +126,17 @@
     }
 
     function updateNavigation() {
+        // Текущий месяц
         const currentMonthName = getMonthName(currentDate);
         const currentYear = currentDate.getFullYear();
         monthTitle.textContent = `${currentMonthName} ${currentYear}`;
 
+        // Предыдущий месяц
         const prevDate = new Date(currentDate);
         prevDate.setMonth(prevDate.getMonth() - 1);
         prevMonthName.textContent = getMonthName(prevDate);
 
+        // Следующий месяц
         const nextDate = new Date(currentDate);
         nextDate.setMonth(nextDate.getMonth() + 1);
         nextMonthName.textContent = getMonthName(nextDate);
@@ -146,14 +144,20 @@
 
     function renderCalendar() {
         updateNavigation();
+
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
+
+        // Очистка предыдущего содержимого
         calendarBody.innerHTML = '';
 
+        // Получение первого дня месяца
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
         const daysInMonth = lastDay.getDate();
-        const startDay = firstDay.getDay();
+        const startDay = firstDay.getDay(); // 0 (воскресенье) - 6 (суббота)
+
+        // Заполнение ячеек пустыми днями до первого дня месяца
         const emptyCells = startDay === 0 ? 6 : startDay - 1;
         const rows = Math.ceil((daysInMonth + emptyCells) / 7);
         let cellIndex = 0;
@@ -165,40 +169,30 @@
                 const dayDiv = document.createElement('div');
                 dayDiv.className = 'calendar-day';
 
-                let cellYear, cellMonth, cellDay;
-
                 if (cellIndex < emptyCells) {
                     // Дни предыдущего месяца
-                    const prevMonthLastDay = new Date(year, month, 0).getDate();
-                    cellDay = prevMonthLastDay - (emptyCells - cellIndex - 1);
-                    cellYear = month === 0 ? year - 1 : year;
-                    cellMonth = month === 0 ? 11 : month - 1;
+                    const prevMonthDay = new Date(year, month, 0).getDate() - (emptyCells - cellIndex - 1);
+                    dayDiv.textContent = prevMonthDay;
+                    dayDiv.classList.add('other-month');
                 } else if (cellIndex < daysInMonth + emptyCells) {
                     // Дни текущего месяца
-                    cellDay = cellIndex - emptyCells + 1;
-                    cellYear = year;
-                    cellMonth = month;
+                    const day = cellIndex - emptyCells + 1;
+                    dayDiv.textContent = day;
+
+                    // Добавление обработчика событий для выделения дня
+                    cell.addEventListener('click', function() {
+                        const selected = document.querySelector('.calendar-grid td.selected');
+                        if (selected) {
+                            selected.classList.remove('selected');
+                        }
+                        cell.classList.add('selected');
+                    });
                 } else {
                     // Дни следующего месяца
-                    cellDay = cellIndex - (daysInMonth + emptyCells) + 1;
-                    cellYear = month === 11 ? year + 1 : year;
-                    cellMonth = month === 11 ? 0 : month + 1;
+                    const nextMonthDay = cellIndex - (daysInMonth + emptyCells) + 1;
+                    dayDiv.textContent = nextMonthDay;
+                    dayDiv.classList.add('other-month');
                 }
-
-                // Форматируем дату без учета времени и часового пояса
-                const date = new Date(cellYear, cellMonth, cellDay);
-                const formattedDate =
-                    `${String(cellDay).padStart(2, '0')}.${String(cellMonth + 1).padStart(2, '0')}.${cellYear}`;
-
-                // Сохраняем дату в атрибуте в формате ДД.ММ.ГГГГ
-                cell.setAttribute('data-date', formattedDate);
-                dayDiv.textContent = cellDay;
-
-                cell.addEventListener('click', function() {
-                    document.querySelectorAll('.calendar-grid td').forEach(td => td.classList.remove('selected'));
-                    cell.classList.add('selected');
-                    selectedDate = formattedDate; // Сохраняем дату в нужном формате
-                });
 
                 cell.appendChild(dayDiv);
                 row.appendChild(cell);
@@ -216,13 +210,16 @@
 
     // Функция для открытия модального окна
     function openEventModal() {
-        if (!selectedDate) {
-            alert('Пожалуйста, выберите дату в календаре');
-            return;
-        }
+        // Устанавливаем текущую дату по умолчанию
+        const today = new Date();
+        const formattedDate = today.toISOString().substr(0, 10);
+        eventDateInput.value = formattedDate;
 
-        // Устанавливаем дату в скрытое поле формы
-        document.getElementById('date').value = selectedDate;
+        // Очищаем поля
+        eventNameInput.value = '';
+        eventDescInput.value = '';
+
+        // Показываем модальное окно
         eventModal.style.display = 'flex';
     }
 
@@ -264,13 +261,11 @@
     // Обработчики событий
     prevMonthButton.addEventListener('click', () => {
         currentDate.setMonth(currentDate.getMonth() - 1);
-        selectedDate = null; // Сброс при смене месяца
         renderCalendar();
     });
 
     nextMonthButton.addEventListener('click', () => {
         currentDate.setMonth(currentDate.getMonth() + 1);
-        selectedDate = null; // Сброс при смене месяца
         renderCalendar();
     });
 

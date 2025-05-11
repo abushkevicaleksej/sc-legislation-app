@@ -8,8 +8,6 @@ login_manager = LoginManager()
 login_manager.login_view = 'main.auth'
 cache = Cache(config={'CACHE_TYPE': 'SimpleCache'})
 
-MAX_SESSION_SIZE = 4096
-
 
 def create_app(config_path: str = 'config.Config'):
     """

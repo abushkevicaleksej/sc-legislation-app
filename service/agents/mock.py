@@ -95,14 +95,14 @@ class OstisAddEventAgent(AddEventAgent):
     Класс-заглушка для представления агента добавления события
     """
     def add_event_agent(self,
-                        user: ScAddr,
+                        user_name: str,
                         event_name: str,
                         event_date,
                         event_description: str
                         ):
         """
         Метод-заглушка для запуска агента добавления события
-        :param user: Адрес ноды пользователя
+        :param user_name: Логин пользователя
         :param event_name: Название события
         :param event_date: Дата события
         :param event_description: Описание события
@@ -131,12 +131,12 @@ class OstisShowEventAgent(ShowEventAgent):
     Класс-заглушка для представления агента просмотра события
     """
     def show_event_agent(self,
-                        user: ScAddr,
+                        username: str,
                         ):
         """
         Метод-заглушка для запуска агента просмотра события
-        :param user: Адрес ноды пользователя
+        :param username: Логин пользователя
         :return:
         """
-        print(f"MockAgent: Pretend requesting {user}")
+        print(f"MockAgent: Pretend requesting {username}")
         return {"status": ShowEventStatus.VALID}

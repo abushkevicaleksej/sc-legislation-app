@@ -14,10 +14,10 @@ class AddEventAgent(ABC):
     Абстрактный класс для реализации агента добавления события
     """
     @abstractmethod
-    def add_event_agent(self, user: ScAddr, event_name: str, event_date, event_description: str):
+    def add_event_agent(self, user_name: str, event_name: str, event_date, event_description: str):
         """
         Абстрактный метод для запуска агента добавления события
-        :param user: Адрес ноды пользователя
+        :param user_name: Логин пользователя
         :param event_name: Название события
         :param event_date: Дата события
         :param event_description: Описание события
@@ -37,9 +37,10 @@ class DeleteEventAgent(ABC):
     Абстрактный класс для реализации агента удаления события
     """
     @abstractmethod
-    def delete_event_agent(self, event_name: str):
+    def delete_event_agent(self, username: str, event_name: str):
         """
         Абстрактный метод для запуска агента удаления события
+        :param username: Логин пользователя
         :param event_name: Название события
         :return:
         """
@@ -57,10 +58,10 @@ class ShowEventAgent(ABC):
     Абстрактный класс для реализации агента просмотра события
     """
     @abstractmethod
-    def show_event_agent(self, user: ScAddr):
+    def show_event_agent(self, username: str):
         """
         Абстрактный метод для запуска агента просмотра события
-        :param user: Адрес ноды пользователя
+        :param username: Логин пользователя
         :return:
         """
         pass

@@ -64,10 +64,10 @@ def directory_agent(content: str):
         content=content
         )
 
-def add_event_agent(user, event_name: str, event_date, event_description: str):
+def add_event_agent(user_name, event_name: str, event_date, event_description: str):
     """
     Метод для запуска агента добавления события
-    :param user: Адрес ноды пользователя
+    :param user_name: Логин пользователя
     :param event_name: Название события
     :param event_date: Дата события
     :param event_description: Описание события
@@ -75,30 +75,32 @@ def add_event_agent(user, event_name: str, event_date, event_description: str):
     """
     agent: AddEventAgent = current_app.config['agents']['add_event_agent']
     return agent.add_event_agent(
-        user=user,
+        user_name=user_name,
         event_name=event_name,
         event_date=event_date,
         event_description=event_description
     )
 
-def delete_event_agent(event_name: str):
+def delete_event_agent(username: str, event_name: str):
     """
     Метод для запуска агента удаления события
+    :param username: Логин пользователя
     :param event_name: Название события
     :return: Словарь со статусом результата выполнения агента удаления события
     """
     agent: DeleteEventAgent = current_app.config['agents']['delete_event_agent']
     return agent.delete_event_agent(
+        username=username,
         event_name=event_name
     )
 
-def show_event_agent(user):
+def show_event_agent(username):
     """
     Метод для запуска агента просмотра события
-    :param user: Адрес ноды пользователя
+    :param username: Логин пользователя
     :return: Словарь со статусом результата выполнения агента просмотра события
     """
     agent: ShowEventAgent = current_app.config['agents']['show_event_agent']
     return agent.show_event_agent(
-        user=user
+        username=username
     )

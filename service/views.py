@@ -104,31 +104,37 @@ def show_calendar():
     Метод для реализации эндпоинта календаря
     :return: Разметка страницы
     """
-    print(get_link_content(current_user.username)[0].data)
-    events = show_event_agent(find_user_by_username(get_link_content(current_user.username)[0].data))
-    return render_template("calendar.html", events=events)
+    user = get_link_content(current_user.username)[0].data
+    print(user)
+    response = show_event_agent(username=user)
+    return render_template("calendar.html")
 
-@main.route("/add_event", methods = ['POST'])
+@main.route("/add_event")
+@login_required
 def add_event():
     """
     Метод для реализации эндпоинта добавления события
     :return: Разметка страницы
     """
-    form = AddEventForm()
-
-    if form.validate_on_submit():
-        try:
-            event_response = add_event_agent()
-            flash('Событие успешно добавлено', 'success')
-
-        except Exception as e:
-            flash('Ошибка при сохранении события', 'error')
-        return redirect(url_for('main.show_calendar'))
-
-    flash('Пожалуйста, проверьте введенные данные', 'error')
+    user = get_link_content(current_user.username)[0].data
+    print(user)
+    response = add_event_agent(user_name=user,
+                               event_name="event1",
+                               event_date="12.04.2025",
+                               event_description="hahaha"
+                               )
     return redirect(url_for('main.show_calendar'))
 
-#todo fix all
+@main.route("/delete_event")
+@login_required
+def delete_event():
+    user = get_link_content(current_user.username)[0].data
+    print(user)
+    response = delete_event_agent(username=user,
+                               event_name="event1",
+                               )
+    return redirect(url_for('main.show_calendar'))
+
 @main.route("/requests", methods=['GET', 'POST'])
 @login_required
 def requests():

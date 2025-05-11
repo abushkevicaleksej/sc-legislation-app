@@ -1,10 +1,9 @@
 from enum import Enum
 from threading import Event
-from collections import defaultdict
 
 import sc_client.client as client
 from ..exceptions import ScServerError
-from sc_client.client import is_connected
+from sc_client.client import is_connected, search_links_by_contents
 from sc_client.models import (
     ScAddr,
     ScEventSubscriptionParams,
@@ -13,13 +12,10 @@ from sc_client.models import (
 )
 from sc_client.constants.common import ScEventType
 from sc_client.constants import sc_types
-from sc_kpm.utils.common_utils import (
-    generate_node, 
-    generate_role_relation,
-    )
 from sc_kpm import ScKeynodes
 
-from service.models import RequestResponse, DirectoryResponse, EventResponse, AppEvent
+from service.models import RequestResponse, DirectoryResponse, EventResponse, UserEvent
+from service.models import get_user_by_login
 from service.agents.abstract.auth_agent import AuthAgent, AuthStatus
 from service.agents.abstract.reg_agent import RegAgent, RegStatus
 from service.agents.abstract.user_request_agent import RequestAgent, RequestStatus
@@ -77,8 +73,9 @@ def call_back(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
     node_err = client.resolve_keynodes(
         ScIdtfResolveParams(idtf='action_finished_with_error', type=sc_types.NODE_CONST_CLASS)
     )[0]
-
     if trg.value == succ_node.value:
+        print(trg.value)
+        print(succ_node.value)
         nrel_result = client.resolve_keynodes(
             ScIdtfResolveParams(idtf='nrel_result', type=sc_types.NODE_CONST_CLASS)
         )[0]
@@ -95,6 +92,7 @@ def call_back(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
             src
         )
+        print("here")
         gen_res = client.template_search(res_templ)[0]
         payload = {"message": result.SUCCESS}
     elif trg.value == unsucc_node.value or trg.value == node_err.value:
@@ -118,8 +116,6 @@ def call_back_request(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
 
     term: str
     content: str
-    related_article = []
-    related_term = []
     content_list = []
 
     succ_node = client.resolve_keynodes(
@@ -522,7 +518,7 @@ class Ostis:
             template.triple_with_relation(
                 main_node >> "_main_node",
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
-                fname_lnk,
+                surname_lnk,
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
                 rrel_3
             )
@@ -536,7 +532,7 @@ class Ostis:
             template.triple_with_relation(
                 main_node >> "_main_node",
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
-                surname_lnk,
+                fname_lnk,
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
                 rrel_5
             )
@@ -730,11 +726,11 @@ class Ostis:
         else:
             raise ScServerError
 
-    def call_add_event_agent(self, action_name: str, user, event_name: str, event_date, event_description: str) -> str:
+    def call_add_event_agent(self, action_name: str, user_name, event_name: str, event_date, event_description: str) -> str:
         """
         Метод для вызова агента добавления события
         :param action_name: Идентификатор action-ноды агента
-        :param user: Адрес ноды пользователя
+        :param user_name: Логин пользователя
         :param event_name: Название события
         :param event_date: Дата события
         :param event_description: Описание события
@@ -744,7 +740,10 @@ class Ostis:
         """
         if is_connected():
             event_name_lnk = create_link(client, event_name)
-            day_lnk, month_lnk, year_lnk = set_date_content(client, event_date)
+            day, month, year = split_date_content(event_date)
+            day_node = set_system_idtf(day)
+            month_node = set_system_idtf(month)
+            year_node = set_system_idtf(year)
             event_description_lnk = create_link(client, event_description)
 
             rrel_1 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_1', type=sc_types.NODE_CONST_ROLE))[0]
@@ -752,19 +751,15 @@ class Ostis:
             rrel_3 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_3', type=sc_types.NODE_CONST_ROLE))[0]
             rrel_4 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_4', type=sc_types.NODE_CONST_ROLE))[0]
 
-            rrel_user_day = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_user_day', type=sc_types.NODE_CONST_ROLE))[0]
-            rrel_user_month = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_user_month', type=sc_types.NODE_CONST_ROLE))[0]
-            rrel_user_year = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_user_year', type=sc_types.NODE_CONST_ROLE))[0]
+            rrel_event_day = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_event_day', type=sc_types.NODE_CONST_ROLE))[0]
+            rrel_event_month = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_event_month', type=sc_types.NODE_CONST_ROLE))[0]
+            rrel_event_year = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_event_year', type=sc_types.NODE_CONST_ROLE))[0]
 
             initiated_node = client.resolve_keynodes(ScIdtfResolveParams(idtf='action_initiated', type=sc_types.NODE_CONST_CLASS))[0]
             action_agent = client.resolve_keynodes(ScIdtfResolveParams(idtf=action_name, type=sc_types.NODE_CONST_CLASS))[0]
             main_node = get_node(client)
 
-            date_con = generate_node(sc_types.NODE_CONST_TUPLE)
-            generate_role_relation(date_con, day_lnk, rrel_user_day)
-            generate_role_relation(date_con, month_lnk, rrel_user_month)
-            generate_role_relation(date_con, year_lnk, rrel_user_year)
-
+            user = get_user_by_login(user_name)
             template = ScTemplate()
             template.triple_with_relation(
                 main_node >> "_main_node",
@@ -783,9 +778,30 @@ class Ostis:
             template.triple_with_relation(
                 main_node >> "_main_node",
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
-                event_date,
+                sc_types.NODE_VAR_TUPLE >> "_tuple",
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
                 rrel_3
+            )
+            template.triple_with_relation(
+                "_tuple",
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                day_node,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                rrel_event_day
+            )
+            template.triple_with_relation(
+                "_tuple",
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                month_node,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                rrel_event_month
+            )
+            template.triple_with_relation(
+                "_tuple",
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                year_node,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                rrel_event_year
             )
             template.triple_with_relation(
                 main_node >> "_main_node",
@@ -804,11 +820,11 @@ class Ostis:
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
                 "_main_node",
             )
-
+            print("here")
             event_params = ScEventSubscriptionParams(main_node, ScEventType.AFTER_GENERATE_INCOMING_ARC, call_back)
             client.events_create(event_params)
             client.template_generate(template)
-
+            print("here")
             global payload
             if callback_event.wait(timeout=10):
                 while not payload:
@@ -819,22 +835,72 @@ class Ostis:
         else:
             raise ScServerError
 
-    def call_delete_event_agent(self, action_name: str, event_name: str) -> str:
+    def call_delete_event_agent(self, action_name: str, username: str, event_name: str) -> str:
         """
         Метод для вызова агента удаления события
         :param action_name: Идентификатор action-ноды агента
         :param event_name: Название события
+        :param username: Логин пользователя
         :return: Ответ сервера
         :raises AgentError: Возникает при истечении времени ожидания
         :raises ScServerError: Возникает при отсутствии запущенного sc-сервера
         """
-        pass
+        if is_connected():
 
-    def call_show_event_agent(self, action_name: str, user) -> str:
+            event_name_lnk = create_link(client, event_name)
+            rrel_1 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_1', type=sc_types.NODE_CONST_ROLE))[0]
+            rrel_2 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_2', type=sc_types.NODE_CONST_ROLE))[0]
+
+            initiated_node = client.resolve_keynodes(ScIdtfResolveParams(idtf='action_initiated', type=sc_types.NODE_CONST_CLASS))[0]
+            action_agent = client.resolve_keynodes(ScIdtfResolveParams(idtf=action_name, type=sc_types.NODE_CONST_CLASS))[0]
+            main_node = get_node(client)
+
+            user = get_user_by_login(username)
+            template = ScTemplate()
+            template.triple_with_relation(
+                main_node >> "_main_node",
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                user,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                rrel_1
+            )
+            template.triple_with_relation(
+                main_node >> "_main_node",
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                event_name_lnk,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                rrel_2
+            )
+            template.triple(
+                action_agent,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                "_main_node",
+            )
+            template.triple(
+                initiated_node,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                "_main_node",
+            )
+
+            event_params = ScEventSubscriptionParams(main_node, ScEventType.AFTER_GENERATE_INCOMING_ARC, call_back)
+            client.events_create(event_params)
+            client.template_generate(template)
+            print("here")
+            global payload
+            if callback_event.wait(timeout=10):
+                while not payload:
+                    continue
+                return payload
+            else:
+                raise AgentError(524, "Timeout")
+        else:
+            raise ScServerError
+
+    def call_show_event_agent(self, action_name: str, username: str) -> str:
         """
         Метод для вызова агента просмотра события
         :param action_name: Идентификатор action-ноды агента
-        :param user: Адрес ноды пользователя
+        :param username: Логин пользователя
         :return: Ответ сервера
         :raises AgentError: Возникает при истечении времени ожидания
         :raises ScServerError: Возникает при отсутствии запущенного sc-сервера
@@ -847,6 +913,7 @@ class Ostis:
             action_agent = client.resolve_keynodes(ScIdtfResolveParams(idtf=action_name, type=sc_types.NODE_CONST_CLASS))[0]
             main_node = get_node(client)
 
+            user = get_user_by_login(username)
             template = ScTemplate()
             template.triple_with_relation(
                 main_node >> "_main_node",
@@ -866,10 +933,10 @@ class Ostis:
                 "_main_node",
             )
 
-            event_params = ScEventSubscriptionParams(main_node, ScEventType.AFTER_GENERATE_INCOMING_ARC, call_back)
+            event_params = ScEventSubscriptionParams(main_node, ScEventType.AFTER_GENERATE_INCOMING_ARC, call_back_get_events)
             client.events_create(event_params)
             client.template_generate(template)
-
+            print("here")
             global payload
             if callback_event.wait(timeout=10):
                 while not payload:
@@ -1023,15 +1090,15 @@ class OstisAddEventAgent(AddEventAgent):
     def __init__(self):
         self.ostis = Ostis(Config.OSTIS_URL)
 
-    def add_event_agent(self,
-                        user: ScAddr,
-                        event_name: str,
-                        event_date,
+    def add_event_agent(self, 
+                        user_name: ScAddr,
+                        event_name: str, 
+                        event_date, 
                         event_description: str
                         ):
         """
         Метод для запуска агента добавления события
-        :param user: Адрес ноды пользователя
+        :param user_name: Логин пользователя
         :param event_name: Название события
         :param event_date: Дата события
         :param event_description: Описание события
@@ -1041,7 +1108,7 @@ class OstisAddEventAgent(AddEventAgent):
         payload = None
         agent_response = self.ostis.call_add_event_agent(
             action_name="action_add_event",
-            user=user,
+            user_name=user_name,
             event_name=event_name,
             event_date=event_date,
             event_description=event_description
@@ -1064,19 +1131,22 @@ class OstisDeleteEventAgent(DeleteEventAgent):
         self.ostis = Ostis(Config.OSTIS_URL)
 
     def delete_event_agent(self,
+                        username: str,
                         event_name: str,
                         ):
         """
         Метод для запуска агента удаления события
         :param event_name: Название события
+        :param username: Логин пользователя
         :return:
         """
         global payload
         payload = None
         agent_response = self.ostis.call_delete_event_agent(
             action_name="action_del_event",
+            username=username,
             event_name=event_name,
-            )
+        )
         if agent_response is not None:
             return {"status": DeleteEventStatus.VALID,
                     "message": agent_response["message"]}
@@ -1095,18 +1165,18 @@ class OstisShowEventAgent(ShowEventAgent):
         self.ostis = Ostis(Config.OSTIS_URL)
 
     def show_event_agent(self,
-                        user
+                        username
                         ):
         """
         Метод для запуска агента просмотра события
-        :param user: Адрес ноды пользователя
+        :param username: Логин пользователя
         :return:
         """
         global payload
         payload = None
         agent_response = self.ostis.call_show_event_agent(
             action_name="action_user_events",
-            user=user
+            username=username
             )
         if agent_response is not None:
             return {"status": ShowEventStatus.VALID,
