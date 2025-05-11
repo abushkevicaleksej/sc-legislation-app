@@ -84,6 +84,9 @@ def logout():
 @main.route("/show_calendar")
 @login_required
 def show_calendar():
+    user = get_link_content(current_user.username)[0].data
+    print(user)
+    response = show_event_agent(username=user)
     return render_template("calendar.html")
 
 @main.route("/add_event")
@@ -95,6 +98,16 @@ def add_event():
                                event_name="event1", 
                                event_date="12.04.2025", 
                                event_description="hahaha"
+                               )
+    return redirect(url_for('main.show_calendar'))
+
+@main.route("/delete_event")
+@login_required
+def delete_event():
+    user = get_link_content(current_user.username)[0].data
+    print(user)
+    response = delete_event_agent(username=user, 
+                               event_name="event1",
                                )
     return redirect(url_for('main.show_calendar'))
 

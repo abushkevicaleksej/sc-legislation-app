@@ -63,13 +63,13 @@ def call_back(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
     node_err = client.resolve_keynodes(
         ScIdtfResolveParams(idtf='action_finished_with_error', type=sc_types.NODE_CONST_CLASS)
     )[0]
-    print("here")
     if trg.value == succ_node.value:
+        print(trg.value)
+        print(succ_node.value)
         nrel_result = client.resolve_keynodes(
             ScIdtfResolveParams(idtf='nrel_result', type=sc_types.NODE_CONST_CLASS)
         )[0]
         res_templ = ScTemplate()
-        print("here")
         res_templ.triple_with_relation(
             src,
             sc_types.EDGE_D_COMMON_VAR,
@@ -82,9 +82,8 @@ def call_back(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
             src
         )
-        print("here")
+        print("here") 
         gen_res = client.template_search(res_templ)[0]
-        print(len(gen_res))
         payload = {"message": result.SUCCESS}
     elif trg.value == unsucc_node.value or trg.value == node_err.value:
         payload = {"message": result.FAILURE}
@@ -667,16 +666,14 @@ class Ostis:
             rrel_3 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_3', type=sc_types.NODE_CONST_ROLE))[0]
             rrel_4 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_4', type=sc_types.NODE_CONST_ROLE))[0]
 
-            rrel_user_day = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_user_day', type=sc_types.NODE_CONST_ROLE))[0]
-            rrel_user_month = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_user_month', type=sc_types.NODE_CONST_ROLE))[0]
-            rrel_user_year = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_user_year', type=sc_types.NODE_CONST_ROLE))[0]
+            rrel_event_day = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_event_day', type=sc_types.NODE_CONST_ROLE))[0]
+            rrel_event_month = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_event_month', type=sc_types.NODE_CONST_ROLE))[0]
+            rrel_event_year = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_event_year', type=sc_types.NODE_CONST_ROLE))[0]
 
             initiated_node = client.resolve_keynodes(ScIdtfResolveParams(idtf='action_initiated', type=sc_types.NODE_CONST_CLASS))[0]
             action_agent = client.resolve_keynodes(ScIdtfResolveParams(idtf=action_name, type=sc_types.NODE_CONST_CLASS))[0]
             main_node = get_node(client)
 
-            print(len(search_links_by_contents(user_name)))
-            _user_lnk = search_links_by_contents(user_name)[0]
             user = get_user_by_login(user_name)
             template = ScTemplate()
             template.triple_with_relation(
@@ -705,21 +702,21 @@ class Ostis:
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
                 day_node,
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
-                rrel_user_day
+                rrel_event_day
             )
             template.triple_with_relation(
                 "_tuple",
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
                 month_node,
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
-                rrel_user_month
+                rrel_event_month
             )
             template.triple_with_relation(
                 "_tuple",
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
                 year_node,
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
-                rrel_user_year
+                rrel_event_year
             )
             template.triple_with_relation(
                 main_node >> "_main_node",
@@ -753,9 +750,10 @@ class Ostis:
         else:
             raise ScServerError
 
-    def call_delete_event_agent(self, action_name: str, user, event_name: str) -> str:
+    def call_delete_event_agent(self, action_name: str, username: str, event_name: str) -> str:
         if is_connected():
-
+            
+            event_name_lnk = create_link(client, event_name)
             rrel_1 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_1', type=sc_types.NODE_CONST_ROLE))[0]
             rrel_2 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_2', type=sc_types.NODE_CONST_ROLE))[0]
 
@@ -763,6 +761,7 @@ class Ostis:
             action_agent = client.resolve_keynodes(ScIdtfResolveParams(idtf=action_name, type=sc_types.NODE_CONST_CLASS))[0]
             main_node = get_node(client)
 
+            user = get_user_by_login(username)
             template = ScTemplate()
             template.triple_with_relation(
                 main_node >> "_main_node",
@@ -774,7 +773,7 @@ class Ostis:
             template.triple_with_relation(
                 main_node >> "_main_node",
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
-                event_name,
+                event_name_lnk,
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
                 rrel_2
             )
@@ -803,7 +802,7 @@ class Ostis:
         else:
             raise ScServerError
 
-    def call_show_event_agent(self, action_name: str, user) -> str:
+    def call_show_event_agent(self, action_name: str, username: str) -> str:
         if is_connected():
 
             rrel_1 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_1', type=sc_types.NODE_CONST_ROLE))[0]
@@ -812,6 +811,7 @@ class Ostis:
             action_agent = client.resolve_keynodes(ScIdtfResolveParams(idtf=action_name, type=sc_types.NODE_CONST_CLASS))[0]
             main_node = get_node(client)
 
+            user = get_user_by_login(username)
             template = ScTemplate()
             template.triple_with_relation(
                 main_node >> "_main_node",
@@ -975,15 +975,15 @@ class OstisDeleteEventAgent(DeleteEventAgent):
         self.ostis = Ostis(Config.OSTIS_URL)
 
     def delete_event_agent(self,
+                        username: str,
                         event_name: str,
-                        user 
                         ):
         global payload
         payload = None
         agent_response = self.ostis.call_delete_event_agent(
             action_name="action_del_event",
+            username=username,
             event_name=event_name,
-            user=user
         )
         if agent_response is not None:
             return {"status": DeleteEventStatus.VALID,
@@ -1000,13 +1000,13 @@ class OstisShowEventAgent(ShowEventAgent):
         self.ostis = Ostis(Config.OSTIS_URL)
 
     def show_event_agent(self,
-                        user 
+                        username
                         ):
         global payload
         payload = None
         agent_response = self.ostis.call_show_event_agent(
             action_name="action_user_events",
-            user=user
+            username=username
             )
         if agent_response is not None:
             return {"status": ShowEventStatus.VALID,

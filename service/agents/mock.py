@@ -69,7 +69,7 @@ class OstisDeleteEventAgent(DeleteEventAgent):
 
 class OstisShowEventAgent(ShowEventAgent):
     def show_event_agent(self, 
-                        user: ScAddr, 
+                        username: str, 
                         ):
-        print(f"MockAgent: Pretend requesting {user}")
+        print(f"MockAgent: Pretend requesting {username}")
         return {"status": ShowEventStatus.VALID}

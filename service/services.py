@@ -45,14 +45,15 @@ def add_event_agent(user_name: str, event_name: str, event_date: str, event_desc
         event_description=event_description
     )
 
-def delete_event_agent(event_name: str):
+def delete_event_agent(username: str, event_name: str):
     agent: DeleteEventAgent = current_app.config['agents']['delete_event_agent']
     return agent.delete_event_agent(
+        username=username,
         event_name=event_name
     )
 
-def show_event_agent(user):
+def show_event_agent(username):
     agent: ShowEventAgent = current_app.config['agents']['show_event_agent']
     return agent.show_event_agent(
-        user=user
+        username=username
     )

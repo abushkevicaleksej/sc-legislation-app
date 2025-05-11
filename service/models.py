@@ -187,8 +187,6 @@ def find_user_by_username(username: str) -> Optional[User]:
     return None
 
 def get_user_by_login(username: str) -> ScAddr:
-    _user_link = search_links_by_contents(username)[0]
-
     template = ScTemplate()
     template.triple_with_relation(
         sc_types.NODE_VAR >> "_user",
@@ -202,7 +200,4 @@ def get_user_by_login(username: str) -> ScAddr:
         login_content = get_link_content(result.get("_login"))[0].data
         if login_content == username:
             return result.get("_user")
-
-    print(f"result {results}")
-    return results[0].get("_user")
     

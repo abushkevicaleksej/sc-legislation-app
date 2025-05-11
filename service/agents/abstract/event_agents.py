@@ -17,7 +17,7 @@ class DeleteEventStatus(StrEnum):
 
 class DeleteEventAgent(ABC):
     @abstractmethod
-    def delete_event_agent(self, event_name: str):
+    def delete_event_agent(self, username: str, event_name: str):
         pass
 
 class ShowEventStatus(StrEnum):
@@ -26,5 +26,5 @@ class ShowEventStatus(StrEnum):
 
 class ShowEventAgent(ABC):
     @abstractmethod
-    def show_event_agent(self, user: ScAddr):
+    def show_event_agent(self, username: str):
         pass
