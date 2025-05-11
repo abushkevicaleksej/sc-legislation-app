@@ -84,27 +84,15 @@ def logout():
 @main.route("/show_calendar")
 @login_required
 def show_calendar():
-    print(get_link_content(current_user.username)[0].data)
-    events = show_event_agent(find_user_by_username(get_link_content(current_user.username)[0].data))
-    return render_template("calendar.html", events=events)
+    return render_template("calendar.html")
 
-@main.route("/add_event", methods = ['POST'])
+@main.route("/add_event")
+@login_required
 def add_event():
-    form = AddEventForm()
-
-    if form.validate_on_submit():
-        try:
-            event_response = add_event_agent()
-            flash('Событие успешно добавлено', 'success')
-
-        except Exception as e:
-            flash('Ошибка при сохранении события', 'error')
-        return redirect(url_for('main.show_calendar'))
-    
-    flash('Пожалуйста, проверьте введенные данные', 'error')
+    user = find_user_by_username(get_link_content(current_user.username)[0].data)
+    response = add_event_agent(user, "event1", "12.04.2025", "hahaha")
     return redirect(url_for('main.show_calendar'))
 
-#todo fix all
 @main.route("/requests", methods=['GET', 'POST'])
 @login_required
 def requests():
@@ -161,7 +149,6 @@ def directory():
     term_titles = get_term_titles()
     if request.method == 'POST':
         content = request.form.get("directory_entry")
-        print(content)
         asked = directory_agent(content=content)
         
         if asked["message"] is not None:

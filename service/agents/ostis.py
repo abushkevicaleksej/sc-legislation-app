@@ -19,7 +19,7 @@ from sc_kpm.utils.common_utils import (
     )
 from sc_kpm import ScKeynodes
 
-from service.models import RequestResponse, DirectoryResponse, EventResponse, AppEvent
+from service.models import RequestResponse, DirectoryResponse, EventResponse, UserEvent
 from service.agents.abstract.auth_agent import AuthAgent, AuthStatus
 from service.agents.abstract.reg_agent import RegAgent, RegStatus
 from service.agents.abstract.user_request_agent import RequestAgent, RequestStatus
@@ -101,8 +101,6 @@ def call_back_request(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
 
     term: str
     content: str
-    related_article = []
-    related_term = []
     content_list = []
 
     succ_node = client.resolve_keynodes(
@@ -464,7 +462,7 @@ class Ostis:
             template.triple_with_relation(
                 main_node >> "_main_node",
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
-                fname_lnk,
+                surname_lnk,
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
                 rrel_3
             )
@@ -478,7 +476,7 @@ class Ostis:
             template.triple_with_relation(
                 main_node >> "_main_node",
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
-                surname_lnk,
+                fname_lnk,
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
                 rrel_5
             )
@@ -659,7 +657,11 @@ class Ostis:
     def call_add_event_agent(self, action_name: str, user, event_name: str, event_date, event_description: str) -> str:
         if is_connected():
             event_name_lnk = create_link(client, event_name)
-            day_lnk, month_lnk, year_lnk = set_date_content(client, event_date)
+            day, month, year = split_date_content(event_date)
+            day_node = set_system_idtf(day)
+            month_node = set_system_idtf(month)
+            year_node = set_system_idtf(year)
+
             event_description_lnk = create_link(client, event_description)
 
             rrel_1 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_1', type=sc_types.NODE_CONST_ROLE))[0]
@@ -674,11 +676,6 @@ class Ostis:
             initiated_node = client.resolve_keynodes(ScIdtfResolveParams(idtf='action_initiated', type=sc_types.NODE_CONST_CLASS))[0]
             action_agent = client.resolve_keynodes(ScIdtfResolveParams(idtf=action_name, type=sc_types.NODE_CONST_CLASS))[0]
             main_node = get_node(client)
-
-            date_con = generate_node(sc_types.NODE_CONST_TUPLE)
-            generate_role_relation(date_con, day_lnk, rrel_user_day)
-            generate_role_relation(date_con, month_lnk, rrel_user_month)
-            generate_role_relation(date_con, year_lnk, rrel_user_year)
 
             template = ScTemplate()
             template.triple_with_relation(
@@ -698,9 +695,30 @@ class Ostis:
             template.triple_with_relation(
                 main_node >> "_main_node",
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
-                event_date,
+                sc_types.NODE_VAR_TUPLE >> "_tuple",
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
                 rrel_3
+            )
+            template.triple_with_relation(
+                "_tuple",
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                day_node,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                rrel_user_day
+            )
+            template.triple_with_relation(
+                "_tuple",
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                month_node,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                rrel_user_month
+            )
+            template.triple_with_relation(
+                "_tuple",
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                year_node,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                rrel_user_year
             )
             template.triple_with_relation(
                 main_node >> "_main_node",
@@ -734,8 +752,55 @@ class Ostis:
         else:
             raise ScServerError
 
-    def call_delete_event_agent(self, action_name: str, event_name: str) -> str:
-        pass
+    def call_delete_event_agent(self, action_name: str, user, event_name: str) -> str:
+        if is_connected():
+
+            rrel_1 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_1', type=sc_types.NODE_CONST_ROLE))[0]
+            rrel_2 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_2', type=sc_types.NODE_CONST_ROLE))[0]
+
+            initiated_node = client.resolve_keynodes(ScIdtfResolveParams(idtf='action_initiated', type=sc_types.NODE_CONST_CLASS))[0]
+            action_agent = client.resolve_keynodes(ScIdtfResolveParams(idtf=action_name, type=sc_types.NODE_CONST_CLASS))[0]
+            main_node = get_node(client)
+
+            template = ScTemplate()
+            template.triple_with_relation(
+                main_node >> "_main_node",
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                user,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                rrel_1
+            )
+            template.triple_with_relation(
+                main_node >> "_main_node",
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                event_name,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                rrel_2
+            )
+            template.triple(
+                action_agent,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                "_main_node",
+            )
+            template.triple(
+                initiated_node,
+                sc_types.EDGE_ACCESS_VAR_POS_PERM,
+                "_main_node",
+            )
+
+            event_params = ScEventSubscriptionParams(main_node, ScEventType.AFTER_GENERATE_INCOMING_ARC, call_back)
+            client.events_create(event_params)
+            client.template_generate(template)
+            print("here")
+            global payload
+            if callback_event.wait(timeout=10):
+                while not payload:
+                    continue
+                return payload
+            else:
+                raise AgentError(524, "Timeout")
+        else:
+            raise ScServerError
 
     def call_show_event_agent(self, action_name: str, user) -> str:
         if is_connected():
@@ -765,10 +830,10 @@ class Ostis:
                 "_main_node",
             )
 
-            event_params = ScEventSubscriptionParams(main_node, ScEventType.AFTER_GENERATE_INCOMING_ARC, call_back)
+            event_params = ScEventSubscriptionParams(main_node, ScEventType.AFTER_GENERATE_INCOMING_ARC, call_back_get_events)
             client.events_create(event_params)
             client.template_generate(template)
-
+            print("here")
             global payload
             if callback_event.wait(timeout=10):
                 while not payload:
@@ -909,14 +974,16 @@ class OstisDeleteEventAgent(DeleteEventAgent):
         self.ostis = Ostis(Config.OSTIS_URL)
 
     def delete_event_agent(self,
-                        event_name: str, 
+                        event_name: str,
+                        user 
                         ):
         global payload
         payload = None
         agent_response = self.ostis.call_delete_event_agent(
             action_name="action_del_event",
             event_name=event_name,
-            )
+            user=user
+        )
         if agent_response is not None:
             return {"status": DeleteEventStatus.VALID,
                     "message": agent_response["message"]}
