@@ -63,9 +63,15 @@
             <h2 class="events-title">События</h2>
             {% for event in events %}
             <div class="event-item">
+<<<<<<< HEAD
                 <div class="event-date">{{ event.date }}</div>
                 <h3 class="event-title">{{ event.title }}</h3>
                 <p class="event-description">{{ event.content }}</p>
+=======
+                <div class="event-date">{{ event.date.strftime('%d.%m.%Y') }}</div>
+                <h3 class="event-title">{{ event.title }}</h3>
+                <p class="event-description">{{ event.description }}</p>
+>>>>>>> 645679bcbec963fd69f93b7fb5dfeb446ed5047d
             </div>
             {% endfor %}
             <button class="add-event-button" id="add-event-button">Добавить событие</button>

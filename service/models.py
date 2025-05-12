@@ -10,6 +10,9 @@ from sc_kpm import ScKeynodes
 
 @dataclass
 class DirectoryResponse:
+    """
+    Датакласс для хранения ответа для агента поиска
+    """
     title: str
     content: str
     def __str__(self) -> str:
@@ -17,6 +20,9 @@ class DirectoryResponse:
 
 @dataclass
 class RequestResponse:
+    """
+    Датакласс для хранения ответа для агента юридических запросов
+    """
     term: str
     content: str
     related_concepts: List[str] = None
@@ -31,16 +37,29 @@ class RequestResponse:
     
 @dataclass   
 class UserEvent:
+<<<<<<< HEAD
     username: str
+=======
+    """
+    Датакласс для хранения события
+    """
+    user: str
+>>>>>>> 645679bcbec963fd69f93b7fb5dfeb446ed5047d
     title: str
     date: str
     content: str
 
 @dataclass
 class EventResponse:
+    """
+    Датакласс для хранения ответа для агента просмотра события
+    """
     events: list[UserEvent]
 
 class User(UserMixin):
+    """
+    Датакласс для хранения пользователя
+    """
     def __init__(
         self,
         sc_addr: str | None,
@@ -65,9 +84,17 @@ class User(UserMixin):
 
     @property
     def get_sc_addr_str(self):
+        """
+        Метод для получения адреса ноды пользователя
+        :return: Адрес ноды пользователя
+        """
         return self._sc_addr.value
 
     def get_id(self):
+        """
+        Метод для получение идентификатора(логина) пользователя
+        :return: Идентификатор(логин) пользователя
+        """
         return str(self.username)
 
     def __repr__(self):
@@ -75,6 +102,11 @@ class User(UserMixin):
 
 
 def collect_user_info(user: ScAddr) -> User:
+    """
+    Метод для сбора информации о пользователе
+    :param user: Адрес на ноду пользователя
+    :return: Пользователь
+    """
     template = ScTemplate()
     template.triple_with_relation(
         user,
@@ -147,6 +179,11 @@ def collect_user_info(user: ScAddr) -> User:
 
 @login_manager.user_loader
 def load_user(username: str) -> Optional[User]:
+    """
+    Метод для загрузки пользователя по его логину
+    :param username: Логин пользователя
+    :return: Адрес на ноду пользователя
+    """
     template = ScTemplate()
     template.triple(
         ScKeynodes["registered_jurisprudence_user"],
@@ -169,6 +206,11 @@ def load_user(username: str) -> Optional[User]:
     return None
 
 def find_user_by_username(username: str) -> Optional[User]:
+    """
+    Метод для поиска пользователя по логину
+    :param username: Логин пользователя
+    :return: Адрес на ноду пользователя
+    """
     template = ScTemplate()
     template.triple_with_relation(
         sc_types.NODE_VAR >> "_user",
@@ -187,6 +229,11 @@ def find_user_by_username(username: str) -> Optional[User]:
     return None
 
 def get_user_by_login(username: str) -> ScAddr:
+    """
+    Метод для получения адреса пользователя по его логину
+    :param username: Логин пользователя
+    :return: Адрес ноды пользователя
+    """
     template = ScTemplate()
     template.triple_with_relation(
         sc_types.NODE_VAR >> "_user",
@@ -200,4 +247,3 @@ def get_user_by_login(username: str) -> ScAddr:
         login_content = get_link_content(result.get("_login"))[0].data
         if login_content == username:
             return result.get("_user")
-    

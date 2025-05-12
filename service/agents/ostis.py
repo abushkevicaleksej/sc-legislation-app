@@ -48,10 +48,20 @@ gender_dict = {
 }
 
 class result(Enum):
+    """
+    Перечисление для представления результата выполнения агента
+    """
     SUCCESS = 0
     FAILURE = 1 
 
 def call_back(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
+    """
+    Метод для реализации дефолтной колбэк-функции выполнения агента
+    :param src: Адрес ноды для вызова агента
+    :param connector: Коннектор
+    :param trg: Адрес ноды, которая показывает результат выполнения агента
+    :return: Результат выполнения агента
+    """
     global payload
     callback_event.clear()
     succ_node = client.resolve_keynodes(
@@ -82,7 +92,7 @@ def call_back(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
             src
         )
-        print("here") 
+        print("here")
         gen_res = client.template_search(res_templ)[0]
         payload = {"message": result.SUCCESS}
     elif trg.value == unsucc_node.value or trg.value == node_err.value:
@@ -94,6 +104,13 @@ def call_back(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
     return result.SUCCESS
 
 def call_back_request(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
+    """
+    Метод для реализации колбэк-функции выполнения агента юридических запросов
+    :param src: Адрес ноды для вызова агента
+    :param connector: Коннектор
+    :param trg: Адрес ноды, которая показывает результат выполнения агента
+    :return: Результат выполнения агента
+    """
     global payload
     callback_event.clear()
 
@@ -202,7 +219,7 @@ def call_back_request(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
                 related_articles=related_articles,
                 related_concepts=related_concepts
             )
-            
+
             content_list.append(response)
 
         payload = {"message": content_list}
@@ -215,6 +232,13 @@ def call_back_request(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
     return result.SUCCESS
 
 def call_back_directory(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
+    """
+    Метод для реализации колбэк-функции выполнения агента поиска
+    :param src: Адрес ноды для вызова агента
+    :param connector: Коннектор
+    :param trg: Адрес ноды, которая показывает результат выполнения агента
+    :return: Результат выполнения агента
+    """
     global payload
     callback_event.clear()
     content_list = []
@@ -307,6 +331,13 @@ def call_back_directory(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
     return result.SUCCESS
 
 def call_back_get_events(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
+    """
+    Метод для реализации колбэк-функции выполнения агента получения событий
+    :param src: Адрес ноды для вызова агента
+    :param connector: Коннектор
+    :param trg: Адрес ноды, которая показывает результат выполнения агента
+    :return: Результат выполнения агента
+    """
     global payload
     callback_event.clear()
     succ_node = client.resolve_keynodes(
@@ -347,10 +378,22 @@ def call_back_get_events(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
     return result.SUCCESS
 
 class Ostis:
+    """
+    Класс для представления OSTIS-системы
+    """
     def __init__(self, url):
         self.ostis_url = url
 
     def call_auth_agent(self, action_name: str, username, password) -> str:
+        """
+        Метод для вызова агента аутентификации
+        :param action_name: Идентификатор action-ноды агента
+        :param username: Логин пользователя для аутентификации
+        :param password: Пароль пользователя для аутентификации
+        :return: Ответ сервера
+        :raises AgentError: Возникает при истечении времени ожидания
+        :raises ScServerError: Возникает при отсутствии запущенного sc-сервера
+        """
         if is_connected():
             username_lnk = create_link(client, username)
             password_lnk = create_link(client, password)
@@ -412,6 +455,21 @@ class Ostis:
             username: str,
             password: str
         ):
+        """
+        Метод для вызова агента регистрации
+        :param action_name: Идентификатор action-ноды агента
+        :param gender: Пол пользователя для регистрации
+        :param surname: Фамилия пользователя для регистрации
+        :param name: Имя пользователя для регистрации
+        :param fname: Отчество пользователя для регистрации
+        :param birthdate: Дата рождения пользователя для регистрации
+        :param reg_place: Место регистрации пользователя для регистрации
+        :param username: Логин пользователя для регистрации
+        :param password: Пароль пользователя для регистрации
+        :return: Ответ сервера
+        :raises AgentError: Возникает при истечении времени ожидания
+        :raises ScServerError: Возникает при отсутствии запущенного sc-сервера
+        """
         if is_connected():
             day, month, year = split_date_content(birthdate)
             username_lnk = create_link(client, username)
@@ -549,6 +607,14 @@ class Ostis:
                                 action_name: str,
                                 content: str
                                 ):
+        """
+        Метод для вызова агента юридических запросов
+        :param action_name: Идентификатор action-ноды агента
+        :param content: Контент, по которому происходит поиск в БЗ
+        :return: Ответ сервера
+        :raises AgentError: Возникает при истечении времени ожидания
+        :raises ScServerError: Возникает при отсутствии запущенного sc-сервера
+        """
         if is_connected():
             request_lnk = create_link(client, content)
 
@@ -592,6 +658,14 @@ class Ostis:
             raise ScServerError
         
     def call_directory_agent(self, action_name: str, content: str) -> str:
+        """
+        Метод для вызова агента поиска
+        :param action_name: Идентификатор action-ноды агента
+        :param content: Контент, по которому происходит поиск в БЗ
+        :return: Ответ сервера
+        :raises AgentError: Возникает при истечении времени ожидания
+        :raises ScServerError: Возникает при отсутствии запущенного sc-сервера
+        """
         if is_connected():
             part_node = ScKeynodes["CONCEPT_FULL_SEARCH"]
             area_node = ScKeynodes["FULL_SEARCH"]
@@ -652,7 +726,18 @@ class Ostis:
         else:
             raise ScServerError
 
-    def call_add_event_agent(self, action_name: str, user_name: str, event_name: str, event_date: str, event_description: str) -> str:
+    def call_add_event_agent(self, action_name: str, user_name, event_name: str, event_date, event_description: str) -> str:
+        """
+        Метод для вызова агента добавления события
+        :param action_name: Идентификатор action-ноды агента
+        :param user_name: Логин пользователя
+        :param event_name: Название события
+        :param event_date: Дата события
+        :param event_description: Описание события
+        :return: Ответ сервера
+        :raises AgentError: Возникает при истечении времени ожидания
+        :raises ScServerError: Возникает при отсутствии запущенного sc-сервера
+        """
         if is_connected():
             event_name_lnk = create_link(client, event_name)
             day, month, year = split_date_content(event_date)
@@ -751,8 +836,17 @@ class Ostis:
             raise ScServerError
 
     def call_delete_event_agent(self, action_name: str, username: str, event_name: str) -> str:
+        """
+        Метод для вызова агента удаления события
+        :param action_name: Идентификатор action-ноды агента
+        :param event_name: Название события
+        :param username: Логин пользователя
+        :return: Ответ сервера
+        :raises AgentError: Возникает при истечении времени ожидания
+        :raises ScServerError: Возникает при отсутствии запущенного sc-сервера
+        """
         if is_connected():
-            
+
             event_name_lnk = create_link(client, event_name)
             rrel_1 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_1', type=sc_types.NODE_CONST_ROLE))[0]
             rrel_2 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_2', type=sc_types.NODE_CONST_ROLE))[0]
@@ -803,6 +897,14 @@ class Ostis:
             raise ScServerError
 
     def call_show_event_agent(self, action_name: str, username: str) -> str:
+        """
+        Метод для вызова агента просмотра события
+        :param action_name: Идентификатор action-ноды агента
+        :param username: Логин пользователя
+        :return: Ответ сервера
+        :raises AgentError: Возникает при истечении времени ожидания
+        :raises ScServerError: Возникает при отсутствии запущенного sc-сервера
+        """
         if is_connected():
 
             rrel_1 = client.resolve_keynodes(ScIdtfResolveParams(idtf='rrel_1', type=sc_types.NODE_CONST_ROLE))[0]
@@ -846,10 +948,19 @@ class Ostis:
             raise ScServerError
 
 class OstisAuthAgent(AuthAgent):
+    """
+    Класс для представления агента аутентификации
+    """
     def __init__(self):
         self.ostis = Ostis(Config.OSTIS_URL)
 
     def auth_agent(self, username: str, password: str):
+        """
+        Метод для запуска агента аутентификации
+        :param username: Логин пользователя для аутентификации
+        :param password: Пароль пользователя для аутентификации
+        :return: Словарь со статусом результата выполнения агента аутентификации
+        """
         global payload
         payload = None
         agent_response = self.ostis.call_auth_agent("action_authentication", username, password)
@@ -863,6 +974,9 @@ class OstisAuthAgent(AuthAgent):
         raise AgentError
     
 class OstisRegAgent(RegAgent):
+    """
+    Класс для представления агента регистрации
+    """
     def __init__(self):
         self.ostis = Ostis(Config.OSTIS_URL)
 
@@ -877,6 +991,18 @@ class OstisRegAgent(RegAgent):
         username: str,
         password: str
         ):
+        """
+        Метод для запуска агента регистрации
+        :param gender: Пол пользователя для регистрации
+        :param surname: Фамилия пользователя для регистрации
+        :param name: Имя пользователя для регистрации
+        :param fname: Отчество пользователя для регистрации
+        :param birthdate: Дата рождения пользователя для регистрации
+        :param reg_place: Место регистрации пользователя для регистрации
+        :param username: Логин пользователя для регистрации
+        :param password: Пароль пользователя для регистрации
+        :return: Словарь со статусом результата выполнения агента регистрации
+        """
         global payload
         payload = None
         agent_response = self.ostis.call_reg_agent(
@@ -900,10 +1026,18 @@ class OstisRegAgent(RegAgent):
         raise AgentError
 
 class OstisUserRequestAgent(RequestAgent):
+    """
+    Класс для представления агента юридических запросов
+    """
     def __init__(self):
         self.ostis = Ostis(Config.OSTIS_URL)
 
     def request_agent(self, content: str):
+        """
+        Метод для запуска агента юридических запросов
+        :param content: Контент, по которому происходит поиск в БЗ
+        :return: Словарь со статусом результата выполнения агента юридических запросов
+        """
         global payload
         payload = None
         agent_response = self.ostis.call_user_request_agent(
@@ -921,10 +1055,18 @@ class OstisUserRequestAgent(RequestAgent):
         raise AgentError
     
 class OstisDirectoryAgent(DirectoryAgent):
+    """
+    Класс для представления агента поиска
+    """
     def __init__(self):
         self.ostis = Ostis(Config.OSTIS_URL)
 
     def directory_agent(self, content: str):
+        """
+        Метод для запуска агента поиска
+        :param content: Контент, по которому происходит поиск в БЗ
+        :return: Словарь со статусом результата выполнения агента поиска
+        """
         global payload
         payload = None
         agent_response = self.ostis.call_directory_agent(
@@ -940,17 +1082,28 @@ class OstisDirectoryAgent(DirectoryAgent):
                 "message": "Invalid credentials",
             }
         raise AgentError
-    
+
 class OstisAddEventAgent(AddEventAgent):
+    """
+    Класс для представления агента добавления события
+    """
     def __init__(self):
         self.ostis = Ostis(Config.OSTIS_URL)
 
     def add_event_agent(self, 
-                        user_name: str, 
+                        user_name: ScAddr,
                         event_name: str, 
-                        event_date: str, 
+                        event_date, 
                         event_description: str
                         ):
+        """
+        Метод для запуска агента добавления события
+        :param user_name: Логин пользователя
+        :param event_name: Название события
+        :param event_date: Дата события
+        :param event_description: Описание события
+        :return:
+        """
         global payload
         payload = None
         agent_response = self.ostis.call_add_event_agent(
@@ -969,8 +1122,11 @@ class OstisAddEventAgent(AddEventAgent):
                 "message": "Invalid credentials",
             }
         raise AgentError
-    
+
 class OstisDeleteEventAgent(DeleteEventAgent):
+    """
+    Класс для представления агента удаления события
+    """
     def __init__(self):
         self.ostis = Ostis(Config.OSTIS_URL)
 
@@ -978,6 +1134,12 @@ class OstisDeleteEventAgent(DeleteEventAgent):
                         username: str,
                         event_name: str,
                         ):
+        """
+        Метод для запуска агента удаления события
+        :param event_name: Название события
+        :param username: Логин пользователя
+        :return:
+        """
         global payload
         payload = None
         agent_response = self.ostis.call_delete_event_agent(
@@ -996,12 +1158,20 @@ class OstisDeleteEventAgent(DeleteEventAgent):
         raise AgentError
 
 class OstisShowEventAgent(ShowEventAgent):
+    """
+    Класс для представления агента просмотра события
+    """
     def __init__(self):
         self.ostis = Ostis(Config.OSTIS_URL)
 
     def show_event_agent(self,
                         username
                         ):
+        """
+        Метод для запуска агента просмотра события
+        :param username: Логин пользователя
+        :return:
+        """
         global payload
         payload = None
         agent_response = self.ostis.call_show_event_agent(

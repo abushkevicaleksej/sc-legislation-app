@@ -93,6 +93,18 @@ nav {
     background-color: #ffffff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
+
+.error-message {
+      background-color: #ff4d4f;
+      color: #ffffff;
+      padding: 16px;
+      margin: 16px 0;
+      border: 1px solid #ff0000;
+      border-radius: 8px;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+
 .search-input::placeholder {
     color: #B5B6E2;
     opacity: 1;

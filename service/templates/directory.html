@@ -34,8 +34,15 @@
                 </div>
                 <div id="suggestions" class="suggestions-container"></div>
             </form>
+            {% with messages = get_flashed_messages(with_categories=true, category_filter=['empty-text-error']) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="error-message">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
         </div>
-    
+
         <footer>
             <p>Персональный ассистент по юриспруденции</p>
             <p>Ostis 2025</p>

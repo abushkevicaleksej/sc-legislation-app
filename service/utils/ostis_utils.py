@@ -12,12 +12,12 @@ from sc_client.models import (
 from sc_client.constants import sc_types
 from sc_kpm import ScKeynodes
 from sc_kpm.utils.common_utils import (
-    generate_node, 
+    generate_node,
     generate_role_relation,
     generate_non_role_relation,
     generate_connector,
     check_connector,
-    check_edge, 
+    check_edge,
     search_connector,
     generate_link
 )
@@ -27,6 +27,12 @@ from service.exceptions import ParseDataError
 from service.models import UserEvent, EventResponse, get_user_by_login
 
 def create_link(client, content: str):
+    """
+    Метод для создания sc-link
+    :param client: sc-client
+    :param content: Контент sc-link
+    :return:
+    """
     construction = ScConstruction()
     to_find_content = ScLinkContent(content, ScLinkContentType.STRING)
     construction.create_link(sc_types.LINK_CONST, to_find_content)
@@ -34,12 +40,22 @@ def create_link(client, content: str):
     return link[0]
 
 def get_node(client) -> ScAddr:
+    """
+    Метод для получения ноды вызова агента
+    :param client: sc-client
+    :return: Нода вызова агента
+    """
     construction = ScConstruction()
     construction.create_node(sc_types.NODE_CONST)
     main_node: ScAddr = client.generate_elements(construction)[0]
     return main_node
 
 def get_main_idtf(node: ScAddr) -> str:
+    """
+    Метод для получения основного идентификатора ноды
+    :param node: Нода
+    :return: Основной идентификатор ноды
+    """
     template = ScTemplate()
     template.quintuple(
         node,
@@ -82,9 +98,9 @@ def set_system_idtf(content: str) -> ScAddr:
         sc_types.EDGE_ACCESS_VAR_POS_PERM,
         ScKeynodes["nrel_system_identifier"]
     )
-    
+
     result = client.generate_by_template(template)
-    
+
     return result.get("_node")
 
 def set_main_idtf(content: str) -> ScAddr:
@@ -100,12 +116,17 @@ def set_main_idtf(content: str) -> ScAddr:
         sc_types.EDGE_ACCESS_VAR_POS_PERM,
         ScKeynodes["nrel_main_identifier"]
     )
-    
+
     result = client.generate_by_template(template)
-    
+
     return result.get("_node")
 
 def set_gender_content(gender) -> ScAddr:
+    """
+    Метод для получения ноды пола пользователя
+    :param gender: Пол пользователя
+    :return: Кейнода для представления пола
+    """
     if gender == "male":
         return ScKeynodes['concept_man']
     if gender == "female":
@@ -126,7 +147,7 @@ def split_date_content(birthdate):
         return day, month, year
     else:
         raise ParseDataError(666, "Failed to parse args")
-    
+
 def get_term_titles() -> list[str]:
     template =  ScTemplate()
     term_list = []
