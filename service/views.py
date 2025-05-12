@@ -1,100 +1,245 @@
-from flask import Blueprint, request, jsonify
-from flask import render_template, redirect, url_for, session, flash
-from flask_login import current_user, login_user
+from flask import Blueprint, request, render_template, redirect, url_for, flash, session
+from flask_login import login_user, logout_user, login_required, current_user
+from sc_client.client import get_link_content, search_by_template
 
+from .models import (
+    find_user_by_username,
+    collect_user_info
+    )
 
-from .services import auth_agent, reg_agent, user_request_agent
-from .errors import ErrorMessages
+from .utils.string_processing import string_processing
+from .utils.ostis_utils import get_term_titles
+from .services import (
+    auth_agent,
+    reg_agent,
+    user_request_agent,
+    directory_agent,
+    add_event_agent,
+    delete_event_agent,
+    show_event_agent
+)
+
+from .forms import LoginForm, RegistrationForm, AddEventForm
 
 main = Blueprint("main", __name__)
 
 @main.route("/index")
+@login_required
 def index():
     return "Hello world!"
 
-@main.route("/auth", methods=['GET', 'POST'])
+@main.route("/protected")
+@login_required
+def protected():
+    return "Только для авторизованных"
+
+@main.route("/about")
+def about():
+    """
+    Метод для реализации ендпоинта, который выводит текущего пользователя
+    :return: Разметка страницы
+    """
+    users = get_term_titles()
+    print(users)
+    return f"<pre>{str(current_user)}</pre>"
+
+@main.route("/auth", methods=['GET','POST'])
 def auth():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        response = auth_agent(username, password)
-        print(f"response {response["status"]}")
-        if response["status"] == "Valid":
-            #TODO обернуть абстракцию вокруг юзера
-            #TODO нужен манагер всех юзеров
-            #TODO login_user(user)
+    """
+    Метод для реализации эндпоинта аутентификации
+    :return: Разметка страницы
+    """
+    if current_user.is_authenticated:
+        return redirect(url_for('main.directory'))
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = find_user_by_username(form.username.data)
+        auth_response = auth_agent(form.username.data, form.password.data)
+        if auth_response["status"] == "Valid":
+            login_user(user)
             return redirect(url_for('main.directory'))
-        else:
-            flash(ErrorMessages.error_auth(ErrorMessages))
-    return render_template('authorization.html')
+    return render_template('authorization.html', form=form)
 
 @main.route("/reg", methods=['GET', 'POST'])
 def reg():
-    if request.method == 'POST':
-        gender = request.form.get("gender")
-        surname = request.form.get("surname")
-        name = request.form.get("name")
-        fname = request.form.get("patronymic")
-        reg_place = request.form.get("registration")
-        birthdate = request.form.get("birthdate")
-        username = request.form.get('login')
-        password = request.form.get('password')
-        response = reg_agent(
-            gender=gender, 
-            surname=surname, 
-            name=name, 
-            fname=fname, 
-            reg_place=reg_place, 
-            birthdate=birthdate, 
-            username=username, 
-            password=password
-            )
-        if response["status"] == "Valid":
+    """
+    Метод для реализации эндпоинта регистрации
+    :return: Разметка страницы
+    """
+    if current_user.is_authenticated:
+        return redirect(url_for('main.directory'))
+    
+    form = RegistrationForm()
+    
+    if form.validate_on_submit():
+        reg_response = reg_agent(
+            gender=form.gender.data,
+            surname=form.surname.data,
+            name=form.name.data,
+            fname=form.patronymic.data,
+            reg_place=form.reg_place.data,
+            birthdate=form.birthdate.data,
+            username=form.username.data,
+            password=form.password.data
+        )
+        if reg_response["status"] == "Valid":
+            user = find_user_by_username(form.username.data)
+            login_user(user)
             return redirect(url_for('main.directory'))
-        else:
-            return render_template('registration.html') 
-    return render_template('registration.html')
+    return render_template('registration.html', form=form)
 
-@main.route("/add-event")
-def add_event():
-    return render_template("add-event.html")
+@main.route("/logout")
+def logout():
+    """
+    Метод для реализации эндпоинта выхода с профиля
+    :return: Разметка страницы
+    """
+    logout_user()
+    return redirect(url_for('main.auth'))
 
 @main.route("/show_calendar")
+@login_required
 def show_calendar():
+    """
+    Метод для реализации эндпоинта календаря
+    :return: Разметка страницы
+    """
+    user = get_link_content(current_user.username)[0].data
+    print(user)
+    response = show_event_agent(username=user)
     return render_template("calendar.html")
 
-@main.route("/doc")
-def doc():
-    return render_template("document.html")
+@main.route("/add_event")
+@login_required
+def add_event():
+    """
+    Метод для реализации эндпоинта добавления события
+    :return: Разметка страницы
+    """
+    user = get_link_content(current_user.username)[0].data
+    print(user)
+    response = add_event_agent(user_name=user,
+                               event_name="event1",
+                               event_date="12.04.2025",
+                               event_description="hahaha"
+                               )
+    return redirect(url_for('main.show_calendar'))
 
-@main.route("/templates")
-def templs():
-    return render_template("templates.html")
+@main.route("/delete_event")
+@login_required
+def delete_event():
+    user = get_link_content(current_user.username)[0].data
+    print(user)
+    response = delete_event_agent(username=user,
+                               event_name="event1",
+                               )
+    return redirect(url_for('main.show_calendar'))
 
 @main.route("/requests", methods=['GET', 'POST'])
+@login_required
 def requests():
+    """
+    Метод для реализации эндпоинта юридических запросов
+    :return: Разметка страницы
+    """
     if request.method == 'POST':
         content = request.form.get("request_entry")
-        asked = user_request_agent(content)
-        print(asked["message"])
-        if asked["message"] is not None:
+        if content == '':
+            flash(f"Для поиска по справочнику требуется ввести текст", category="empty-text-error")
+    else:
+        content = request.args.get('q')
+
+    if content:
+        processed_terms = string_processing(content)
+        
+        all_results = []
+        all_queries = []
+        
+        for term in processed_terms:
+            response = user_request_agent(content=term)
+            if response["message"] is not None:
+                try:
+                    if len(response["message"]) == 0:
+                        flash(f"По вашему запросу ничего не найдено", category="empty-result-error")
+                        return render_template("requests.html")
+                    results = [{
+                        'term': item.term,
+                        'content': item.content,
+                        'related_concepts': item.related_concepts,
+                        'related_articles': item.related_articles
+                    } for item in response["message"]]
+                except AttributeError as e:
+                    print(f"Ошибка формата данных: {e}")
+                    results = []
+
+                all_results.extend(results)
+                all_queries.append(term)
+        
+        if all_results:
+            session['search_query'] = ", ".join(all_queries)
+            session['search_results'] = all_results
             return redirect(url_for('main.requests_results'))
-        else:
-            return render_template("requests.html")
+        
+        return render_template("requests.html")
+    
     return render_template("requests.html")
 
 @main.route("/requests_results")
+@login_required
 def requests_results():
-    return render_template("requests-results.html")
+    """
+    Метод для реализации эндпоинта просмотра результатов юридических запросов
+    :return: Разметка страницы
+    """
+    query = session.get('search_query', '')
+    results = session.get('search_results', [])
 
-@main.route("/directory")
+    return render_template("requests-results.html", 
+                         query=query, 
+                         results=results)
+
+@main.route("/directory", methods=['GET', 'POST'])
+@login_required
 def directory():
-    return render_template("directory.html")
+    """
+    Метод для реализации эндпоинта поиска
+    :return: Разметка страницы
+    """
+    term_titles = get_term_titles()
+    if request.method == 'POST':
+        content = request.form.get("directory_entry")
+        if content == '':
+            flash(f"Для поиска по справочнику требуется ввести текст", category="empty-text-error")
+            return render_template("directory.html", term_titles=term_titles)
+        print(content)
+        asked = directory_agent(content=content)
+
+        if asked["message"] is not None:
+            session['search_query'] = content
+            session['search_results'] = asked["message"]
+            return redirect(url_for('main.directory_results'))
+        else:
+            flash('Ничего не найдено', 'warning')
+            return render_template("directory.html", term_titles=term_titles)
+
+    return render_template("directory.html", term_titles=term_titles)
+
+@main.route("/directory_results")
+@login_required
+def directory_results():
+    """
+    Метод для реализации эндпоинта просмотра результатов поиска
+    :return: Разметка страницы
+    """
+    query = session.get('search_query', '')
+    results = session.get('search_results', [])
+    return render_template("directory-results.html", query=query, results=results)
 
 @main.route("/templates")
+@login_required
 def templates():
+    """
+    Метод для реализации эндпоинта шаблонов
+    :return: Разметка страницы
+    """
     return render_template("templates.html")
-
-@main.route("/show_calendar")
-def calendar():
-    return render_template("calendar.html")

@@ -1,3 +1,0 @@
-from marshmallow import ValidationError
-
-SchemaValidationError = ValidationError

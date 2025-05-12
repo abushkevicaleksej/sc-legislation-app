@@ -1,17 +1,14 @@
-from service import create_app
-from sc_client.client import connect, is_connected
 from sc_kpm import ScServer
-import config
-from service.exceptions import ScServerError
-
-from flask_login import LoginManager
-
-app = create_app()
+from config import Config
+from service import create_app
 
 if __name__ == "__main__":
+    app = create_app()
+    
     try:
-        server = ScServer(f"{config.Config.PROTOCOL_DEFAULT}://{config.Config.HOST_DEFAULT}:{config.Config.PORT_DEFAULT}")
+        server = ScServer(f"{Config.PROTOCOL_DEFAULT}://{Config.HOST_DEFAULT}:{Config.PORT_DEFAULT}")
         with server.connect():
-            app.run()
-    except:
+            app.run(debug=True)
+    except Exception as e:
+        from service.exceptions import ScServerError
         raise ScServerError
