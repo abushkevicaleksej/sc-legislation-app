@@ -61,19 +61,21 @@
         <!-- Блок событий -->
         <div class="events-section">
             <h2 class="events-title">События</h2>
-            {% for event in events %}
-            <div class="event-item">
-<<<<<<< HEAD
-                <div class="event-date">{{ event.date }}</div>
-                <h3 class="event-title">{{ event.title }}</h3>
-                <p class="event-description">{{ event.content }}</p>
-=======
-                <div class="event-date">{{ event.date.strftime('%d.%m.%Y') }}</div>
-                <h3 class="event-title">{{ event.title }}</h3>
-                <p class="event-description">{{ event.description }}</p>
->>>>>>> 645679bcbec963fd69f93b7fb5dfeb446ed5047d
-            </div>
-            {% endfor %}
+            {% if selected_date %}
+                {% for event in events %}
+                <div class="event-item" data-event-title="{{ event.title }}">
+                    <div class="event-date">{{ event.date }}</div>
+                    <h3 class="event-title">{{ event.title }}</h3>
+                    <p class="event-description">{{ event.content }}</p>
+                    <button class="delete-button" 
+                            onclick="deleteEvent('{{ event.title }}', '{{ selected_date }}')">
+                        Удалить
+                    </button>
+                </div>
+                {% else %}
+                <div class="no-events">Событий на этот месяц нет</div>
+                {% endfor %}
+            {% endif %}
             <button class="add-event-button" id="add-event-button">Добавить событие</button>
         </div>
     </div>
@@ -209,6 +211,14 @@
             }
             calendarBody.appendChild(row);
         }
+        setTimeout(() => {
+        if (selectedDate) {
+            const cell = document.querySelector(`[data-date="${selectedDate}"]`);
+            if (cell) {
+                cell.classList.add('selected');
+            }
+        }
+    }, 0);
     }
 
     // Функция для форматирования даты в ДД-ММ-ГГГГ
@@ -272,6 +282,23 @@
 
         closeEventModal();
     }
+    async function deleteEvent(eventTitle) {
+        if (!confirm('Вы уверены, что хотите удалить это событие?')) return;
+        
+        try {
+            const response = await fetch(`/delete_event?event_name=${encodeURIComponent(eventTitle)}`);
+            if (response.ok) {
+                // Обновляем список событий после удаления
+                const selectedDate = new URLSearchParams(window.location.search).get('selected_date');
+                window.location.href = `/show_calendar?selected_date=${selectedDate}`;
+            } else {
+                alert('Ошибка при удалении события');
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            alert('Произошла ошибка при удалении события');
+        }
+    }
 
     // Обработчики событий
     prevMonthButton.addEventListener('click', () => {
@@ -304,6 +331,24 @@
         button.addEventListener('click', function() {
             this.closest('.event-item').remove();
         });
+    });
+    cell.addEventListener('click', function() {
+        document.querySelectorAll('.calendar-grid td').forEach(td => td.classList.remove('selected'));
+        cell.classList.add('selected');
+        selectedDate = formattedDate;
+        
+        // Обновляем URL с выбранной датой
+        window.history.pushState({}, '', `/show_calendar?selected_date=${selectedDate}`);
+        
+        // Запрос на обновление списка событий
+        fetch(`/show_calendar?selected_date=${selectedDate}`)
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newEvents = doc.querySelector('.events-section').innerHTML;
+                document.querySelector('.events-section').innerHTML = newEvents;
+            });
     });
 
     // Начальная отрисовка календаря

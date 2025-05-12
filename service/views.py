@@ -3,13 +3,8 @@ from flask_login import login_user, logout_user, login_required, current_user
 from sc_client.client import get_link_content, search_by_template
 
 from .models import (
-<<<<<<< HEAD
     find_user_by_username, 
     collect_user_info,
-=======
-    find_user_by_username,
-    collect_user_info
->>>>>>> 645679bcbec963fd69f93b7fb5dfeb446ed5047d
     )
 
 from .utils.string_processing import string_processing
@@ -122,7 +117,10 @@ def show_calendar():
 @main.route("/add_event", methods=["POST"])
 @login_required
 def add_event():
-<<<<<<< HEAD
+    """
+    Метод для реализации эндпоинта добавления события
+    :return: Разметка страницы
+    """
     form = AddEventForm()
     if form.validate_on_submit():
         user = get_link_content(current_user.username)[0].data
@@ -133,30 +131,17 @@ def add_event():
             event_description=form.description.data
         )
     return redirect(url_for('main.show_calendar', selected_date=form.date.data))
-=======
-    """
-    Метод для реализации эндпоинта добавления события
-    :return: Разметка страницы
-    """
-    user = get_link_content(current_user.username)[0].data
-    print(user)
-    response = add_event_agent(user_name=user,
-                               event_name="event1",
-                               event_date="12.04.2025",
-                               event_description="hahaha"
-                               )
-    return redirect(url_for('main.show_calendar'))
->>>>>>> 645679bcbec963fd69f93b7fb5dfeb446ed5047d
 
 @main.route("/delete_event")
 @login_required
 def delete_event():
     user = get_link_content(current_user.username)[0].data
-    print(user)
-    response = delete_event_agent(username=user,
-                               event_name="event1",
-                               )
-    return redirect(url_for('main.show_calendar'))
+    event_name = request.args.get("event_name")
+    selected_date = request.args.get("selected_date")
+    
+    delete_event_agent(username=user, event_name=event_name)
+    
+    return redirect(url_for('main.show_calendar', selected_date=selected_date))
 
 @main.route("/requests", methods=['GET', 'POST'])
 @login_required

@@ -37,14 +37,10 @@ class RequestResponse:
     
 @dataclass   
 class UserEvent:
-<<<<<<< HEAD
-    username: str
-=======
     """
     Датакласс для хранения события
     """
-    user: str
->>>>>>> 645679bcbec963fd69f93b7fb5dfeb446ed5047d
+    username: str
     title: str
     date: str
     content: str

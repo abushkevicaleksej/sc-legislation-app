@@ -8,7 +8,7 @@ if __name__ == "__main__":
     try:
         server = ScServer(f"{Config.PROTOCOL_DEFAULT}://{Config.HOST_DEFAULT}:{Config.PORT_DEFAULT}")
         with server.connect():
-            app.run(debug=True)
+            app.run()
     except Exception as e:
         from service.exceptions import ScServerError
         raise ScServerError

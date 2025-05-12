@@ -92,7 +92,6 @@ def call_back(src: ScAddr, connector: ScAddr, trg: ScAddr) -> Enum:
             sc_types.EDGE_ACCESS_VAR_POS_PERM,
             src
         )
-        print("here")
         gen_res = client.template_search(res_templ)[0]
         payload = {"message": result.SUCCESS}
     elif trg.value == unsucc_node.value or trg.value == node_err.value:
@@ -820,11 +819,9 @@ class Ostis:
                 sc_types.EDGE_ACCESS_VAR_POS_PERM,
                 "_main_node",
             )
-            print("here")
             event_params = ScEventSubscriptionParams(main_node, ScEventType.AFTER_GENERATE_INCOMING_ARC, call_back)
             client.events_create(event_params)
             client.template_generate(template)
-            print("here")
             global payload
             if callback_event.wait(timeout=10):
                 while not payload:
@@ -885,7 +882,6 @@ class Ostis:
             event_params = ScEventSubscriptionParams(main_node, ScEventType.AFTER_GENERATE_INCOMING_ARC, call_back)
             client.events_create(event_params)
             client.template_generate(template)
-            print("here")
             global payload
             if callback_event.wait(timeout=10):
                 while not payload:

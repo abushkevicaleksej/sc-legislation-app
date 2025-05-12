@@ -12,13 +12,6 @@ from sc_client.models import (
 from sc_client.constants import sc_types
 from sc_kpm import ScKeynodes
 from sc_kpm.utils.common_utils import (
-    generate_node,
-    generate_role_relation,
-    generate_non_role_relation,
-    generate_connector,
-    check_connector,
-    check_edge,
-    search_connector,
     generate_link
 )
 
