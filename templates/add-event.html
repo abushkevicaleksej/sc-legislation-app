@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Юридический справочник</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="static/styles/add-event.css">
+</head>
+<body>
+
+<div class="modal-overlay" id="event-modal">
+    <div class="modal-content">
+        <h3 class="modal-title">Добавление события</h3>
+        <div class="date-selected" id="selected-date">Выбранная дата: ДД-ММ-ГГГГ</div>
+
+        <div class="input-group">
+            <label class="input-label">Название события</label>
+            <input type="text" class="event-name-input" placeholder="Введите название события">
+        </div>
+
+        <div class="input-group">
+            <label class="input-label">Описание события</label>
+            <textarea class="event-description-input" placeholder="Описание"></textarea>
+        </div>
+
+        <button class="save-button">Сохранить</button>
+    </div>
+</div>
+
+<script>
+    // Функция для открытия модального окна
+    function openEventModal(date) {
+        const modal = document.getElementById('event-modal');
+        const dateElement = document.getElementById('selected-date');
+
+        // Устанавливаем выбранную дату
+        const formattedDate = formatDate(date);
+        dateElement.textContent = `Выбранная дата: ${formattedDate}`;
+
+        // Показываем модальное окно
+        modal.style.display = 'flex';
+    }
+
+    // Функция для форматирования даты в ДД-ММ-ГГГГ
+    function formatDate(date) {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+    }
+
+    // Функция для закрытия модального окна
+    function closeEventModal() {
+        const modal = document.getElementById('event-modal');
+        modal.style.display = 'none';
+    }
+
+    // Обработчик клика по ячейке календаря
+    document.querySelectorAll('.calendar-grid td').forEach(cell => {
+        cell.addEventListener('click', function() {
+            // Получаем дату из ячейки
+            const day = this.querySelector('.calendar-day').textContent;
+            const currentDate = new Date();
+            currentDate.setDate(parseInt(day));
+
+            // Открываем модальное окно
+            openEventModal(currentDate);
+        });
+    });
+
+    // Обработчик клика по кнопке "Сохранить"
+    document.querySelector('.save-button').addEventListener('click', function() {
+        // Здесь можно добавить логику сохранения события
+        closeEventModal();
+    });
+
+    // Закрытие модального окна при клике вне его
+    document.querySelector('.modal-overlay').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeEventModal();
+        }
+    });
+</script>
+</body>
+</html>

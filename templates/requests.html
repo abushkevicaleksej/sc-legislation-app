@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Запросы | Юридический справочник</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="static/styles/requests.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="static/images/logo.png" alt="Логотип" class="header-logo">
+            <nav>
+                <a href="{{ url_for('main.requests') }}"><button class="nav-button active">Запросы</button></a>
+                <a href="{{ url_for('main.directory') }}"><button class="nav-button">Справочник</button></a>
+                <a href="{{ url_for('main.show_calendar') }}"><button class="nav-button">Календарь</button></a>
+                <a href="{{ url_for('main.templates') }}"><button class="nav-button">Шаблоны</button></a>
+                <a href="{{ url_for('main.logout') }}">
+                    <img src="static/images/logout.png" alt="Выйти" class="user-icon">
+                </a>
+            </nav>
+        </header>
+    
+        <div id="loading-overlay" style="display: none;">
+            <div class="spinner"></div>
+        </div>
+        <div class="header-title">
+            <h1 class="main-heading">Запросы</h1>
+            <form class="search-bar" action="/requests" method="POST">
+                <input type="text" placeholder="Что такое арендное жилье?" class="search-input" id="searchQuery" name="request_entry">
+                <div class="search-icon" id="searchButton">
+                    <button class="search-button" type="submit">
+                        <img src="static/images/search.png" alt="Поиск">
+                    </button>
+                </div>
+            </form>
+        </div>
+        <script>
+            window.addEventListener('beforeunload', function() {
+                document.getElementById('loading-overlay').style.display = 'flex';
+            });
+        
+            window.addEventListener('load', function() {
+                document.getElementById('loading-overlay').style.display = 'none';
+            });
+        </script>
+        <footer>
+            <p>Персональный ассистент по юриспруденции</p>
+            <p>Ostis 2025</p>
+        </footer>
+    </div>
+    </body>
+    </html>

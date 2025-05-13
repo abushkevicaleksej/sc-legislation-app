@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Регистрация</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="static/styles/registration.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <img src="static/images/logo.png" alt="Логотип" class="header-logo">
+      <nav>
+        <a href="{{ url_for('main.requests') }}"><button class="nav-button">Запросы</button></a>
+        <a href="{{ url_for('main.directory') }}"><button class="nav-button">Справочник</button></a>
+        <a href="{{ url_for('main.show_calendar') }}"><button class="nav-button">Календарь</button></a>
+        <a href="{{ url_for('main.templates') }}"><button class="nav-button">Шаблоны</button></a>
+        <img src="static/images/logout.png" alt="Иконка пользователя" class="user-icon">
+      </nav>
+    </header>
+    <!-- Main -->
+    <main>
+      <img src="static/images/logo.png" alt="Логотип" class="main-logo">
+      
+      <div class="registr-form">
+        <form method="POST" action="{{ url_for('main.reg') }}">
+        <h2>Регистрация</h2>
+        <label>Ваш пол:</label>
+        <div class="radio-group">
+          <input type="radio" id="male" name="gender" value="male">
+          <label for="male">мужской</label>
+          <input type="radio" id="female" name="gender" value="female">
+          <label for="female">женский</label>
+        </div>
+        <label for="surname">Фамилия</label>
+        <input type="text" id="surname" name="surname" placeholder="Введите вашу фамилию">
+        <label for="name">Имя</label>
+        <input type="text" id="name" name="name" placeholder="Введите ваше имя">
+        <label for="patronymic">Отчество</label>
+        <input type="text" id="patronymic" name="patronymic" placeholder="Введите ваше отчество">
+        <label for="birthdate">Выберите дату рождения</label>
+        <div class="date-picker">
+          <input type="text" name = "birthdate" id="birthdate-text" placeholder="Дата рождения в формате ДД.ММ.ГГГГ">
+          <button type="button" id="calendar-button">
+            <img src="static/images/calendar.png" alt="Календарь" class="calendar">
+          </button>
+          <input type="date" id="birthdate" name="birthdate">
+        </div>
+        
+        <label for="registration">Место регистрации</label>
+        <input type="text" id="registration" name="registration" placeholder="Введите ваше место регистрации">
+        <label for="login">Логин</label>
+        <input type="text" id="login" name="login" placeholder="Введите ваш логин">
+        <label for="password">Пароль</label>
+        <input type="password" id="password" name="password" placeholder="Введите ваш пароль">
+        <a class="submit" href="{{ url_for('main.reg') }}"><button type="submit">Зарегистрироваться</button></a>
+        <a href="auth">Войти</a>
+      </form>
+      </div>
+    
+    </main>
+    <!-- Footer -->
+    <footer>
+      <p>Персональный ассистент по юриспруденции</p>
+      <p>Ostis 2025</p>
+    </footer>
+  </div>
+</body>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const dateInput = document.getElementById("birthdate");
+    const textInput = document.getElementById("birthdate-text");
+    const calendarButton = document.getElementById("calendar-button");
+
+    // Открытие календаря при клике на кнопку
+    calendarButton.addEventListener("click", () => {
+        dateInput.showPicker();
+    });
+
+    // Обновление текстового поля при выборе даты через календарь
+    dateInput.addEventListener("change", () => {
+        if (dateInput.value) {
+            textInput.value = dateInput.value.split("-").reverse().join("."); // Преобразуем в ДД.ММ.ГГГГ
+        }
+    });
+
+    // Обновление скрытого input[type="date"] при ручном вводе в текстовое поле
+    textInput.addEventListener("input", () => {
+        const dateParts = textInput.value.split(".");
+        if (dateParts.length === 3) {
+            const [day, month, year] = dateParts;
+            if (day.length === 2 && month.length === 2 && year.length === 4) {
+                const isoDate = `${year}-${month}-${day}`;
+                if (!isNaN(Date.parse(isoDate))) {
+                    dateInput.value = isoDate;
+                }
+            }
+        }
+    });
+});
+
+
+</script>
+</html>
